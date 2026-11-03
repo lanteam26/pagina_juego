@@ -1,17 +1,19 @@
 // Shared rules for the setup panels and the turn engine. No DOM dependencies.
 RL.turnModel = {
-  maxParticipants: 12,
-  maxTeams: 5,
-  label(i, team = false) { return team ? ['Equipo Azul','Equipo Rojo','Equipo Dorado','Equipo Verde','Equipo Violeta'][i] : 'Jugador ' + (i + 1); },
+  maxIndividualParticipants: 12,
+  maxTeamParticipants: 25,
+  limit(draft) { return draft.format === 'teams' ? this.maxTeamParticipants : this.maxIndividualParticipants; },
+  maxTeams: 6,
+  label(i, team = false) { return team ? ['Equipo Azul','Equipo Rojo','Equipo Dorado','Equipo Verde','Equipo Violeta','Equipo Naranja'][i] : 'Jugador ' + (i + 1); },
   draft() {
     return {
-      format: 'individual', count: 2, names: Array(12).fill(''),
+      format: 'individual', teamStyle: 'separate', count: 2, names: Array(12).fill(''),
       teams: [{ name: '', members: Array(6).fill('') }, { name: '', members: Array(6).fill('') }],
       variant: 'timed', minutes: 2, missionIndex: 0
     };
   },
   resizeTeams(draft, count) {
-    const total = Math.min(12, Math.max(count, draft.teams.reduce((n, t) => n + t.members.length, 0)));
+    const total = Math.min(this.maxTeamParticipants, Math.max(count, draft.teams.reduce((n, t) => n + t.members.length, 0)));
     draft.teams = Array.from({ length: count }, (_, i) => {
       const size = Math.floor(total / count) + (i < total % count ? 1 : 0);
       const old = draft.teams[i];
@@ -25,11 +27,12 @@ RL.turnModel = {
     const errors = [];
     if (!['individual', 'teams'].includes(draft.format)) errors.push('Elige cómo van a jugar.');
     if (step >= 1) {
-      if (draft.format === 'individual' && (!Number.isInteger(draft.count) || draft.count < 2 || draft.count > 12)) errors.push('Elige entre 2 y 12 jugadores.');
+      if (draft.format === 'individual' && (!Number.isInteger(draft.count) || draft.count < 2 || draft.count > this.maxIndividualParticipants)) errors.push('Elige entre 2 y 12 jugadores.');
       if (draft.format === 'teams') {
-        if (draft.teams.length < 2 || draft.teams.length > 5) errors.push('Elige entre 2 y 5 equipos.');
-        if (draft.teams.some(t => t.members.length < 1 || t.members.length > 11)) errors.push('Cada equipo necesita al menos un integrante.');
-        if (this.participants(draft) > 12) errors.push('La partida admite un máximo de 12 participantes en total. Reduce algún equipo.');
+        if (!['separate','shared'].includes(draft.teamStyle)) errors.push('Elige cómo construirá el equipo su abeja.');
+        if (draft.teams.length < 2 || draft.teams.length > this.maxTeams) errors.push('Elige entre 2 y 6 equipos.');
+        if (draft.teams.some(t => t.members.length < 1 || t.members.length > this.maxTeamParticipants - draft.teams.length + 1)) errors.push('Cada equipo necesita al menos un integrante.');
+        if (this.participants(draft) > this.maxTeamParticipants) errors.push('La partida admite un máximo de 25 integrantes en total. Reduce algún equipo.');
       }
     }
     if (step >= 2) {
@@ -65,7 +68,7 @@ RL.turnModel = {
       return { name, members };
     });
     return {
-      format: draft.format, names: entities.map(e => e.name), entities,
+      format: draft.format, teamStyle: teams ? draft.teamStyle : 'separate', names: entities.map(e => e.name), entities,
       participantCount: this.participants(draft), variant: draft.variant,
       durationSeconds: draft.variant === 'timed' ? draft.minutes * 60 : 300,
       maxHints: 3

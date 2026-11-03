@@ -145,7 +145,7 @@ COMPETITIVO POR TURNOS · PARTICIPACIONES COMPLETAS
 El acceso Por turnos está junto a Diseño libre y Competitivo en cada nivel
 de Primaria y Secundaria; también permanece dentro de Competitivo.
 La configuración tiene cuatro pasos: Formato, Participantes, Reglas y Referencia.
-Admite de 2 a 12 participantes en total, individuales o en 2 a 5 equipos.
+Admite de 2 a 12 jugadores individuales o hasta 25 integrantes en 2 a 6 equipos.
 Los nombres y reglas se conservan al avanzar y volver entre los paneles.
 
 INDIVIDUAL
@@ -161,7 +161,7 @@ Comprobar y finalizar permite terminar antes si ya colocó todas las piezas.
 Hasta completar: no hay cuenta atrás. Se registra el tiempo individual;
 Comprobar y finalizar exige todas las cantidades de piezas necesarias.
 
-EQUIPOS
+EQUIPOS: UNA ABEJA POR INTEGRANTE
 Cada integrante tiene un intento independiente: robot, preguntas, errores,
 trazos, tiempo y pistas propios. Los robots de los demás no se modifican.
 Orden: Azul 1, Rojo 1, Azul 2, Rojo 2... hasta que jueguen todos.
@@ -169,7 +169,7 @@ Con más equipos se sigue el mismo orden por rondas de integrantes.
 Cada niño participa una vez. Con equipos desiguales, al final continúan
 los integrantes pendientes. El equipo con más integrantes tendrá más
 participaciones; la puntuación de equipo es una SUMA, no un promedio.
-Los accesos rápidos permiten 6 contra 6, 5 contra 5 o 3 equipos de 4.
+Los accesos rápidos permiten 6 contra 6, 5 contra 5, 3 equipos de 4 o 5 equipos de 5.
 Los resultados muestran el total de cada equipo y un detalle por integrante.
 
 PISTAS Y PUNTUACIÓN DEL MODO POR TURNOS
@@ -187,13 +187,48 @@ Las copias repetidas de una pieza no dan más puntos.
 No se evalúan semejanza visual, posición, orientación ni tamaño del robot.
 Las cantidades de piezas se usan únicamente para permitir finalizar antes.
 
-CLASIFICACIÓN
-Se ordena por puntos, sin criterios ocultos de desempate.
-Igual puntaje = mismo puesto. Se usa la numeración 1, 1, 3 si hay dos primeros.
+EQUIPOS: UNA ABEJA ENTRE TODOS
+En Formato > Por equipos elige Una abeja entre todos.
+Hasta 6 equipos y 25 integrantes en total; cada equipo conserva una sola abeja.
+Un equipo juega su sesión completa y luego comienza el siguiente equipo.
+Sus integrantes rotan por nombre y comparten robot, piezas, capas e historial.
+Flujo de cada integrante:
+1. Se muestra su nombre. Pulsa Comenzar.
+2. Aparece directamente un problema, sin permitir editar el robot antes.
+3. Al acertar, Acomodar piezas muestra la abeja compartida. Se entregan las
+   cantidades de ese tipo necesarias para la referencia.
+4. Puede mover, girar, cambiar capas y ajustar las piezas.
+5. Terminado guarda el diseño y da paso al siguiente integrante del equipo.
+Si faltan piezas, vuelven a rotar. El juego prioriza las piezas pendientes.
+Si ya están todas pero alguien aún no participó, recibe un reto de refuerzo
+para colaborar sobre la misma abeja. No duplica piezas innecesariamente.
+En Hasta completar deben estar todas las piezas y todos haber participado
+al menos una vez. Contra reloj termina al agotarse el tiempo del equipo.
+El reloj compartido solo cuenta resolver y acomodar; los cambios de nombre
+quedan pausados hasta pulsar Comenzar. No es un tiempo nuevo por integrante.
+Cada integrante tiene 3 pistas para toda la partida, incluso si vuelve a rotar.
+Se registran sus problemas resueltos, errores, pistas, tiempo y turnos.
+Puntaje compartido:
+  Suma de aportes de los integrantes: 100*aciertos - 20*errores + bono sin pistas.
+  Cada integrante que resolvió al menos un problema sin pistas aporta +10.
+  Bono del equipo por completar: max(0, 30 - parte_entera(tiempo_activo / 10)).
+  Puntaje final mínimo: 0.
+Los aportes individuales pueden ser negativos por errores; se suman antes
+de aplicar el mínimo 0 al equipo. No se evalúa el parecido visual.
+
+CLASIFICACIÓN Y ABEJAS GRANDES
+Se muestra una sola abeja grande, comenzando por el primer puesto.
+Anterior y Siguiente recorren todos los jugadores/equipos en orden de puntaje.
+Igual puntaje = mismo puesto. Se usa 1, 1, 3 cuando hay dos primeros.
 Coronas doradas, plateadas y bronceadas identifican los puestos 1, 2 y 3.
-En equipos se suman los puntajes individuales completos, incluidos sus bonos.
-La clasificación se revela únicamente cuando terminan todas las participaciones.
-Revancha conserva participantes y reglas, y reinicia robots, preguntas y pistas.
+En equipos colaborativos se muestra la abeja compartida y el total del equipo.
+Toca un integrante para ver sus aportes sin cambiar la abeja compartida.
+En equipos de abejas individuales se muestra primero la abeja del integrante
+con más puntos. Se puede seleccionar a cualquier otro para ver su abeja y
+sus estadísticas. Ver totales del equipo recupera las estadísticas conjuntas.
+Los puntajes solo se revelan cuando terminan todos los jugadores/equipos.
+Revancha conserva participantes, estilo de equipo y reglas; reinicia piezas,
+operaciones, pistas y resultados.
 
 PIZARRA Y REFERENCIA EN TURNOS
 La referencia ocupa más espacio en el panel y se puede ampliar sin abrir
@@ -213,7 +248,10 @@ CÓDIGO
 js/turn-model.js: validación, participantes y orden de participación.
 js/turn-score.js: puntajes, bonos, suma de equipos, clasificación y coronas.
 js/turn-setup.js: configuración por pasos con un único borrador de partida.
-js/turns.js: participaciones, reloj, problemas, pistas, tableros y resultados.
+js/turns.js: participaciones, reloj, problemas, pistas y tableros individuales.
+js/coop.js: abeja compartida, rotaciones y aportes de cada integrante.
+js/turn-results.js: galería común de resultados y selección de integrantes.
+css/results.css: formatos de equipo y presentación de resultados grandes.
 css/participation.css: referencia ampliada, pizarra grande y clasificación.
 Se reutilizan la construcción, capas, herramientas y pizarra del resto del juego.
 

@@ -2,7 +2,8 @@
 RL.geometry={left:6,top:15,width:88};
 RL.geometry.bottom=RL.geometry.top+RL.geometry.width*1.25/(RL.body.viewport[2]/RL.body.viewport[3]);
 RL.createAssembly=function({state,scene,onChange=()=>{},onSelection=()=>{},message=()=>{},isUnlocked=()=>true,limit=5,prefix='piece',canMutate=()=>true}){
-  let serial=0;const getState=typeof state==='function'?state:()=>state,getScene=typeof scene==='function'?scene:()=>scene;
+  const getState=typeof state==='function'?state:()=>state,getScene=typeof scene==='function'?scene:()=>scene;
+  let serial=Math.max(0,...(getState()?.placed||[]).filter(p=>p.uid.startsWith(prefix+'-')).map(p=>Number(p.uid.slice(prefix.length+1))||0));
   const api={
     save(){const s=getState();s.history.push(JSON.stringify({placed:s.placed,layers:s.layers}));if(s.history.length>60)s.history.shift()},
     syncLayers(){const s=getState(),body=s.layers.indexOf('body');s.placed.forEach(p=>p.layer=s.layers.indexOf(p.uid)<body?'back':'front')},

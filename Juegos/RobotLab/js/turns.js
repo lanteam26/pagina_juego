@@ -11,6 +11,7 @@ RL.turns = { ...RL.race, match: null, timer: null, deadlineTimer: null,
   },
   prepareTurn(mission) {
     this.stop();
+    if(this.settings.format==='teams'&&this.settings.teamStyle==='shared'){RL.coop.start(this.config,this.settings,mission);return;}
     const players = RL.turnModel.schedule(this.settings).map((entry,id)=>({
       ...entry,id,mode:'competitivo',grade:this.config.grade,level:this.config.level,
       placed:[],layers:['body'],history:[],selected:null,unlocked:[],itemChallenges:{},
@@ -203,18 +204,11 @@ RL.turns = { ...RL.race, match: null, timer: null, deadlineTimer: null,
     if (missing) { this.notice(id, 'Faltan ' + missing + ' piezas. '+(this.match.variant==='timed'?'Sigue resolviendo o espera a que termine tu tiempo.':'Sigue resolviendo y colocando tus piezas.')); return; }
     this.endTurn(false);
   },
-  resultCard(row, team = false) {
-    const details = team ? `<details class="turn-member-results"><summary>${row.members.length} participantes · ver suma del equipo</summary>${row.members.map(p => `<div><b>${this.escape(p.name)} · ${p.result.score} puntos</b><span>${p.correct} problemas · ${p.errors} errores · ${p.hints} pistas · ${this.format(p.result.elapsed)}</span><span>Rapidez +${p.result.timeBonus} · Sin pistas +${p.result.noHintBonus}</span></div>`).join('')}</details>` : `<div class="race-win-preview">${row.preview}</div>`;
-    return `<article class="game-panel turn-result podium-place place-${Math.min(row.rank, 4)}"><div class="podium-emblem">${RL.turnScoring.crown(row.rank)}<span>${row.rank}º puesto</span></div><h2>${this.escape(row.name)}</h2><div class="podium-score">${row.score}<small>puntos${team ? ' del equipo' : ''}</small></div><p>${row.correct} problemas resueltos · ${row.errors} errores</p><p>${row.hints} / ${team ? row.members.length * 3 : 3} pistas · Tiempo ${this.format(row.elapsed)}</p><div class="podium-bonuses"><span>Rapidez +${row.timeBonus}</span><span>Sin ayuda +${row.noHintBonus}</span></div>${details}</article>`;
-  },
   resolve() {
     const m = this.match; m.active = false; m.revealed = true; clearInterval(this.timer);
     const rows = m.format === 'teams' ? RL.turnScoring.teams(m.entities, m.players) : m.players.map(p => ({ name: p.name, ...p.result }));
     m.ranking = RL.turnScoring.rank(rows);
-    this.config.render(`<div class="screen-heading"><div><span class="eyebrow">TODAS LAS PARTICIPACIONES TERMINARON</span><h1>${m.format === 'teams' ? 'Clasificación de equipos' : 'Clasificación de jugadores'}</h1></div><button class="btn quiet" id="leave-turns">Elegir modo</button></div><p class="podium-explanation">${m.format === 'teams' ? 'El puntaje de cada equipo es la suma de sus integrantes. ' : ''}Igual puntaje, mismo puesto. No se evalúa el parecido visual de la abeja.</p><div class="turn-results podium-results">${m.ranking.map(row => this.resultCard(row, m.format === 'teams')).join('')}</div><div class="menu-actions"><button class="btn primary" id="turn-rematch">Revancha</button><button class="btn quiet" id="turn-new">Configurar otra partida</button></div>`, 'turns-results');
-    document.querySelector('#leave-turns').onclick = this.config.onMode;
-    document.querySelector('#turn-rematch').onclick = () => this.prepareTurn(m.mission);
-    document.querySelector('#turn-new').onclick = () => this.pick(); RL.celebrate();
+    RL.turnResults.show(this); RL.celebrate();
   },
   stop() {
     clearInterval(this.timer); this.timer = null;
