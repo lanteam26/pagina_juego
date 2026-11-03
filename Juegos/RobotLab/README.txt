@@ -139,7 +139,7 @@ mientras está abierta esa partida. «Sonido» guarda la preferencia de audio.
 RECURSOS
 Se conserva la paleta azul noche/morado con acentos cian y violeta.
 RECURSOS_VISUALES.md contiene ideas de imágenes y prompts para nuevos fondos,
-avatares e insignias. Rugged, Ludio y Secundaria siguen como Próximamente.
+avatares e insignias. Rugged y Ludio siguen como Próximamente. Secundaria está disponible.
 
 COMPETITIVO POR TURNOS · INDIVIDUAL O POR EQUIPOS
 Competitivo > Por turnos. La configuración tiene cuatro paneles:
@@ -201,3 +201,12 @@ ACTUALIZAR EN EL PORTAL
 Reemplaza Juegos/RobotLab por la carpeta RobotLab completa incluida.
 No modifiques rayet.html, rayet.css ni rayet.js para instalar esta versión.
 Abre de nuevo el juego y, si conserva una versión anterior, usa Ctrl+F5.
+
+SECUNDARIA HABILITADA
+10 niveles: Enteros, Operaciones combinadas, Fracciones, Potencias, Ecuaciones,
+Paréntesis, Fracciones con x, Expresiones algebraicas, Variables en ambos lados
+y Desafío final. Todos conectan con libre, solitario, duelo y turnos/equipos.
+En fracciones, el denominador se muestra en el enunciado y se elige el
+numerador que falta. En álgebra, se elige el valor o coeficiente solicitado.
+Las miniaturas se reutilizan sin rutas inválidas. La cuadrícula de niveles
+se adapta para mostrar los diez retos.
