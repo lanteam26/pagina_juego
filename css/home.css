@@ -784,3 +784,90 @@
     mask-image: linear-gradient(transparent,#000 10%,#000 87%,transparent);
     -webkit-mask-image: linear-gradient(transparent,#000 10%,#000 87%,transparent);
 }
+
+/* YachayAventura: una paleta opaca compartida por navegación y tarjetas. */
+.home-portal .nav-inicio { --tile: #54658f; --tile-edge: #dce5ff; }
+.home-portal :is(.nav-beebot,.wp-inicial,.world-inicial) { --tile: #56518c; --tile-edge: #ffe56b; }
+.home-portal :is(.nav-rayet,.wp-primaria,.world-primaria) { --tile: #794950; --tile-edge: #ffb663; }
+.home-portal :is(.nav-ludio,.wp-secundaria,.world-secundaria) { --tile: #405595; --tile-edge: #8de7ff; }
+.home-portal :is(.nav-recursos,.wp-recursos) { --tile: #356b75; --tile-edge: #9af1cd; }
+.home-portal .nav-ayuda { --tile: #604580; --tile-edge: #e3b4ff; }
+.home-portal .main-nav .nav-btn,
+.home-portal .main-nav .nav-btn:hover,
+.home-portal .main-nav .nav-btn.is-active {
+    box-sizing: border-box; flex: 0 0 116px; width: 116px; height: 56px;
+    min-height: 56px; padding: 10px; justify-content: center;
+    background: var(--tile); color: #fff; border: 2px solid var(--tile-edge);
+    border-bottom-width: 4px; border-radius: 14px; opacity: 1;
+    filter: none; text-shadow: none; box-shadow: none; backdrop-filter: none;
+}
+.home-portal .main-nav .nav-btn.is-active { outline: 2px solid var(--tile-edge); outline-offset: 3px; }
+.home-portal .main-nav .nav-btn :is(.home-nav-robot,.nav-btn-ico) {
+    width: 28px; height: 28px; flex: 0 0 28px; display: grid; place-items: center;
+}
+.home-portal .world-preview,
+.home-portal .world-preview:hover,
+.home-portal .world .world-card {
+    background: var(--tile); border: 2px solid var(--tile-edge);
+    border-bottom-width: 5px; color: #fff; opacity: 1; filter: none; backdrop-filter: none;
+}
+.home-portal .world-preview .wp-orb { background: #293554; border: 2px solid var(--tile-edge); }
+.home-portal .world-preview .wp-label { color: var(--tile-edge); text-shadow: none; }
+.home-portal .world-preview .wp-stage { color: #fff; text-shadow: none; }
+.home-portal .world .world-card :is(.card-title,.card-title-main,.card-desc) { color: #fff; }
+.home-portal .world .world-card .card-title-accent { color: var(--tile-edge); text-shadow: none; }
+.home-portal .world .world-card::before { display: none; }
+.home-portal .world .btn-world,
+.home-portal .world .btn-world:hover {
+    box-sizing: border-box; display: inline-flex; align-items: center; justify-content: center;
+    width: 100%; max-width: 320px; height: 68px; min-height: 68px; padding: 10px 16px;
+    background: var(--tile); color: #fff; border: 2px solid var(--tile-edge);
+    border-bottom-width: 5px; border-radius: 14px; font-size: 1rem;
+    opacity: 1; filter: none; text-shadow: none; box-shadow: none;
+}
+.home-portal .world .btn-world::before,
+.home-portal .world .btn-world::after,
+.home-portal .world .btn-world .btn-glow { display: none; }
+.home-portal .hero-title { font-size: clamp(2rem,6.6vw,6.2rem); }
+.home-portal .hero-quote {
+    max-width: 680px; margin: 18px auto 20px; color: #e0e7f5;
+    font-size: clamp(.95rem,1.3vw,1.08rem); line-height: 1.75; font-style: normal;
+}
+.home-portal .development-team { display: flex; flex-direction: column; align-items: flex-start; gap: 8px; margin: 20px 0; color: #dce5ff; font-size: .8rem; }
+@media (max-width: 1200px) {
+    .home-portal .main-nav .nav-btn { flex: 0 0 56px; width: 100%; height: 56px; min-height: 56px; justify-content: flex-start; padding: 10px 15px; }
+}
+@media (max-width: 700px) {
+    .home-portal .development-team { align-items: center; }
+}
+
+/* LAN Studio: identidad integrada, sin tarjetas ni fondos añadidos. */
+.home-portal .brand-logo {
+    width: 76px; height: 54px; display: flex; align-items: center;
+    justify-content: center; flex: 0 0 76px; padding: 0;
+    background: none; border: 0; border-radius: 0; box-shadow: none;
+    overflow: visible;
+}
+.home-portal .brand-logo .brand-team-logo {
+    display: block; width: 100%; height: 100%; object-fit: contain;
+}
+.home-portal .footer-brand { display: flex; align-items: center; gap: 14px; }
+.home-portal .footer-brand-logo {
+    display: flex; align-items: center; justify-content: center;
+    width: 100px; height: 70px; flex: 0 0 100px;
+    background: none; border: 0; border-radius: 0; box-shadow: none;
+    padding: 0; overflow: visible;
+}
+.home-portal .footer-brand-logo img { display: block; width: 100%; height: 100%; object-fit: contain; }
+.home-portal .development-team {
+    display: flex; flex-direction: column; align-items: flex-start;
+    gap: 4px; margin: 18px 0; padding: 0 0 0 14px;
+    border-left: 3px solid #79dfff; color: #edf3ff;
+}
+.home-portal .development-team-label { font-size: .75rem; color: #b8c8e2; }
+.home-portal .development-team strong { font: 600 1.15rem 'Fredoka',sans-serif; letter-spacing: .03em; }
+@media (max-width: 700px) {
+    .home-portal .development-team { align-items: center; border-left: 0; padding: 0; }
+    .home-portal .brand-logo { width: 64px; flex-basis: 64px; height: 46px; }
+    .home-portal .footer-brand-logo { width: 80px; flex-basis: 80px; height: 56px; }
+}
