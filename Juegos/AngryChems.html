@@ -3,136 +3,514 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>🧪 Lanzador Iónico | Química</title>
-    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;700&family=Nunito:wght@400;700;900&display=swap" rel="stylesheet">
+    <title>🧪 Lanzador Iónico | Laboratorio Cuántico</title>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;700&family=Nunito:wght@500;700;900&display=swap" rel="stylesheet">
     <style>
         :root {
-            --lab-bg: #0b0f19;
+            --lab-bg: #070b14;
+            --lab-panel: rgba(13, 20, 36, 0.78);
             --lab-acid: #39ff14;
+            --lab-acid-dim: #128000;
             --lab-purple: #b339ff;
             --lab-cyan: #00f3ff;
+            --lab-danger: #ff3366;
             --font-title: 'Fredoka', sans-serif;
             --font-text: 'Nunito', sans-serif;
         }
 
-        body {
-            font-family: var(--font-text);
-            display: flex; flex-direction: column; align-items: center; justify-content: center;
-            margin: 0; padding: 15px; min-height: 100vh; touch-action: none; color: #fff;
-            background-color: var(--lab-bg); overflow: hidden;
+        * {
+            box-sizing: border-box;
+            user-select: none;
+            -webkit-user-select: none;
         }
 
-        /* FONDO DEL LABORATORIO TECNOLÓGICO */
-        .lab-background { position: fixed; inset: 0; z-index: -2; background: radial-gradient(circle at center, #161a29 0%, var(--lab-bg) 100%); overflow: hidden;}
-        
-        .tube { position: absolute; bottom: 0; height: 100vh; background: linear-gradient(90deg, rgba(57,255,20,0.02) 0%, rgba(57,255,20,0.1) 50%, rgba(57,255,20,0.02) 100%); border-left: 1px solid rgba(57,255,20,0.2); border-right: 1px solid rgba(57,255,20,0.2); box-shadow: 0 0 20px rgba(57,255,20,0.1);}
-        .tube-1 { left: 8%; width: 50px;} .tube-2 { right: 12%; width: 70px; } .tube-3 { left: 25%; width: 35px; opacity: 0.6;}
+        body {
+            font-family: var(--font-text);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            margin: 0;
+            padding: 12px 16px;
+            min-height: 100vh;
+            touch-action: none;
+            color: #fff;
+            background-color: var(--lab-bg);
+            overflow: hidden;
+        }
 
-        .bubble-bg { position: absolute; bottom: -20px; background: rgba(57, 255, 20, 0.4); border-radius: 50%; animation: floatUp linear infinite; box-shadow: 0 0 15px rgba(57, 255, 20, 0.6); }
+        /* FONDO DEL LABORATORIO CUÁNTICO */
+        .lab-background {
+            position: fixed;
+            inset: 0;
+            z-index: -2;
+            background: 
+                radial-gradient(circle at 20% 20%, rgba(0, 243, 255, 0.06) 0%, transparent 45%),
+                radial-gradient(circle at 80% 80%, rgba(57, 255, 20, 0.06) 0%, transparent 50%),
+                radial-gradient(circle at 50% 50%, #11182b 0%, var(--lab-bg) 100%);
+            overflow: hidden;
+        }
+
+        .lab-grid-overlay {
+            position: absolute;
+            inset: 0;
+            background-image: 
+                linear-gradient(rgba(0, 243, 255, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0, 243, 255, 0.03) 1px, transparent 1px);
+            background-size: 40px 40px;
+            mask-image: radial-gradient(circle at center, black 40%, transparent 95%);
+            -webkit-mask-image: radial-gradient(circle at center, black 40%, transparent 95%);
+        }
+        
+        .tube {
+            position: absolute;
+            bottom: 0;
+            height: 100vh;
+            background: linear-gradient(90deg, rgba(57,255,20,0.01) 0%, rgba(57,255,20,0.08) 50%, rgba(57,255,20,0.01) 100%);
+            border-left: 1px solid rgba(57,255,20,0.18);
+            border-right: 1px solid rgba(57,255,20,0.18);
+            box-shadow: 0 0 25px rgba(57,255,20,0.06);
+        }
+        .tube-1 { left: 6%; width: 55px; }
+        .tube-2 { right: 9%; width: 75px; }
+        .tube-3 { left: 24%; width: 35px; opacity: 0.5; }
+
+        .bubble-bg {
+            position: absolute;
+            bottom: -25px;
+            background: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.8), rgba(57, 255, 20, 0.35));
+            border-radius: 50%;
+            animation: floatUp linear infinite;
+            box-shadow: 0 0 12px rgba(57, 255, 20, 0.5);
+        }
         @keyframes floatUp {
-            0% { transform: translateY(0) translateX(0); opacity: 0; }
-            10% { opacity: 1; }
-            90% { opacity: 1; }
-            100% { transform: translateY(-100vh) translateX(20px); opacity: 0; }
+            0% { transform: translateY(0) translateX(0) scale(0.9); opacity: 0; }
+            15% { opacity: 0.75; }
+            85% { opacity: 0.75; }
+            100% { transform: translateY(-105vh) translateX(25px) scale(1.1); opacity: 0; }
         }
 
         /* PANELES SUPERIORES GLASSMORPHISM */
         .top-ui-container {
-            display: flex; flex-direction: column; width: 100%; max-width: 900px; z-index: 10; gap: 10px; margin-bottom: 10px;
+            display: flex;
+            flex-direction: column;
+            width: 100%;
+            max-width: 920px;
+            z-index: 10;
+            gap: 10px;
+            margin-bottom: 10px;
         }
 
         .header-row {
-            display: flex; justify-content: space-between; align-items: center; width: 100%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+            flex-wrap: wrap;
+            gap: 12px;
+            background: rgba(11, 17, 30, 0.65);
+            padding: 10px 20px;
+            border-radius: 16px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
         }
 
-        h1 { color: #fff; margin: 0; font-size: 26px; font-family: var(--font-title); text-transform: uppercase; letter-spacing: 2px; text-shadow: 0 0 10px var(--lab-acid); display: flex; align-items: center; gap: 10px;}
-        .level-badge { background: rgba(179, 57, 255, 0.2); color: #fff; padding: 6px 20px; border-radius: 20px; font-size: 16px; font-weight: bold; font-family: var(--font-title); box-shadow: inset 0 0 10px rgba(179, 57, 255, 0.5), 0 0 10px rgba(179, 57, 255, 0.3); border: 2px solid var(--lab-purple);}
+        .brand-title {
+            color: #fff;
+            margin: 0;
+            font-size: 24px;
+            font-family: var(--font-title);
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            text-shadow: 0 0 14px rgba(57, 255, 20, 0.6);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
 
-        .difficulty-selector { display: flex; gap: 10px; justify-content: center; }
-        .diff-btn { background: rgba(11, 15, 25, 0.8); border: 2px solid #334; padding: 6px 18px; border-radius: 20px; font-size: 14px; font-weight: bold; color: #889; cursor: pointer; transition: all 0.2s; font-family: var(--font-title); text-transform: uppercase; letter-spacing: 1px;}
-        .diff-btn.active { background: rgba(0, 243, 255, 0.15); border-color: var(--lab-cyan); color: #fff; box-shadow: 0 0 15px rgba(0, 243, 255, 0.4), inset 0 0 10px rgba(0, 243, 255, 0.2); transform: translateY(-2px); text-shadow: 0 0 5px var(--lab-cyan);}
+        .brand-icon {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 38px;
+            height: 38px;
+            border-radius: 10px;
+            background: linear-gradient(135deg, rgba(57, 255, 20, 0.2), rgba(0, 243, 255, 0.2));
+            border: 1px solid rgba(57, 255, 20, 0.5);
+            box-shadow: 0 0 12px rgba(57, 255, 20, 0.3);
+            font-size: 22px;
+        }
+
+        .difficulty-selector {
+            display: flex;
+            gap: 8px;
+            background: rgba(5, 8, 16, 0.7);
+            padding: 5px;
+            border-radius: 24px;
+            border: 1px solid rgba(255, 255, 255, 0.07);
+        }
+
+        .diff-btn {
+            background: transparent;
+            border: 1.5px solid transparent;
+            padding: 6px 18px;
+            border-radius: 18px;
+            font-size: 13.5px;
+            font-weight: 700;
+            color: #8a99ad;
+            cursor: pointer;
+            transition: all 0.25s cubic-bezier(0.2, 0.8, 0.2, 1);
+            font-family: var(--font-title);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .diff-btn:hover:not(.active) {
+            color: #d0dce8;
+            background: rgba(255, 255, 255, 0.04);
+        }
+
+        .diff-btn.active {
+            background: linear-gradient(135deg, rgba(0, 243, 255, 0.22), rgba(0, 140, 255, 0.15));
+            border-color: var(--lab-cyan);
+            color: #fff;
+            box-shadow: 0 0 16px rgba(0, 243, 255, 0.35), inset 0 0 8px rgba(0, 243, 255, 0.2);
+            text-shadow: 0 0 6px var(--lab-cyan);
+        }
 
         .prompt-box {
-            display: flex; justify-content: space-between; align-items: center; background: rgba(16, 22, 36, 0.75); padding: 12px 25px; border-radius: 18px; width: 100%; box-sizing: border-box; backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); border: 1px solid rgba(57, 255, 20, 0.4); box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: var(--lab-panel);
+            padding: 12px 26px;
+            border-radius: 18px;
+            width: 100%;
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(57, 255, 20, 0.35);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .prompt-box::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 5px;
+            background: linear-gradient(180deg, var(--lab-acid), var(--lab-cyan));
+            box-shadow: 0 0 12px var(--lab-acid);
         }
         
-        .compound-info { display: flex; flex-direction: column; }
-        .compound-label { color: #889; font-size: 13px; text-transform: uppercase; font-weight: bold; letter-spacing: 1px; margin-bottom: 2px;}
+        .compound-info {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .compound-label {
+            color: #93a3b8;
+            font-size: 12px;
+            text-transform: uppercase;
+            font-weight: 800;
+            letter-spacing: 1.5px;
+        }
         
-        /* Animación de pulso para llamar la atención */
         @keyframes pulseGlow {
-            0%, 100% { text-shadow: 0 0 10px rgba(57, 255, 20, 0.6); transform: scale(1); }
-            50% { text-shadow: 0 0 20px var(--lab-acid), 0 0 30px var(--lab-acid); transform: scale(1.02); }
+            0%, 100% { text-shadow: 0 0 10px rgba(57, 255, 20, 0.5); }
+            50% { text-shadow: 0 0 18px var(--lab-acid), 0 0 28px rgba(57, 255, 20, 0.4); }
         }
-        .compound-name { color: var(--lab-acid); font-size: 24px; font-family: var(--font-title); font-weight: 700; letter-spacing: 1px; animation: pulseGlow 2.5s infinite; transform-origin: left center;}
+
+        .compound-name {
+            color: var(--lab-acid);
+            font-size: 25px;
+            font-family: var(--font-title);
+            font-weight: 700;
+            letter-spacing: 0.8px;
+            animation: pulseGlow 3s ease-in-out infinite;
+        }
         
-        .progress-tracker { display: flex; flex-direction: column; align-items: center; background: rgba(0,0,0,0.4); padding: 6px 20px; border-radius: 12px; border: 1px solid rgba(0, 243, 255, 0.3); box-shadow: inset 0 0 15px rgba(0,0,0,0.5); }
-        .progress-tracker span:first-child { color: #889; font-size: 11px; text-transform: uppercase; font-weight: bold; letter-spacing: 1px;}
-        .progress-tracker #atoms-left { color: var(--lab-cyan); font-size: 26px; font-family: var(--font-title); font-weight: 700; text-shadow: 0 0 15px rgba(0, 243, 255, 0.8); line-height: 1.1;}
+        .progress-tracker {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            background: rgba(4, 8, 16, 0.65);
+            padding: 8px 20px;
+            border-radius: 14px;
+            border: 1px solid rgba(0, 243, 255, 0.3);
+            box-shadow: inset 0 2px 10px rgba(0, 0, 0, 0.6);
+        }
+
+        .progress-meta {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+        }
+
+        .progress-meta span:first-child {
+            color: #93a3b8;
+            font-size: 11px;
+            text-transform: uppercase;
+            font-weight: 800;
+            letter-spacing: 1px;
+        }
+
+        .progress-meta span:last-child {
+            color: #64748b;
+            font-size: 10px;
+            font-weight: 700;
+        }
+
+        .progress-tracker #atoms-left {
+            color: var(--lab-cyan);
+            font-size: 28px;
+            font-family: var(--font-title);
+            font-weight: 700;
+            text-shadow: 0 0 14px rgba(0, 243, 255, 0.8);
+            min-width: 34px;
+            text-align: center;
+            line-height: 1;
+        }
 
         /* CANVAS AREA CON EFECTO SHAKE */
         .canvas-container {
-            position: relative; width: 100%; max-width: 900px; background: rgba(5, 8, 15, 0.6); border-radius: 20px; border: 2px solid rgba(255,255,255,0.1); box-shadow: inset 0 0 50px rgba(0,0,0,0.8), 0 20px 50px rgba(0,0,0,0.6); overflow: hidden; backdrop-filter: blur(4px);
+            position: relative;
+            width: 100%;
+            max-width: 920px;
+            background: radial-gradient(ellipse at 50% 35%, rgba(16, 28, 48, 0.75) 0%, rgba(5, 9, 18, 0.9) 100%);
+            border-radius: 22px;
+            border: 1.5px solid rgba(0, 243, 255, 0.2);
+            box-shadow: 
+                inset 0 0 60px rgba(0, 0, 0, 0.85),
+                0 20px 50px rgba(0, 0, 0, 0.65),
+                0 0 25px rgba(0, 243, 255, 0.08);
+            overflow: hidden;
+            backdrop-filter: blur(6px);
+            -webkit-backdrop-filter: blur(6px);
         }
         
         @keyframes shake {
             0%, 100% { transform: translateX(0); }
-            20%, 60% { transform: translateX(-8px) rotate(-1deg); }
-            40%, 80% { transform: translateX(8px) rotate(1deg); }
+            20%, 60% { transform: translateX(-8px) rotate(-0.8deg); }
+            40%, 80% { transform: translateX(8px) rotate(0.8deg); }
         }
-        .shake { animation: shake 0.4s cubic-bezier(.36,.07,.19,.97) both; border-color: #e74c3c !important; box-shadow: 0 0 30px rgba(231, 76, 60, 0.6) !important;}
+        .shake {
+            animation: shake 0.4s cubic-bezier(.36,.07,.19,.97) both;
+            border-color: var(--lab-danger) !important;
+            box-shadow: 0 0 35px rgba(255, 51, 102, 0.6) !important;
+        }
 
-        #gameCanvas { display: block; width: 100%; height: auto; border-radius: 18px; cursor: crosshair; }
+        #gameCanvas {
+            display: block;
+            width: 100%;
+            height: auto;
+            border-radius: 20px;
+            cursor: crosshair;
+        }
 
         /* CONTROLES INFERIORES */
-        .controls { display: flex; justify-content: center; gap: 20px; width: 100%; max-width: 900px; margin-top: 15px; z-index: 10; }
-        .btn { font-family: var(--font-title); font-weight: 700; font-size: 15px; padding: 12px 30px; border: none; border-radius: 12px; cursor: pointer; text-transform: uppercase; transition: all 0.2s; color: #fff; letter-spacing: 1px;}
-        .btn:active { transform: translateY(4px); box-shadow: none !important; }
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 16px;
+            width: 100%;
+            max-width: 920px;
+            margin-top: 14px;
+            z-index: 10;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            font-family: var(--font-title);
+            font-weight: 700;
+            font-size: 14.5px;
+            padding: 11px 26px;
+            border: none;
+            border-radius: 14px;
+            cursor: pointer;
+            text-transform: uppercase;
+            transition: all 0.2s cubic-bezier(0.2, 0.8, 0.2, 1);
+            color: #fff;
+            letter-spacing: 1px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn:active {
+            transform: translateY(3px);
+            box-shadow: none !important;
+        }
         
-        .btn-reset { background: rgba(255,255,255,0.1); box-shadow: 0 6px 0 rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.2); backdrop-filter: blur(5px);}
-        .btn-reset:hover { background: rgba(255,255,255,0.2); }
+        .btn-reset {
+            background: rgba(255, 255, 255, 0.08);
+            box-shadow: 0 5px 0 rgba(0, 0, 0, 0.45);
+            border: 1px solid rgba(255, 255, 255, 0.16);
+            backdrop-filter: blur(6px);
+        }
+        .btn-reset:hover {
+            background: rgba(255, 255, 255, 0.15);
+            border-color: rgba(255, 255, 255, 0.3);
+        }
+
+        .btn-skip {
+            background: linear-gradient(180deg, rgba(179, 57, 255, 0.25), rgba(120, 0, 204, 0.35));
+            box-shadow: 0 5px 0 #390066, 0 0 15px rgba(179, 57, 255, 0.25);
+            border: 1px solid rgba(179, 57, 255, 0.5);
+        }
+        .btn-skip:hover {
+            background: linear-gradient(180deg, rgba(179, 57, 255, 0.4), rgba(120, 0, 204, 0.5));
+        }
         
-        .btn-info { background: linear-gradient(180deg, #00d2ff, #0081d4); color: #fff; box-shadow: 0 6px 0 #00568c, 0 0 20px rgba(0, 210, 255, 0.4); border: 1px solid #75e2ff; text-shadow: 0 2px 4px rgba(0,0,0,0.3);}
+        .btn-info {
+            background: linear-gradient(180deg, #00d2ff, #0077c8);
+            color: #fff;
+            box-shadow: 0 5px 0 #004b80, 0 0 20px rgba(0, 210, 255, 0.35);
+            border: 1px solid #80e5ff;
+            text-shadow: 0 1px 3px rgba(0, 0, 0, 0.35);
+        }
+        .btn-info:hover {
+            filter: brightness(1.08);
+        }
 
         /* MODAL (ALERTS Y VICTORIA) */
-        .modal-overlay { position: fixed; inset: 0; background: rgba(5, 8, 15, 0.85); backdrop-filter: blur(8px); display: flex; justify-content: center; align-items: center; z-index: 1000; visibility: hidden; opacity: 0; transition: all 0.3s; }
-        .modal-overlay.active { visibility: visible; opacity: 1; }
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(4, 7, 14, 0.85);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            visibility: hidden;
+            opacity: 0;
+            transition: all 0.28s ease;
+            padding: 16px;
+        }
+        .modal-overlay.active {
+            visibility: visible;
+            opacity: 1;
+        }
         
-        .modal-box { background: rgba(16, 22, 36, 0.95); border: 2px solid var(--lab-cyan); padding: 40px; border-radius: 25px; text-align: center; max-width: 85%; width: 450px; transform: scale(0.8); transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); box-shadow: 0 20px 60px rgba(0, 243, 255, 0.15), inset 0 0 40px rgba(0,0,0,0.6); }
-        .modal-overlay.active .modal-box { transform: scale(1); }
+        .modal-box {
+            background: linear-gradient(165deg, rgba(19, 28, 46, 0.96) 0%, rgba(10, 15, 26, 0.98) 100%);
+            border: 2px solid var(--lab-cyan);
+            padding: 34px 32px;
+            border-radius: 26px;
+            text-align: center;
+            max-width: 460px;
+            width: 100%;
+            transform: scale(0.86) translateY(12px);
+            transition: 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            box-shadow: 0 24px 60px rgba(0, 0, 0, 0.75), 0 0 40px rgba(0, 243, 255, 0.18), inset 0 1px 0 rgba(255, 255, 255, 0.15);
+        }
+        .modal-overlay.active .modal-box {
+            transform: scale(1) translateY(0);
+        }
         
-        .modal-title { font-size: 32px; font-family: var(--font-title); margin-top: 0; margin-bottom: 10px; color: var(--lab-acid); text-shadow: 0 0 15px rgba(57, 255, 20, 0.5);}
-        .modal-formula { font-size: 50px; color: #fff; font-family: var(--font-title); margin-bottom: 25px; letter-spacing: 3px; text-shadow: 0 5px 15px rgba(0,0,0,0.6);}
-        .modal-msg { font-size: 17px; margin-bottom: 25px; color: #bdc3c7; white-space: pre-line; line-height: 1.5; font-weight: bold;}
-        
-        .fact-box { background: rgba(0,0,0,0.4); border-left: 4px solid var(--lab-purple); padding: 15px; border-radius: 0 12px 12px 0; margin-bottom: 30px; text-align: left; display: flex; gap: 15px; align-items: center; box-shadow: inset 0 0 20px rgba(0,0,0,0.5);}
-        .fact-icon { font-size: 30px; }
-        .fact-text { font-size: 14.5px; color: #aeb6bf; font-style: italic; margin: 0; line-height: 1.5;}
+        .modal-title {
+            font-size: 28px;
+            font-family: var(--font-title);
+            margin-top: 0;
+            margin-bottom: 8px;
+            color: var(--lab-acid);
+            text-shadow: 0 0 15px rgba(57, 255, 20, 0.45);
+        }
 
-        .modal-btn { background: linear-gradient(180deg, #b339ff, #7800cc); box-shadow: 0 6px 0 #4c0080, 0 0 25px rgba(179, 57, 255, 0.4); padding: 15px 35px; font-size: 18px; color: white; border: 1px solid #d9a0ff; border-radius: 12px; font-family: var(--font-title); font-weight: bold; cursor: pointer; text-transform: uppercase; letter-spacing: 1px;}
-        .modal-btn:active { transform: translateY(6px); box-shadow: none; }
+        .modal-formula {
+            font-size: 48px;
+            color: #fff;
+            font-family: var(--font-title);
+            margin: 6px 0 18px;
+            letter-spacing: 3px;
+            text-shadow: 0 0 20px rgba(0, 243, 255, 0.5), 0 5px 15px rgba(0, 0, 0, 0.6);
+        }
+
+        .modal-msg {
+            font-size: 16.5px;
+            margin-bottom: 22px;
+            color: #cbd5e1;
+            white-space: pre-line;
+            line-height: 1.55;
+            font-weight: 700;
+        }
+        
+        .fact-box {
+            background: rgba(4, 8, 16, 0.55);
+            border: 1px solid rgba(179, 57, 255, 0.3);
+            border-left: 4px solid var(--lab-purple);
+            padding: 14px 16px;
+            border-radius: 12px;
+            margin-bottom: 26px;
+            text-align: left;
+            display: flex;
+            gap: 14px;
+            align-items: center;
+            box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.4);
+        }
+        .fact-icon { font-size: 28px; flex-shrink: 0; }
+        .fact-text { font-size: 14px; color: #cbd5e1; font-style: italic; margin: 0; line-height: 1.5; }
+
+        .modal-btn {
+            background: linear-gradient(180deg, #b339ff, #7800cc);
+            box-shadow: 0 6px 0 #4c0080, 0 0 25px rgba(179, 57, 255, 0.4);
+            padding: 14px 36px;
+            font-size: 17px;
+            color: white;
+            border: 1px solid #d9a0ff;
+            border-radius: 14px;
+            font-family: var(--font-title);
+            font-weight: bold;
+            cursor: pointer;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            transition: transform 0.15s, filter 0.2s;
+        }
+        .modal-btn:hover { filter: brightness(1.1); }
+        .modal-btn:active { transform: translateY(5px); box-shadow: none; }
+
+        @media (max-width: 640px) {
+            .header-row {
+                justify-content: center;
+                padding: 10px 14px;
+            }
+            .brand-title { font-size: 20px; }
+            .compound-name { font-size: 20px; }
+            .prompt-box { padding: 10px 16px; }
+            .btn { padding: 10px 18px; font-size: 13px; }
+        }
     </style>
 </head>
 <body>
 
     <div class="lab-background">
+        <div class="lab-grid-overlay"></div>
         <div class="tube tube-1"></div>
         <div class="tube tube-2"></div>
         <div class="tube tube-3"></div>
         <div id="bg-bubbles"></div>
     </div>
 
-    <!-- UI SUPERIOR -->
+    <!-- UI SUPERIOR (Sin contador de niveles, diseño limpio e integrado) -->
     <div class="top-ui-container">
         <div class="header-row">
-            <h1><span style="font-size: 32px;">👨‍🔬</span> Lanzador Iónico</h1>
-            <div class="level-badge" id="level-indicator">Nivel 1/30</div>
-        </div>
-        
-        <div class="difficulty-selector">
-            <button id="btn-diff-easy" class="diff-btn active" onclick="setDifficulty('easy')">Fácil</button>
-            <button id="btn-diff-medium" class="diff-btn" onclick="setDifficulty('medium')">Medio</button>
-            <button id="btn-diff-hard" class="diff-btn" onclick="setDifficulty('hard')">Difícil</button>
+            <h1 class="brand-title">
+                <span class="brand-icon">⚛️</span>
+                Lanzador Iónico
+            </h1>
+            
+            <div class="difficulty-selector">
+                <button id="btn-diff-easy" class="diff-btn active" onclick="setDifficulty('easy')">Fácil</button>
+                <button id="btn-diff-medium" class="diff-btn" onclick="setDifficulty('medium')">Medio</button>
+                <button id="btn-diff-hard" class="diff-btn" onclick="setDifficulty('hard')">Difícil</button>
+            </div>
         </div>
 
         <div class="prompt-box">
@@ -141,7 +519,10 @@
                 <span class="compound-name" id="target-compound">Cargando...</span>
             </div>
             <div class="progress-tracker">
-                <span>Requeridos</span>
+                <div class="progress-meta">
+                    <span>Átomos</span>
+                    <span>Requeridos</span>
+                </div>
                 <span id="atoms-left">0</span>
             </div>
         </div>
@@ -154,36 +535,37 @@
 
     <!-- CONTROLES -->
     <div class="controls">
-        <button class="btn btn-reset" onclick="resetShot()">🔄 Abortar Tiro</button>
-        <button class="btn btn-info" onclick="showHelp()">💡 Ayuda del Doc</button>
+        <button class="btn btn-reset" onclick="resetShot()">🔄 Recargar Átomo</button>
+        <button class="btn btn-skip" onclick="loadNextRandomLevel()">🎲 Otro Compuesto</button>
+        <button class="btn btn-info" onclick="showHelp()">💡 Guía del Laboratorio</button>
     </div>
 
     <!-- MODAL -->
     <div class="modal-overlay" id="modal">
-        <div class="modal-box">
+        <div class="modal-box" id="modal-box">
             <h2 class="modal-title" id="m-title">Título</h2>
             <div class="modal-formula" id="m-formula"></div>
             <p class="modal-msg" id="m-msg">Mensaje</p>
             <div class="fact-box" id="fact-container" style="display: none;">
-                <span class="fact-icon">💡</span>
+                <span class="fact-icon">🧪</span>
                 <p class="fact-text" id="m-fact">Dato curioso aquí.</p>
             </div>
-            <button class="modal-btn" onclick="nextLevelAction()" id="m-btn">Siguiente Nivel</button>
+            <button class="modal-btn" onclick="nextLevelAction()" id="m-btn">Continuar</button>
         </div>
     </div>
 
     <script>
-        // GENERADOR DE BURBUJAS CSS
+        // GENERADOR DE BURBUJAS AMBIENTALES CSS
         const bubbleContainer = document.getElementById('bg-bubbles');
-        for(let i=0; i<15; i++) {
+        for (let i = 0; i < 16; i++) {
             let b = document.createElement('div');
             b.className = 'bubble-bg';
             let size = Math.random() * 12 + 6;
             b.style.width = size + 'px';
             b.style.height = size + 'px';
             b.style.left = Math.random() * 100 + 'vw';
-            b.style.animationDuration = (Math.random() * 6 + 4) + 's';
-            b.style.animationDelay = (Math.random() * 5) + 's';
+            b.style.animationDuration = (Math.random() * 8 + 7) + 's';
+            b.style.animationDelay = (Math.random() * 6) + 's';
             bubbleContainer.appendChild(b);
         }
 
@@ -191,98 +573,260 @@
         const ctx = canvas.getContext('2d');
         const canvasWrap = document.getElementById('canvasWrap');
 
-        // AUDIO
+        // SISTEMA DE AUDIO SINTETIZADO (Web Audio API)
         const AudioContext = window.AudioContext || window.webkitAudioContext;
         let audioCtx;
-        function initAudio() { if (!audioCtx) { audioCtx = new AudioContext(); if (audioCtx.state === 'suspended') audioCtx.resume(); } }
-        function playTone(freq, type, duration, vol = 0.1) {
-            if (!audioCtx) return; const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain();
-            osc.type = type; osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
-            gain.gain.setValueAtTime(vol, audioCtx.currentTime); gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + duration);
-            osc.connect(gain); gain.connect(audioCtx.destination); osc.start(); osc.stop(audioCtx.currentTime + duration);
+        function initAudio() {
+            if (!audioCtx) {
+                audioCtx = new AudioContext();
+            }
+            if (audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
         }
 
-        // Físicas Generales
-        const gravity = 0.25;
-        const friction = 0.98;
-        const groundY = 390; 
+        function playTone(freq, type, duration, vol = 0.1) {
+            if (!audioCtx) return;
+            try {
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.type = type;
+                osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+                gain.gain.setValueAtTime(vol, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.008, audioCtx.currentTime + duration);
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.start();
+                osc.stop(audioCtx.currentTime + duration);
+            } catch (e) {}
+        }
+
+        // FÍSICAS CALIBRADAS A 1X (Normalizadas a 60 FPS mediante deltaTime)
+        const gravity = 0.19;
+        const groundFriction = 0.975;
+        const groundY = 392;
 
         // Estado del Juego
         let isDragging = false;
         let isFlying = false;
-        let currentLevel = 0;
+        let currentDifficulty = 'easy';
+        let activeLevel = null;
+        let levelDeck = { easy: [], medium: [], hard: [] };
+
         let particles = [];
-        let bumpers = []; 
+        let acidBubbles = [];
+        let shockwaves = [];
+        let bumpers = [];
         let targets = [];
         let trail = [];
         let floatTexts = [];
         let requiredCollected = 0;
-        let time = 0; 
 
-        // Bobina Tesla
-        const sling = { x: 120, y: 290, r: 90 }; 
+        // Control de tiempo real (Delta Time) para evitar el efecto 2x en pantallas de 120Hz/144Hz
+        let simTime = 0;
+        let lastFrameTime = performance.now();
+        let trailTimer = 0;
 
-        // Proyectil
-        let bird = { x: 120, y: 290, r: 22, vx: 0, vy: 0, text: "", color: "#00f3ff", active: true, successfulHit: false };
+        // Bobina Tesla (Lanzador)
+        const sling = { x: 125, y: 285, r: 92 };
 
-        // CLASES DE EFECTOS
+        // Proyectil Atómico
+        let bird = {
+            x: sling.x,
+            y: sling.y,
+            r: 22,
+            vx: 0,
+            vy: 0,
+            text: "",
+            color: "#00f3ff",
+            active: true,
+            successfulHit: false
+        };
+
+        // CLASES DE EFECTOS VISUALES CON DELTA TIME
         class Particle {
             constructor(x, y, color, isSuccess) {
-                this.x = x; this.y = y;
-                this.vx = (Math.random() - 0.5) * (isSuccess ? 12 : 18);
-                this.vy = (Math.random() - 0.5) * (isSuccess ? 12 : 18);
+                this.x = x;
+                this.y = y;
+                const speed = isSuccess ? 7.5 : 10.5;
+                const angle = Math.random() * Math.PI * 2;
+                const mag = Math.random() * speed + 1.5;
+                this.vx = Math.cos(angle) * mag;
+                this.vy = Math.sin(angle) * mag;
                 this.life = 1.0;
                 this.color = color;
-                this.size = Math.random() * 8 + 4;
-                this.gravity = isSuccess ? 0.05 : 0.2;
+                this.size = Math.random() * 6 + 3.5;
+                this.gravity = isSuccess ? 0.04 : 0.14;
             }
-            update() { 
-                this.vy += this.gravity;
-                this.x += this.vx; this.y += this.vy; 
-                this.life -= 0.025; 
-                this.size *= 0.95; 
+            update(dt) {
+                this.vy += this.gravity * dt;
+                this.x += this.vx * dt;
+                this.y += this.vy * dt;
+                this.life -= 0.022 * dt;
+                this.size *= Math.pow(0.96, dt);
             }
             draw(ctx) {
-                ctx.globalAlpha = Math.max(0, this.life); ctx.fillStyle = this.color;
-                ctx.beginPath(); ctx.arc(this.x, this.y, this.size, 0, Math.PI*2); ctx.fill();
-                ctx.globalAlpha = 1.0;
+                if (this.life <= 0) return;
+                ctx.save();
+                ctx.globalAlpha = Math.max(0, this.life);
+                ctx.fillStyle = this.color;
+                ctx.shadowBlur = 10;
+                ctx.shadowColor = this.color;
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, Math.max(0.5, this.size), 0, Math.PI * 2);
+                ctx.fill();
+                ctx.restore();
+            }
+        }
+
+        class Shockwave {
+            constructor(x, y, color, maxR = 65) {
+                this.x = x;
+                this.y = y;
+                this.r = 12;
+                this.maxR = maxR;
+                this.color = color;
+                this.life = 1.0;
+            }
+            update(dt) {
+                this.r += (this.maxR - this.r) * 0.14 * dt;
+                this.life -= 0.038 * dt;
+            }
+            draw(ctx) {
+                if (this.life <= 0) return;
+                ctx.save();
+                ctx.globalAlpha = Math.max(0, this.life);
+                ctx.strokeStyle = this.color;
+                ctx.lineWidth = 3 * this.life;
+                ctx.shadowBlur = 12;
+                ctx.shadowColor = this.color;
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.r, 0, Math.PI * 2);
+                ctx.stroke();
+                ctx.restore();
+            }
+        }
+
+        class AcidBubble {
+            constructor() {
+                this.reset();
+                this.y = groundY + Math.random() * (canvas.height - groundY);
+            }
+            reset() {
+                this.x = Math.random() * canvas.width;
+                this.y = canvas.height + 5;
+                this.r = Math.random() * 4.5 + 2;
+                this.vy = -(Math.random() * 0.65 + 0.35);
+                this.wobbleSeed = Math.random() * Math.PI * 2;
+                this.life = 1.0;
+            }
+            update(dt) {
+                this.y += this.vy * dt;
+                this.x += Math.sin(simTime * 2 + this.wobbleSeed) * 0.3 * dt;
+                if (this.y < groundY - 8) {
+                    this.life -= 0.08 * dt;
+                    if (this.life <= 0) this.reset();
+                }
+            }
+            draw(ctx) {
+                ctx.save();
+                ctx.globalAlpha = Math.max(0, this.life * 0.65);
+                ctx.strokeStyle = "#9eff7a";
+                ctx.fillStyle = "rgba(57, 255, 20, 0.25)";
+                ctx.lineWidth = 1;
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.r, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.stroke();
+                ctx.restore();
             }
         }
 
         class FloatText {
             constructor(x, y, text, color) {
-                this.x = x; this.y = y; this.text = text; this.color = color;
-                this.life = 1.0; this.vy = -1.5;
+                this.x = x;
+                this.y = y;
+                this.text = text;
+                this.color = color;
+                this.life = 1.0;
+                this.vy = -1.1;
             }
-            update() { this.y += this.vy; this.life -= 0.015; }
+            update(dt) {
+                this.y += this.vy * dt;
+                this.life -= 0.016 * dt;
+            }
             draw(ctx) {
+                if (this.life <= 0) return;
+                ctx.save();
                 ctx.globalAlpha = Math.max(0, this.life);
                 ctx.fillStyle = this.color;
-                ctx.font = "bold 28px Fredoka";
+                ctx.font = "bold 26px Fredoka";
                 ctx.textAlign = "center";
-                ctx.shadowBlur = 10; ctx.shadowColor = this.color;
+                ctx.shadowBlur = 12;
+                ctx.shadowColor = this.color;
                 ctx.fillText(this.text, this.x, this.y);
-                ctx.shadowBlur = 0; ctx.globalAlpha = 1.0;
+                ctx.restore();
             }
         }
 
         class Bumper {
-            constructor(x, y, r) { this.x = x; this.y = y; this.r = r; }
+            constructor(x, y, r) {
+                this.x = x;
+                this.y = y;
+                this.r = r;
+                this.hitPulse = 0;
+            }
+            update(dt) {
+                if (this.hitPulse > 0) {
+                    this.hitPulse = Math.max(0, this.hitPulse - 0.06 * dt);
+                }
+            }
             draw(ctx) {
-                ctx.beginPath(); ctx.arc(this.x, this.y, this.r, 0, Math.PI*2);
-                let grad = ctx.createRadialGradient(this.x - this.r/3, this.y - this.r/3, this.r/5, this.x, this.y, this.r);
-                grad.addColorStop(0, "#fff"); grad.addColorStop(0.3, "#7f8c8d"); grad.addColorStop(1, "#1e272c");
-                ctx.fillStyle = grad; ctx.fill();
+                ctx.save();
+                const pulseOffset = this.hitPulse * 5;
+                const drawR = this.r + pulseOffset;
 
-                ctx.strokeStyle = "rgba(0, 243, 255, 0.5)"; ctx.lineWidth = 2; ctx.stroke();
+                // Halo exterior magnético
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, drawR + 5, 0, Math.PI * 2);
+                ctx.strokeStyle = `rgba(0, 243, 255, ${0.22 + Math.sin(simTime * 2.5) * 0.08 + this.hitPulse * 0.4})`;
+                ctx.lineWidth = 2;
+                ctx.setLineDash([6, 6]);
+                ctx.stroke();
+                ctx.setLineDash([]);
 
-                ctx.beginPath(); ctx.arc(this.x, this.y, this.r * 0.4 + Math.sin(time*5)*2, 0, Math.PI*2);
-                ctx.fillStyle = varColor('--lab-acid');
-                ctx.shadowBlur = 15; ctx.shadowColor = varColor('--lab-acid');
-                ctx.fill(); ctx.shadowBlur = 0;
+                // Cuerpo metálico del repulsor
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, drawR, 0, Math.PI * 2);
+                let grad = ctx.createRadialGradient(this.x - drawR / 3, this.y - drawR / 3, drawR / 6, this.x, this.y, drawR);
+                grad.addColorStop(0, "#bae6fd");
+                grad.addColorStop(0.35, "#334155");
+                grad.addColorStop(1, "#0f172a");
+                ctx.fillStyle = grad;
+                ctx.fill();
+
+                ctx.strokeStyle = this.hitPulse > 0.1 ? "#39ff14" : "rgba(0, 243, 255, 0.7)";
+                ctx.lineWidth = 2.5;
+                ctx.stroke();
+
+                // Núcleo de energía
+                const coreR = drawR * 0.38 + Math.sin(simTime * 3.5) * 1.8;
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, coreR, 0, Math.PI * 2);
+                ctx.fillStyle = "#39ff14";
+                ctx.shadowBlur = 16 + this.hitPulse * 15;
+                ctx.shadowColor = "#39ff14";
+                ctx.fill();
+                ctx.restore();
             }
         }
 
+        // Inicializar burbujas del ácido en el canvas
+        for (let i = 0; i < 18; i++) {
+            acidBubbles.push(new AcidBubble());
+        }
+
+        // BASE DE DATOS DE 30 COMPUESTOS QUÍMICOS
         const allLevels = [
             { diff: "easy", name: "Monóxido de carbono", form: "CO", base: "C", baseCol: "#95a5a6", reqA: "O", reqCount: 1, reqCol: "#e74c3c", wrongA: ["N"], fact: "Es un gas muy peligroso que sale del escape de los autos." },
             { diff: "easy", name: "Cloruro de sodio", form: "NaCl", base: "Na", baseCol: "#f1c40f", reqA: "Cl", reqCount: 1, reqCol: "#2ecc71", wrongA: ["He"], fact: "¡Es la sal de mesa que usamos todos los días en la comida!" },
@@ -318,38 +862,83 @@
             { diff: "hard", name: "Pentóxido de dinitrógeno", form: "N₂O₅", base: "N₂", baseCol: "#8e44ad", reqA: "O", reqCount: 5, reqCol: "#e74c3c", wrongA: ["C", "H", "S", "Cl"], fact: "Es un sólido blanco inestable que se utiliza en la fabricación de explosivos modernos." }
         ];
 
-        const colorMap = { "N":"#8e44ad", "C":"#95a5a6", "O":"#e74c3c", "H":"#3498db", "He":"#9b59b6", "F":"#1abc9c", "S":"#f1c40f", "Cl":"#2ecc71", "Br":"#d35400", "Na":"#f1c40f" };
+        const colorMap = {
+            "N": "#8e44ad", "C": "#95a5a6", "O": "#e74c3c", "H": "#3498db",
+            "He": "#9b59b6", "F": "#1abc9c", "S": "#f1c40f", "Cl": "#2ecc71",
+            "Br": "#d35400", "Na": "#f1c40f", "I": "#8e44ad"
+        };
+
+        // ALGORITMO FISHER-YATES PARA BARAJAR NIVELES ALEATORIAMENTE POR DIFICULTAD
+        function shuffleArray(arr) {
+            const copy = [...arr];
+            for (let i = copy.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [copy[i], copy[j]] = [copy[j], copy[i]];
+            }
+            return copy;
+        }
+
+        function refillDeck(diff) {
+            const filtered = allLevels.filter(lvl => lvl.diff === diff);
+            levelDeck[diff] = shuffleArray(filtered);
+            // Evitar que el primer nivel de la nueva baraja sea idéntico al último jugado
+            if (activeLevel && levelDeck[diff].length > 1 && levelDeck[diff][levelDeck[diff].length - 1].name === activeLevel.name) {
+                const last = levelDeck[diff].pop();
+                levelDeck[diff].unshift(last);
+            }
+        }
+
+        function getNextRandomLevel(diff) {
+            if (!levelDeck[diff] || levelDeck[diff].length === 0) {
+                refillDeck(diff);
+            }
+            return levelDeck[diff].pop();
+        }
 
         function drawChemicalText(ctx, text, x, y) {
-            ctx.textAlign = "center"; ctx.textBaseline = "middle";
+            ctx.textAlign = "center";
+            ctx.textBaseline = "middle";
             let hasNum = text.match(/[0-9₂₃₄₅₆₇₈]/);
-            if (!hasNum) { ctx.fillText(text, x, y); return; }
+            if (!hasNum) {
+                ctx.font = "900 19px Nunito";
+                ctx.fillText(text, x, y);
+                return;
+            }
             let letter = text.replace(/[0-9₂₃₄₅₆₇₈]/g, '');
             let num = text.match(/[0-9₂₃₄₅₆₇₈]/)[0];
             const subMap = {'₂':'2','₃':'3','₄':'4','₅':'5','₆':'6','₇':'7','₈':'8'};
-            if(subMap[num]) num = subMap[num];
-            ctx.font = "bold 20px Nunito"; ctx.fillText(letter, x - 5, y);
-            ctx.font = "bold 12px Nunito"; ctx.fillText(num, x + 8, y + 8);
-            ctx.font = "bold 18px Nunito";
+            if (subMap[num]) num = subMap[num];
+            ctx.font = "900 19px Nunito";
+            ctx.fillText(letter, x - 4, y);
+            ctx.font = "900 12px Nunito";
+            ctx.fillText(num, x + 9, y + 7);
         }
 
         function buildBumpers(difficulty) {
             bumpers = [];
             let count = difficulty === 'easy' ? 1 : (difficulty === 'medium' ? 2 : 3);
-            let fixedRadius = 35; 
+            let fixedRadius = 34;
             let maxAttempts = 100;
 
-            for(let i = 0; i < count; i++) {
-                let placed = false; let attempts = 0;
+            for (let i = 0; i < count; i++) {
+                let placed = false;
+                let attempts = 0;
                 while (!placed && attempts < maxAttempts) {
-                    let x = 350 + Math.random() * 450; 
-                    let y = 100 + Math.random() * (groundY - 150 - fixedRadius);
+                    let x = 340 + Math.random() * 440;
+                    let y = 95 + Math.random() * (groundY - 155 - fixedRadius);
                     let overlap = false;
                     for (let b of bumpers) {
-                        let dx = x - b.x; let dy = y - b.y;
-                        if (Math.sqrt(dx*dx + dy*dy) < (fixedRadius + b.r + 20)) { overlap = true; break; }
+                        let dx = x - b.x;
+                        let dy = y - b.y;
+                        if (Math.sqrt(dx * dx + dy * dy) < (fixedRadius + b.r + 35)) {
+                            overlap = true;
+                            break;
+                        }
                     }
-                    if (!overlap) { bumpers.push(new Bumper(x, y, fixedRadius)); placed = true; }
+                    if (!overlap) {
+                        bumpers.push(new Bumper(x, y, fixedRadius));
+                        placed = true;
+                    }
                     attempts++;
                 }
             }
@@ -357,54 +946,60 @@
 
         function spawnTarget(text, isCorrect) {
             let angle = Math.random() * Math.PI * 2;
-            let uniformSpeed = Math.random() * 1.5 + 1.5; 
+            // Velocidad suave y natural (1x regulada)
+            let uniformSpeed = Math.random() * 0.65 + 1.05;
             return {
-                text: text, color: colorMap[text] || "#7f8c8d", isCorrect: isCorrect,
-                r: 25, x: 400 + Math.random() * 400, y: 50 + Math.random() * 250,
-                vx: Math.cos(angle) * uniformSpeed, vy: Math.sin(angle) * uniformSpeed, hit: false
+                text: text,
+                color: colorMap[text] || "#7f8c8d",
+                isCorrect: isCorrect,
+                r: 25,
+                x: 410 + Math.random() * 410,
+                y: 55 + Math.random() * 250,
+                vx: Math.cos(angle) * uniformSpeed,
+                vy: Math.sin(angle) * uniformSpeed,
+                orbitPhase: Math.random() * Math.PI * 2,
+                hit: false
             };
         }
 
         function setDifficulty(diff) {
-            if (isFlying && bird.active) return; 
-            if (diff === 'easy') currentLevel = 0;
-            else if (diff === 'medium') currentLevel = 10;
-            else if (diff === 'hard') currentLevel = 20;
-            loadLevel(currentLevel);
+            if (isFlying && bird.active) return;
+            currentDifficulty = diff;
+            updateDifficultyUI(diff);
+            initAudio();
+            playTone(520, 'sine', 0.08, 0.08);
+            loadNextRandomLevel();
         }
 
-        function updateDifficultyUI(index) {
+        function updateDifficultyUI(diff) {
             document.querySelectorAll('.diff-btn').forEach(btn => btn.classList.remove('active'));
-            if (index < 10) document.getElementById('btn-diff-easy').classList.add('active');
-            else if (index < 20) document.getElementById('btn-diff-medium').classList.add('active');
-            else document.getElementById('btn-diff-hard').classList.add('active');
+            const activeBtn = document.getElementById(`btn-diff-${diff}`);
+            if (activeBtn) activeBtn.classList.add('active');
         }
 
-        function loadLevel(index) {
-            if(index >= allLevels.length) {
-                showModal("¡Maestro Químico! 🏆", "", "Has completado todos los compuestos del laboratorio.", "Volver a Jugar", null, () => {
-                    currentLevel = 0; loadLevel(0); closeModal();
-                });
-                return;
-            }
+        function loadNextRandomLevel() {
+            const lvl = getNextRandomLevel(currentDifficulty);
+            loadSpecificLevel(lvl);
+        }
 
-            const lvl = allLevels[index];
-            updateDifficultyUI(index);
+        function loadSpecificLevel(lvl) {
+            activeLevel = lvl;
+            updateDifficultyUI(lvl.diff);
 
-            document.getElementById('level-indicator').innerText = `Nivel ${index + 1}/30`;
             document.getElementById('target-compound').innerText = lvl.name;
             requiredCollected = 0;
-            
-            bird.text = lvl.base; bird.color = lvl.baseCol;
+
+            bird.text = lvl.base;
+            bird.color = lvl.baseCol;
             document.getElementById('atoms-left').innerText = lvl.reqCount;
 
             let maxTargets = 2;
-            if(lvl.diff === "medium") maxTargets = 3; 
-            if(lvl.diff === "hard") maxTargets = 5; 
+            if (lvl.diff === "medium") maxTargets = 3;
+            if (lvl.diff === "hard") maxTargets = 5;
 
             targets = [];
             targets.push(spawnTarget(lvl.reqA, true));
-            for(let i=0; i<maxTargets-1; i++) {
+            for (let i = 0; i < maxTargets - 1; i++) {
                 let wAtom = lvl.wrongA[i % lvl.wrongA.length];
                 targets.push(spawnTarget(wAtom, false));
             }
@@ -414,305 +1009,669 @@
         }
 
         function resetShot() {
-            bird.x = sling.x; bird.y = sling.y; bird.vx = 0; bird.vy = 0;
-            isFlying = false; isDragging = false; bird.active = true; bird.successfulHit = false; 
+            canvasWrap.classList.remove('shake');
+            bird.x = sling.x;
+            bird.y = sling.y;
+            bird.vx = 0;
+            bird.vy = 0;
+            isFlying = false;
+            isDragging = false;
+            bird.active = true;
+            bird.successfulHit = false;
             trail = [];
         }
 
         function createExplosion(x, y, color, isSuccess) {
-            for(let i=0; i<35; i++) particles.push(new Particle(x, y, color, isSuccess));
+            for (let i = 0; i < 32; i++) {
+                particles.push(new Particle(x, y, color, isSuccess));
+            }
+            shockwaves.push(new Shockwave(x, y, color, isSuccess ? 75 : 95));
         }
         
         function triggerShake() {
             canvasWrap.classList.remove('shake');
-            void canvasWrap.offsetWidth; 
+            void canvasWrap.offsetWidth;
             canvasWrap.classList.add('shake');
+            setTimeout(() => {
+                canvasWrap.classList.remove('shake');
+            }, 400);
         }
 
         function circleCollision(obj, staticBumper, bounceFactor = 0.8) {
-            let dx = obj.x - staticBumper.x; let dy = obj.y - staticBumper.y;
-            let dist = Math.sqrt(dx*dx + dy*dy); let minDist = obj.r + staticBumper.r;
+            let dx = obj.x - staticBumper.x;
+            let dy = obj.y - staticBumper.y;
+            let dist = Math.sqrt(dx * dx + dy * dy);
+            let minDist = obj.r + staticBumper.r;
 
-            if (dist < minDist) {
-                let overlap = minDist - dist; let nx = dx / dist; let ny = dy / dist;
-                obj.x += nx * overlap; obj.y += ny * overlap;
+            if (dist < minDist && dist > 0.0001) {
+                let overlap = minDist - dist;
+                let nx = dx / dist;
+                let ny = dy / dist;
+                obj.x += nx * overlap;
+                obj.y += ny * overlap;
                 let dp = obj.vx * nx + obj.vy * ny;
-                if (dp < 0) { obj.vx -= (1 + bounceFactor) * dp * nx; obj.vy -= (1 + bounceFactor) * dp * ny; }
+                if (dp < 0) {
+                    obj.vx -= (1 + bounceFactor) * dp * nx;
+                    obj.vy -= (1 + bounceFactor) * dp * ny;
+                }
                 return true;
             }
             return false;
         }
 
-        function handleCollisions() {
-            if(!bird.active) return;
+        function handleCollisions(dt) {
+            if (!bird.active || !activeLevel) return;
 
-            if (bird.y + bird.r >= groundY) { bird.y = groundY - bird.r; bird.vy *= -0.6; bird.vx *= friction; if(Math.abs(bird.vy) < 1) bird.vy = 0; }
-            if (bird.x + bird.r >= canvas.width) { bird.x = canvas.width - bird.r; bird.vx *= -0.8; }
-            if (bird.x - bird.r <= 0) { bird.x = bird.r; bird.vx *= -0.8; }
-            if (bird.y - bird.r <= 0) { bird.y = bird.r; bird.vy *= -0.8; }
+            // Colisión con el ácido inferior
+            if (bird.y + bird.r >= groundY) {
+                bird.y = groundY - bird.r;
+                if (Math.abs(bird.vy) > 2.2) {
+                    shockwaves.push(new Shockwave(bird.x, groundY, "#39ff14", 40));
+                }
+                bird.vy *= -0.58;
+                bird.vx *= Math.pow(groundFriction, dt);
+                if (Math.abs(bird.vy) < 0.8) bird.vy = 0;
+            }
+            if (bird.x + bird.r >= canvas.width) {
+                bird.x = canvas.width - bird.r;
+                bird.vx *= -0.78;
+            }
+            if (bird.x - bird.r <= 0) {
+                bird.x = bird.r;
+                bird.vx *= -0.78;
+            }
+            if (bird.y - bird.r <= 0) {
+                bird.y = bird.r;
+                bird.vy *= -0.78;
+            }
 
+            // Colisión con repulsores magnéticos
             bumpers.forEach(b => {
-                if(circleCollision(bird, b, 0.7)) {
-                    playTone(200, 'square', 0.1, 0.1);
-                    createExplosion(bird.x + (b.x - bird.x)/2, bird.y + (b.y - bird.y)/2, varColor('--lab-cyan'), false); 
+                if (circleCollision(bird, b, 0.78)) {
+                    b.hitPulse = 1.0;
+                    playTone(220, 'triangle', 0.12, 0.12);
+                    const hitX = bird.x + (b.x - bird.x) / 2;
+                    const hitY = bird.y + (b.y - bird.y) / 2;
+                    createExplosion(hitX, hitY, varColor('--lab-cyan'), false);
                 }
             });
 
-            let hitList = targets.filter(t => !t.hit && Math.sqrt((bird.x - t.x)**2 + (bird.y - t.y)**2) < bird.r + t.r);
+            // Colisión con átomos objetivo
+            let hitList = targets.filter(t => !t.hit && Math.sqrt((bird.x - t.x) ** 2 + (bird.y - t.y) ** 2) < bird.r + t.r);
             hitList.sort((a, b) => (a.isCorrect === b.isCorrect) ? 0 : a.isCorrect ? -1 : 1);
 
             for (let t of hitList) {
                 t.hit = true;
-                let lvl = allLevels[currentLevel];
+                let lvl = activeLevel;
 
                 if (t.isCorrect) {
-                    bird.successfulHit = true; 
-                    playTone(880, 'sine', 0.15, 0.2); setTimeout(()=> playTone(1174, 'sine', 0.2, 0.2), 100);
+                    bird.successfulHit = true;
+                    playTone(880, 'sine', 0.15, 0.18);
+                    setTimeout(() => playTone(1174, 'sine', 0.22, 0.18), 90);
                     createExplosion(t.x, t.y, varColor('--lab-acid'), true);
-                    floatTexts.push(new FloatText(t.x, t.y - 20, "+1", varColor('--lab-acid')));
-                    
+                    floatTexts.push(new FloatText(t.x, t.y - 22, `+1 ${t.text}`, varColor('--lab-acid')));
+
                     requiredCollected++;
                     let left = lvl.reqCount - requiredCollected;
-                    
+
                     if (left > 0) {
                         document.getElementById('atoms-left').innerText = left;
-                        setTimeout(() => { targets.push(spawnTarget(lvl.reqA, true)); }, 500);
-                    } else {
-                        isFlying = false; bird.active = false;
-                        document.getElementById('atoms-left').innerText = `¡LISTO!`;
                         setTimeout(() => {
-                            playTone(523, 'square', 0.2, 0.1); setTimeout(()=>playTone(659, 'square', 0.2, 0.1), 150); setTimeout(()=>playTone(1046, 'square', 0.4, 0.1), 300);
-                            showModal("¡Reacción Exitosa! ✨", lvl.form, `Has sintetizado ${lvl.name}.`, "Siguiente Nivel", lvl.fact, () => {
-                                currentLevel++; loadLevel(currentLevel); closeModal();
-                            });
-                        }, 600);
+                            if (activeLevel === lvl) {
+                                targets.push(spawnTarget(lvl.reqA, true));
+                            }
+                        }, 480);
+                    } else {
+                        isFlying = false;
+                        bird.active = false;
+                        document.getElementById('atoms-left').innerText = `✓`;
+                        setTimeout(() => {
+                            playTone(523, 'triangle', 0.18, 0.12);
+                            setTimeout(() => playTone(659, 'triangle', 0.18, 0.12), 140);
+                            setTimeout(() => playTone(1046, 'triangle', 0.38, 0.14), 280);
+                            showModal(
+                                "¡Síntesis Exitosa! ✨",
+                                lvl.form,
+                                `Has sintetizado ${lvl.name}.`,
+                                "Siguiente Compuesto",
+                                lvl.fact,
+                                () => {
+                                    loadNextRandomLevel();
+                                    closeModal();
+                                }
+                            );
+                        }, 550);
                     }
                 } else {
                     if (bird.successfulHit) {
-                        createExplosion(t.x, t.y, '#7f8c8d', false);
+                        createExplosion(t.x, t.y, '#94a3b8', false);
                     } else {
-                        isFlying = false; bird.active = false;
-                        playTone(150, 'sawtooth', 0.4, 0.3);
+                        isFlying = false;
+                        bird.active = false;
+                        playTone(145, 'sawtooth', 0.42, 0.25);
                         triggerShake();
-                        createExplosion(t.x, t.y, '#e74c3c', false);
+                        createExplosion(t.x, t.y, '#ff3366', false);
                         setTimeout(() => {
-                            showModal("¡BOOM! Reacción Inestable 💥", "", `Atrapaste un elemento equivocado.\nConcéntrate en buscar el átomo correcto.`, "Reintentar", null, () => {
-                                loadLevel(currentLevel); closeModal();
-                            });
-                        }, 700);
+                            showModal(
+                                "¡Reacción Inestable! 💥",
+                                "",
+                                `Impactaste un átomo de (${t.text}) que no forma parte de ${lvl.name}.\n¡Inténtalo de nuevo!`,
+                                "Reintentar Compuesto",
+                                null,
+                                () => {
+                                    loadSpecificLevel(activeLevel);
+                                    closeModal();
+                                }
+                            );
+                        }, 650);
                     }
                 }
             }
 
-            if (isFlying && Math.abs(bird.vx) < 0.1 && Math.abs(bird.vy) < 0.1 && bird.y >= groundY - bird.r - 2) {
-                isFlying = false; setTimeout(resetShot, 800);
+            if (isFlying && Math.abs(bird.vx) < 0.15 && Math.abs(bird.vy) < 0.15 && bird.y >= groundY - bird.r - 2) {
+                isFlying = false;
+                setTimeout(resetShot, 650);
             }
         }
 
-        function updateTargets() {
+        function updateTargets(dt) {
             targets = targets.filter(t => !t.hit);
             targets.forEach(t => {
-                t.x += t.vx; t.y += t.vy;
-                if (t.x + t.r > canvas.width) { t.x = canvas.width - t.r; t.vx *= -1; }
-                else if (t.x - t.r < 250) { t.x = 250 + t.r; t.vx *= -1; }
-                if (t.y + t.r > groundY) { t.y = groundY - t.r; t.vy *= -1; }
-                else if (t.y - t.r < 0) { t.y = t.r; t.vy *= -1; }
+                t.x += t.vx * dt;
+                t.y += t.vy * dt;
+                if (t.x + t.r > canvas.width - 6) {
+                    t.x = canvas.width - 6 - t.r;
+                    t.vx *= -1;
+                } else if (t.x - t.r < 255) {
+                    t.x = 255 + t.r;
+                    t.vx *= -1;
+                }
+                if (t.y + t.r > groundY - 6) {
+                    t.y = groundY - 6 - t.r;
+                    t.vy *= -1;
+                } else if (t.y - t.r < 10) {
+                    t.y = 10 + t.r;
+                    t.vy *= -1;
+                }
                 bumpers.forEach(b => circleCollision(t, b, 1.0));
             });
         }
 
-        function varColor(name) { return getComputedStyle(document.documentElement).getPropertyValue(name).trim() || '#fff'; }
+        function varColor(name) {
+            return getComputedStyle(document.documentElement).getPropertyValue(name).trim() || '#fff';
+        }
+
+        // DIBUJO DE ARCO ELÉCTRICO (BOBINA TESLA)
+        function drawElectricArc(ctx, x1, y1, x2, y2) {
+            const segments = 9;
+            ctx.save();
+            ctx.beginPath();
+            ctx.moveTo(x1, y1);
+            for (let i = 1; i < segments; i++) {
+                const t = i / segments;
+                const bx = x1 + (x2 - x1) * t;
+                const by = y1 + (y2 - y1) * t;
+                const jitter = (Math.random() - 0.5) * 11;
+                ctx.lineTo(bx + jitter, by + jitter);
+            }
+            ctx.lineTo(x2, y2);
+            ctx.strokeStyle = "#00f3ff";
+            ctx.lineWidth = 3;
+            ctx.shadowBlur = 15;
+            ctx.shadowColor = "#00f3ff";
+            ctx.stroke();
+
+            // Núcleo blanco del rayo
+            ctx.strokeStyle = "#ffffff";
+            ctx.lineWidth = 1.2;
+            ctx.stroke();
+            ctx.restore();
+        }
+
+        // DIBUJO DE ÁTOMO CON ANILLOS ORBITALES Y ELECTRONES
+        function drawAtomEntity(ctx, x, y, r, color, text, phaseOffset, isProjectile = false) {
+            ctx.save();
+
+            // Halo exterior suave
+            let halo = ctx.createRadialGradient(x, y, r * 0.3, x, y, r * 1.65);
+            halo.addColorStop(0, color + "55");
+            halo.addColorStop(1, "transparent");
+            ctx.fillStyle = halo;
+            ctx.beginPath();
+            ctx.arc(x, y, r * 1.65, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Esfera del núcleo
+            let grad = ctx.createRadialGradient(x - r * 0.35, y - r * 0.35, r * 0.12, x, y, r);
+            grad.addColorStop(0, "#ffffff");
+            grad.addColorStop(0.35, color);
+            grad.addColorStop(1, "#0b1120");
+
+            ctx.shadowBlur = isProjectile ? 18 : 14;
+            ctx.shadowColor = color;
+            ctx.fillStyle = grad;
+            ctx.beginPath();
+            ctx.arc(x, y, r, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.shadowBlur = 0;
+
+            // Borde sutil del núcleo
+            ctx.strokeStyle = "rgba(255, 255, 255, 0.45)";
+            ctx.lineWidth = 1.5;
+            ctx.stroke();
+
+            // Órbita 1 + Electrón
+            ctx.save();
+            ctx.translate(x, y);
+            ctx.rotate(simTime * 1.8 + phaseOffset);
+            ctx.strokeStyle = "rgba(255, 255, 255, 0.45)";
+            ctx.lineWidth = 1.4;
+            ctx.beginPath();
+            ctx.ellipse(0, 0, r + 9, r * 0.48, 0, 0, Math.PI * 2);
+            ctx.stroke();
+
+            ctx.fillStyle = "#00f3ff";
+            ctx.shadowBlur = 8;
+            ctx.shadowColor = "#00f3ff";
+            ctx.beginPath();
+            ctx.arc(r + 9, 0, 3.2, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.restore();
+
+            // Órbita 2 cruzada (para el proyectil o átomos destacados)
+            ctx.save();
+            ctx.translate(x, y);
+            ctx.rotate(-simTime * 1.4 - phaseOffset + Math.PI / 3);
+            ctx.strokeStyle = "rgba(255, 255, 255, 0.25)";
+            ctx.lineWidth = 1.1;
+            ctx.beginPath();
+            ctx.ellipse(0, 0, r + 7, r * 0.42, 0, 0, Math.PI * 2);
+            ctx.stroke();
+
+            ctx.fillStyle = "#ffffff";
+            ctx.beginPath();
+            ctx.arc(-(r + 7), 0, 2.4, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.restore();
+
+            // Símbolo químico
+            ctx.fillStyle = "#ffffff";
+            ctx.shadowBlur = 6;
+            ctx.shadowColor = "rgba(0, 0, 0, 0.9)";
+            drawChemicalText(ctx, text, x, y);
+            ctx.restore();
+        }
 
         function draw() {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
-            time += 0.05;
 
-            // OLA DE ÁCIDO DINÁMICA
-            let acidGrad = ctx.createLinearGradient(0, groundY, 0, canvas.height);
-            acidGrad.addColorStop(0, "rgba(57, 255, 20, 0.4)");
-            acidGrad.addColorStop(1, "rgba(18, 128, 0, 0.8)");
-            ctx.fillStyle = acidGrad; ctx.fillRect(0, groundY, canvas.width, canvas.height - groundY);
-            
-            // Ola trasera
-            ctx.beginPath(); ctx.moveTo(0, groundY);
-            for(let i=0; i<=canvas.width; i+=20) { ctx.lineTo(i, groundY + Math.cos(i*0.03 + time*1.5) * 6); }
-            ctx.lineTo(canvas.width, canvas.height); ctx.lineTo(0, canvas.height);
-            ctx.fillStyle = "rgba(18, 128, 0, 0.6)"; ctx.fill();
+            // CUADRÍCULA CIENTÍFICA SUTIL EN EL CANVAS
+            ctx.save();
+            ctx.strokeStyle = "rgba(0, 243, 255, 0.04)";
+            ctx.lineWidth = 1;
+            for (let gx = 50; gx < canvas.width; gx += 50) {
+                ctx.beginPath();
+                ctx.moveTo(gx, 0);
+                ctx.lineTo(gx, groundY);
+                ctx.stroke();
+            }
+            for (let gy = 50; gy < groundY; gy += 50) {
+                ctx.beginPath();
+                ctx.moveTo(0, gy);
+                ctx.lineTo(canvas.width, gy);
+                ctx.stroke();
+            }
 
-            // Ola delantera
-            ctx.beginPath(); ctx.moveTo(0, groundY);
-            for(let i=0; i<=canvas.width; i+=20) { ctx.lineTo(i, groundY + Math.sin(i*0.04 + time*2.5) * 8); }
-            ctx.lineTo(canvas.width, canvas.height); ctx.lineTo(0, canvas.height);
-            ctx.fillStyle = "rgba(57, 255, 20, 0.25)"; ctx.fill();
-            ctx.strokeStyle = varColor('--lab-acid'); ctx.lineWidth = 3; ctx.stroke();
+            // Línea divisoria de zona de objetivos
+            ctx.strokeStyle = "rgba(0, 243, 255, 0.12)";
+            ctx.setLineDash([6, 8]);
+            ctx.beginPath();
+            ctx.moveTo(255, 15);
+            ctx.lineTo(255, groundY - 10);
+            ctx.stroke();
+            ctx.setLineDash([]);
+            ctx.restore();
 
-            // BOBINA TESLA
-            ctx.fillStyle = "rgba(255,255,255,0.05)"; ctx.fillRect(sling.x - 15, sling.y, 30, groundY - sling.y); 
-            ctx.fillStyle = "rgba(255,255,255,0.15)"; ctx.fillRect(sling.x - 25, groundY - 20, 50, 20); 
-            
-            ctx.beginPath(); ctx.arc(sling.x, sling.y, 14, 0, Math.PI*2);
-            ctx.fillStyle = varColor('--lab-cyan'); ctx.fill();
-            ctx.shadowBlur = 20; ctx.shadowColor = varColor('--lab-cyan');
-            
-            // RAYO LÁSER (CORREGIDO EL BUG DEL LÁSER PERMANENTE)
+            // TORRE BOBINA TESLA MEJORADA
+            ctx.save();
+            // Base metálica
+            let baseGrad = ctx.createLinearGradient(sling.x - 32, 0, sling.x + 32, 0);
+            baseGrad.addColorStop(0, "#1e293b");
+            baseGrad.addColorStop(0.5, "#475569");
+            baseGrad.addColorStop(1, "#0f172a");
+            ctx.fillStyle = baseGrad;
+            ctx.beginPath();
+            ctx.roundRect(sling.x - 32, groundY - 22, 64, 22, [8, 8, 0, 0]);
+            ctx.fill();
+            ctx.strokeStyle = "rgba(0, 243, 255, 0.35)";
+            ctx.lineWidth = 1.5;
+            ctx.stroke();
+
+            // Columna aislante
+            let colGrad = ctx.createLinearGradient(sling.x - 14, 0, sling.x + 14, 0);
+            colGrad.addColorStop(0, "rgba(15, 23, 42, 0.9)");
+            colGrad.addColorStop(0.5, "rgba(56, 189, 248, 0.3)");
+            colGrad.addColorStop(1, "rgba(15, 23, 42, 0.9)");
+            ctx.fillStyle = colGrad;
+            ctx.fillRect(sling.x - 12, sling.y + 8, 24, groundY - sling.y - 30);
+
+            // Anillos inductores de la bobina
+            for (let ry = sling.y + 24; ry < groundY - 26; ry += 16) {
+                ctx.fillStyle = "#38bdf8";
+                ctx.fillRect(sling.x - 19, ry, 38, 4);
+            }
+
+            // Esfera de plasma de la bobina
+            ctx.beginPath();
+            ctx.arc(sling.x, sling.y, 16, 0, Math.PI * 2);
+            let orbGrad = ctx.createRadialGradient(sling.x - 4, sling.y - 4, 2, sling.x, sling.y, 16);
+            orbGrad.addColorStop(0, "#ffffff");
+            orbGrad.addColorStop(0.5, "#00f3ff");
+            orbGrad.addColorStop(1, "#0284c7");
+            ctx.fillStyle = orbGrad;
+            ctx.shadowBlur = 22;
+            ctx.shadowColor = "#00f3ff";
+            ctx.fill();
+            ctx.restore();
+
+            // ARCO LÁSER Y SIMULACIÓN DE TRAYECTORIA
             if (bird.active && !isFlying) {
                 let dx = bird.x - sling.x;
                 let dy = bird.y - sling.y;
-                let distToSling = Math.sqrt(dx*dx + dy*dy);
+                let distToSling = Math.sqrt(dx * dx + dy * dy);
 
-                // Dibuja la conexión solo si se arrastra o si está posado en la base (distancia mínima)
                 if (isDragging || distToSling < 20) {
-                    ctx.beginPath(); ctx.moveTo(sling.x, sling.y); ctx.lineTo(bird.x, bird.y); 
-                    ctx.strokeStyle = `rgba(0, 243, 255, ${0.5 + Math.sin(time*10)*0.3})`; ctx.lineWidth = 4; ctx.stroke();
-                    
-                    if (isDragging) {
-                        ctx.shadowBlur = 0; 
-                        ctx.beginPath(); ctx.setLineDash([8, 12]); ctx.lineWidth = 2; ctx.strokeStyle = "rgba(0, 243, 255, 0.4)"; 
-                        let simX = bird.x; let simY = bird.y; let simVx = (sling.x - bird.x) * 0.2; let simVy = (sling.y - bird.y) * 0.2;
-                        ctx.moveTo(simX, simY);
-                        for (let i = 0; i < 35; i++) { simVy += gravity; simX += simVx; simY += simVy; ctx.lineTo(simX, simY); }
-                        ctx.stroke(); ctx.setLineDash([]); 
+                    drawElectricArc(ctx, sling.x, sling.y, bird.x, bird.y);
+
+                    if (isDragging && distToSling > 10) {
+                        ctx.save();
+                        let simX = bird.x;
+                        let simY = bird.y;
+                        let simVx = (sling.x - bird.x) * 0.175;
+                        let simVy = (sling.y - bird.y) * 0.175;
+                        for (let i = 0; i < 36; i++) {
+                            simVy += gravity;
+                            simX += simVx;
+                            simY += simVy;
+                            if (i % 2 === 0) {
+                                const alpha = Math.max(0.08, 0.65 - (i / 36) * 0.6);
+                                ctx.fillStyle = `rgba(0, 243, 255, ${alpha})`;
+                                ctx.beginPath();
+                                ctx.arc(simX, simY, 3, 0, Math.PI * 2);
+                                ctx.fill();
+                            }
+                        }
+                        ctx.restore();
                     }
                 }
             }
-            ctx.shadowBlur = 0; 
 
-            bumpers.forEach(b => { b.draw(ctx); });
+            // REPULSORES MAGNÉTICOS (BUMPERS)
+            bumpers.forEach(b => b.draw(ctx));
 
-            // DRONES BLANCO
-            ctx.font = "bold 20px Nunito";
+            // ONDAS DE CHOQUE
+            shockwaves.forEach(sw => sw.draw(ctx));
+
+            // DRONES ATÓMICOS OBJETIVO
             targets.forEach(t => {
                 if (!t.hit) {
-                    ctx.save(); ctx.translate(t.x, t.y); let angle = Math.atan2(t.vy, t.vx); ctx.rotate(angle); 
-                    ctx.fillStyle = "rgba(0, 255, 255, 0.4)"; ctx.beginPath();
-                    ctx.moveTo(-t.r + 5, -10); ctx.lineTo(-t.r + 5, 10); ctx.lineTo(-t.r - 15 - Math.random() * 15, 0); ctx.fill();
+                    // Estela de propulsión iónica suave
+                    ctx.save();
+                    ctx.translate(t.x, t.y);
+                    let angle = Math.atan2(t.vy, t.vx);
+                    ctx.rotate(angle);
+                    let thrustLen = 14 + Math.sin(simTime * 10 + t.orbitPhase) * 4;
+                    let thrGrad = ctx.createLinearGradient(-t.r, 0, -t.r - thrustLen, 0);
+                    thrGrad.addColorStop(0, "rgba(0, 243, 255, 0.45)");
+                    thrGrad.addColorStop(1, "transparent");
+                    ctx.fillStyle = thrGrad;
+                    ctx.beginPath();
+                    ctx.moveTo(-t.r + 4, -8);
+                    ctx.lineTo(-t.r + 4, 8);
+                    ctx.lineTo(-t.r - thrustLen, 0);
+                    ctx.closePath();
+                    ctx.fill();
                     ctx.restore();
 
-                    let grad = ctx.createRadialGradient(t.x-8, t.y-8, 3, t.x, t.y, t.r);
-                    grad.addColorStop(0, "#fff"); grad.addColorStop(1, t.color);
-                    ctx.shadowBlur = 15; ctx.shadowColor = t.color;
-                    ctx.fillStyle = grad; ctx.beginPath(); ctx.arc(t.x, t.y, t.r, 0, Math.PI*2); ctx.fill();
-                    ctx.shadowBlur = 0;
-
-                    ctx.save(); ctx.translate(t.x, t.y); ctx.rotate(time * 2); 
-                    ctx.strokeStyle = "rgba(255,255,255,0.6)"; ctx.lineWidth = 1.5;
-                    ctx.beginPath(); ctx.ellipse(0, 0, t.r + 8, t.r - 10, 0, 0, Math.PI*2); ctx.stroke();
-                    ctx.fillStyle = "#fff"; ctx.beginPath(); ctx.arc(t.r + 8, 0, 3, 0, Math.PI*2); ctx.fill();
-                    ctx.restore();
-
-                    ctx.fillStyle = "#fff"; ctx.shadowBlur = 5; ctx.shadowColor = "#000"; 
-                    drawChemicalText(ctx, t.text, t.x, t.y); ctx.shadowBlur = 0;
+                    drawAtomEntity(ctx, t.x, t.y, t.r, t.color, t.text, t.orbitPhase, false);
                 }
             });
 
-            // RASTRO
-            if(trail.length > 0) {
-                for(let i=0; i<trail.length; i++) {
-                    ctx.globalAlpha = trail[i].alpha * 0.5;
+            // RASTRO DEL PROYECTIL EN VUELO
+            if (trail.length > 0) {
+                ctx.save();
+                for (let i = 0; i < trail.length; i++) {
+                    ctx.globalAlpha = trail[i].alpha * 0.45;
                     ctx.fillStyle = bird.color;
-                    ctx.beginPath(); ctx.arc(trail[i].x, trail[i].y, bird.r * trail[i].alpha, 0, Math.PI*2); ctx.fill();
+                    ctx.beginPath();
+                    ctx.arc(trail[i].x, trail[i].y, bird.r * 0.75 * trail[i].alpha, 0, Math.PI * 2);
+                    ctx.fill();
                 }
-                ctx.globalAlpha = 1.0;
-            }
-
-            // PROYECTIL
-            if (bird.active) {
-                if (!isFlying && !isDragging) bird.y = sling.y + Math.sin(time * 4) * 6;
-                
-                let bGrad = ctx.createRadialGradient(bird.x-8, bird.y-8, 3, bird.x, bird.y, bird.r);
-                bGrad.addColorStop(0, "#fff"); bGrad.addColorStop(1, bird.color);
-
-                ctx.shadowBlur = 20; ctx.shadowColor = bird.color;
-                ctx.fillStyle = bGrad; ctx.beginPath(); ctx.arc(bird.x, bird.y, bird.r, 0, Math.PI*2); ctx.fill();
-                ctx.shadowBlur = 0;
-
-                ctx.save(); ctx.translate(bird.x, bird.y); ctx.rotate(-time * 3); 
-                ctx.strokeStyle = "rgba(255,255,255,0.8)"; ctx.lineWidth = 2;
-                ctx.beginPath(); ctx.ellipse(0, 0, bird.r + 8, bird.r - 10, 0, 0, Math.PI*2); ctx.stroke();
-                ctx.fillStyle = "#fff"; ctx.beginPath(); ctx.arc(bird.r + 8, 0, 3, 0, Math.PI*2); ctx.fill();
                 ctx.restore();
-
-                ctx.fillStyle = "#fff"; ctx.shadowBlur = 5; ctx.shadowColor = "#000";
-                ctx.font = "bold 18px Nunito"; drawChemicalText(ctx, bird.text, bird.x, bird.y); ctx.shadowBlur = 0;
             }
 
-            for(let i = particles.length - 1; i >= 0; i--) {
-                particles[i].update(); particles[i].draw(ctx);
-                if(particles[i].life <= 0) particles.splice(i, 1);
+            // PROYECTIL ATÓMICO
+            if (bird.active) {
+                if (!isFlying && !isDragging) {
+                    bird.y = sling.y + Math.sin(simTime * 2.8) * 5;
+                }
+                drawAtomEntity(ctx, bird.x, bird.y, bird.r, bird.color, bird.text, 0, true);
             }
-            
-            for(let i = floatTexts.length - 1; i >= 0; i--) {
-                floatTexts[i].update(); floatTexts[i].draw(ctx);
-                if(floatTexts[i].life <= 0) floatTexts.splice(i, 1);
+
+            // PISCINA DE ÁCIDO REACTIVO CON BURBUJAS
+            ctx.save();
+            let acidGrad = ctx.createLinearGradient(0, groundY, 0, canvas.height);
+            acidGrad.addColorStop(0, "rgba(57, 255, 20, 0.38)");
+            acidGrad.addColorStop(1, "rgba(10, 95, 0, 0.88)");
+            ctx.fillStyle = acidGrad;
+            ctx.fillRect(0, groundY, canvas.width, canvas.height - groundY);
+
+            // Ola trasera
+            ctx.beginPath();
+            ctx.moveTo(0, groundY);
+            for (let i = 0; i <= canvas.width; i += 18) {
+                ctx.lineTo(i, groundY + Math.cos(i * 0.025 + simTime * 1.4) * 5);
             }
+            ctx.lineTo(canvas.width, canvas.height);
+            ctx.lineTo(0, canvas.height);
+            ctx.fillStyle = "rgba(16, 120, 0, 0.55)";
+            ctx.fill();
+
+            // Burbujas emergiendo del ácido
+            acidBubbles.forEach(ab => ab.draw(ctx));
+
+            // Ola delantera brillante
+            ctx.beginPath();
+            ctx.moveTo(0, groundY);
+            for (let i = 0; i <= canvas.width; i += 18) {
+                ctx.lineTo(i, groundY + Math.sin(i * 0.035 + simTime * 2.1) * 6.5);
+            }
+            ctx.lineTo(canvas.width, canvas.height);
+            ctx.lineTo(0, canvas.height);
+            ctx.fillStyle = "rgba(57, 255, 20, 0.24)";
+            ctx.fill();
+
+            ctx.strokeStyle = varColor('--lab-acid');
+            ctx.lineWidth = 2.5;
+            ctx.shadowBlur = 12;
+            ctx.shadowColor = varColor('--lab-acid');
+            ctx.stroke();
+            ctx.restore();
+
+            // PARTÍCULAS Y TEXTOS FLOTANTES
+            particles.forEach(p => p.draw(ctx));
+            floatTexts.forEach(ft => ft.draw(ctx));
         }
 
-        function update() {
-            if (isFlying && bird.active) { 
-                bird.vy += gravity; bird.x += bird.vx; bird.y += bird.vy; 
-                trail.push({x: bird.x, y: bird.y, alpha: 1.0});
-                if(trail.length > 15) trail.shift();
+        // BUCLE PRINCIPAL CON DELTA TIME NORMALIZADO A 60 FPS (Velocidad 1x garantizada)
+        function update(timestamp) {
+            if (!timestamp) timestamp = performance.now();
+            let elapsed = timestamp - lastFrameTime;
+            lastFrameTime = timestamp;
+
+            // Normalizar a 60 FPS (16.667ms = dt de 1.0) y limitar saltos si se cambia de pestaña
+            let dt = Math.min(elapsed / 16.667, 2.5);
+            if (dt <= 0) dt = 1;
+
+            simTime += 0.035 * dt;
+
+            if (isFlying && bird.active) {
+                bird.vy += gravity * dt;
+                bird.x += bird.vx * dt;
+                bird.y += bird.vy * dt;
+
+                trailTimer += dt;
+                if (trailTimer >= 0.85) {
+                    trail.push({ x: bird.x, y: bird.y, alpha: 1.0 });
+                    if (trail.length > 16) trail.shift();
+                    trailTimer = 0;
+                }
             }
-            trail.forEach(t => t.alpha -= 0.08);
+
+            trail.forEach(t => t.alpha -= 0.055 * dt);
             trail = trail.filter(t => t.alpha > 0);
 
-            handleCollisions(); updateTargets(); draw(); requestAnimationFrame(update);
+            bumpers.forEach(b => b.update(dt));
+            acidBubbles.forEach(ab => ab.update(dt));
+
+            for (let i = shockwaves.length - 1; i >= 0; i--) {
+                shockwaves[i].update(dt);
+                if (shockwaves[i].life <= 0) shockwaves.splice(i, 1);
+            }
+
+            for (let i = particles.length - 1; i >= 0; i--) {
+                particles[i].update(dt);
+                if (particles[i].life <= 0) particles.splice(i, 1);
+            }
+
+            for (let i = floatTexts.length - 1; i >= 0; i--) {
+                floatTexts[i].update(dt);
+                if (floatTexts[i].life <= 0) floatTexts.splice(i, 1);
+            }
+
+            handleCollisions(dt);
+            updateTargets(dt);
+            draw();
+
+            requestAnimationFrame(update);
         }
 
+        // CONTROLES DE PUNTERO / TOUCH
         function getPos(evt) {
             const rect = canvas.getBoundingClientRect();
-            let clientX = evt.clientX; let clientY = evt.clientY;
-            if(evt.touches && evt.touches.length > 0) { clientX = evt.touches[0].clientX; clientY = evt.touches[0].clientY; }
-            return { x: (clientX - rect.left) * (canvas.width / rect.width), y: (clientY - rect.top) * (canvas.height / rect.height) };
+            let clientX = evt.clientX;
+            let clientY = evt.clientY;
+            if (evt.touches && evt.touches.length > 0) {
+                clientX = evt.touches[0].clientX;
+                clientY = evt.touches[0].clientY;
+            }
+            return {
+                x: (clientX - rect.left) * (canvas.width / rect.width),
+                y: (clientY - rect.top) * (canvas.height / rect.height)
+            };
         }
+
         function down(e) {
             if (isFlying || !bird.active) return;
-            const pos = getPos(e); let dx = pos.x - bird.x; let dy = pos.y - bird.y;
-            if (Math.sqrt(dx*dx + dy*dy) < bird.r + 25) { isDragging = true; initAudio(); playTone(400, 'sine', 0.1, 0.1); if(e.cancelable) e.preventDefault(); }
-        }
-        function move(e) {
-            if (!isDragging || !bird.active) return;
-            if(e.cancelable) e.preventDefault();
-            const pos = getPos(e); let dx = pos.x - sling.x; let dy = pos.y - sling.y;
-            let angle = Math.atan2(dy, dx); let dist = Math.min(Math.sqrt(dx*dx + dy*dy), sling.r);
-            if (Math.cos(angle) > 0.2) angle = Math.acos(0.2) * Math.sign(Math.asin(Math.sin(angle)));
-            bird.x = sling.x + Math.cos(angle) * dist; bird.y = sling.y + Math.sin(angle) * dist;
-        }
-        function up(e) {
-            if (isDragging) {
-                isDragging = false; let dx = sling.x - bird.x; let dy = sling.y - bird.y;
-                if (Math.sqrt(dx*dx + dy*dy) > 10) { bird.vx = dx * 0.2; bird.vy = dy * 0.2; isFlying = true; playTone(300, 'triangle', 0.2, 0.1); } 
-                else { resetShot(); }
+            const pos = getPos(e);
+            let dx = pos.x - bird.x;
+            let dy = pos.y - bird.y;
+            if (Math.sqrt(dx * dx + dy * dy) < bird.r + 28) {
+                isDragging = true;
+                initAudio();
+                playTone(400, 'sine', 0.1, 0.09);
+                if (e.cancelable) e.preventDefault();
             }
         }
 
-        canvas.addEventListener('mousedown', down); window.addEventListener('mousemove', move); window.addEventListener('mouseup', up);
-        canvas.addEventListener('touchstart', down, {passive:false}); window.addEventListener('touchmove', move, {passive:false}); window.addEventListener('touchend', up);
+        function move(e) {
+            if (!isDragging || !bird.active) return;
+            if (e.cancelable) e.preventDefault();
+            const pos = getPos(e);
+            let dx = pos.x - sling.x;
+            let dy = pos.y - sling.y;
+            let angle = Math.atan2(dy, dx);
+            let dist = Math.min(Math.sqrt(dx * dx + dy * dy), sling.r);
+            if (Math.cos(angle) > 0.25) {
+                angle = Math.acos(0.25) * Math.sign(Math.asin(Math.sin(angle)) || 1);
+            }
+            bird.x = sling.x + Math.cos(angle) * dist;
+            bird.y = sling.y + Math.sin(angle) * dist;
+        }
 
+        function up(e) {
+            if (isDragging) {
+                isDragging = false;
+                let dx = sling.x - bird.x;
+                let dy = sling.y - bird.y;
+                if (Math.sqrt(dx * dx + dy * dy) > 12) {
+                    // Impulso calibrado a 1x
+                    bird.vx = dx * 0.175;
+                    bird.vy = dy * 0.175;
+                    isFlying = true;
+                    playTone(310, 'triangle', 0.22, 0.12);
+                } else {
+                    resetShot();
+                }
+            }
+        }
+
+        canvas.addEventListener('mousedown', down);
+        window.addEventListener('mousemove', move);
+        window.addEventListener('mouseup', up);
+        canvas.addEventListener('touchstart', down, { passive: false });
+        window.addEventListener('touchmove', move, { passive: false });
+        window.addEventListener('touchend', up);
+
+        // GESTIÓN DEL MODAL
         let nextAction = null;
         function showModal(title, formula, msg, btnText, fact, action) {
             document.getElementById('m-title').innerText = title;
             document.getElementById('m-formula').innerText = formula;
+            document.getElementById('m-formula').style.display = formula ? "block" : "none";
             document.getElementById('m-msg').innerText = msg;
             document.getElementById('m-btn').innerText = btnText;
-            if(fact) { document.getElementById('fact-container').style.display = "flex"; document.getElementById('m-fact').innerText = fact; } 
-            else { document.getElementById('fact-container').style.display = "none"; }
-            nextAction = action; document.getElementById('modal').classList.add('active');
-        }
-        function closeModal() { document.getElementById('modal').classList.remove('active'); initAudio(); playTone(600, 'sine', 0.1, 0.1); }
-        function showHelp() { initAudio(); playTone(600, 'sine', 0.1, 0.1); showModal("💡 Instrucciones del Doc", "", "1. Lee el compuesto a sintetizar arriba a la derecha.\n2. Deduce la fórmula química (ej. Agua = H₂O).\n3. Tienes el átomo base en el lanzador. ¡Apunta y dispara a los átomos correctos para atraparlos en el aire!", "¡Entendido!", null, closeModal); }
-        function nextLevelAction() { initAudio(); playTone(600, 'sine', 0.1, 0.1); if(nextAction) nextAction(); }
-
-        loadLevel(0); update();
-    </script>
-    <script>
-        document.body.addEventListener('pointerdown', function() {
-            let elem = document.documentElement;
-            if (!document.fullscreenElement) {
-                if (elem.requestFullscreen) { elem.requestFullscreen().catch(e=>{}); } 
-                else if (elem.webkitRequestFullscreen) { elem.webkitRequestFullscreen(); }
+            if (fact) {
+                document.getElementById('fact-container').style.display = "flex";
+                document.getElementById('m-fact').innerText = fact;
+            } else {
+                document.getElementById('fact-container').style.display = "none";
             }
-        }, { once: true });
+            nextAction = action;
+            document.getElementById('modal').classList.add('active');
+        }
+
+        function closeModal() {
+            document.getElementById('modal').classList.remove('active');
+            initAudio();
+            playTone(600, 'sine', 0.08, 0.08);
+        }
+
+        function showHelp() {
+            initAudio();
+            playTone(600, 'sine', 0.1, 0.1);
+            showModal(
+                "💡 Guía del Laboratorio",
+                "",
+                "1. Observa el compuesto objetivo en el panel superior.\n2. Deduce su fórmula química (ej. Dióxido de carbono = CO₂).\n3. Tienes el átomo base en la Bobina Tesla. ¡Tensa el arco eléctrico y dispara hacia los átomos requeridos evitando los intrusos!",
+                "¡A Sintetizar!",
+                "Cada dificultad presenta compuestos en orden 100% aleatorio para poner a prueba tu dominio químico.",
+                closeModal
+            );
+        }
+
+        function nextLevelAction() {
+            initAudio();
+            playTone(600, 'sine', 0.1, 0.1);
+            if (nextAction) nextAction();
+        }
+
+        // Iniciar con un compuesto aleatorio de la dificultad inicial
+        window.onload = function () {
+            loadNextRandomLevel();
+            lastFrameTime = performance.now();
+            requestAnimationFrame(update);
+        };
     </script>
 </body>
 </html>
