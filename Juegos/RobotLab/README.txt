@@ -221,3 +221,20 @@ ACTUALIZAR EN EL PORTAL
 Reemplaza Juegos/RobotLab por la carpeta RobotLab completa incluida.
 No necesitas cambiar rayet.html, rayet.css ni rayet.js.
 Si el navegador conserva la versión anterior, recarga con Ctrl+F5.
+
+PANTALLAS TÁCTILES
+Los controles usan Pointer Events y conservan un identificador por dedo.
+Se permiten botones, arrastres y pizarras simultáneos en los dos tableros.
+Una pizarra también puede recibir varios trazos a la vez, sin unirlos.
+La actualización de otras piezas o de la caja compartida no interrumpe
+un arrastre ni descarta el toque del otro jugador.
+Se bloquean el menú contextual por pulsación larga, la selección de texto
+y el arrastre nativo de imágenes dentro del juego. En las pizarras y
+mesas de creación se bloquean los gestos de desplazamiento/zoom.
+Las listas mantienen su desplazamiento con un dedo. Los campos de nombres
+conservan la selección de texto, edición y controles nativos del navegador.
+El teclado, el ratón y el lápiz siguen disponibles. No se bloquean atajos
+del navegador ni se modifican ajustes del sistema operativo.
+Para dos usuarios simultáneos la pantalla y su controlador deben informar
+varios puntos de contacto. El código no convierte una pantalla de un solo
+punto en multitáctil. La prueba física debe hacerse en el equipo del aula.

@@ -1,0 +1,8 @@
+/* No press-and-hold callout, text selection or native image dragging in play. */
+#app,.math-dialog,.turn-reference-dialog{-webkit-touch-callout:none;-webkit-user-select:none;user-select:none;touch-action:manipulation}
+#app input,#app textarea,#app select,#app [contenteditable],dialog input,dialog textarea,dialog select{-webkit-touch-callout:default;-webkit-user-select:text;user-select:text;touch-action:manipulation}
+#app img,#app svg,.math-dialog img,.turn-reference-dialog img{-webkit-user-drag:none;user-drag:none}
+.board,.robot-scene,.placed,.scratch-surface,.drawing-canvas{touch-action:none;overscroll-behavior:contain;-webkit-user-select:none;user-select:none}
+#app button,.math-dialog button,.turn-reference-dialog button{touch-action:manipulation;-webkit-touch-callout:none}
+.scroll-area,.setup-scroll,.setup-summary,.turn-results,.turn-exercise{touch-action:pan-y;overscroll-behavior:contain;-webkit-overflow-scrolling:touch}
+.turn-roster,.setup-team-tabs{touch-action:pan-x;overscroll-behavior:contain}

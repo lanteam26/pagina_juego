@@ -40,16 +40,43 @@ RL.createAssembly=function({state,scene,onChange=()=>{},onSelection=()=>{},messa
     moveSelected(dx,dy){const s=getState(),p=s.placed.find(p=>p.uid===s.selected);if(!p||s.done||!canMutate())return;this.save();p.x+=dx;p.y+=dy;this.keepVisible(p);this.notify()},
     draw(){
       const s=getState(),root=getScene();if(!root)return;
-      root.querySelectorAll('.placed').forEach(el=>el.remove());root.querySelector('.base-piece').style.zIndex=20+s.layers.indexOf('body');
+      const existing=new Map([...root.querySelectorAll('.placed')].map(el=>[el.dataset.uid,el]));
+      const ids=new Set(s.placed.map(p=>p.uid));
+      existing.forEach((el,uid)=>{if(!ids.has(uid))el.remove()});
+      const body=root.querySelector('.base-piece');if(body)body.style.zIndex=20+s.layers.indexOf('body');
       s.placed.forEach(p=>{
-        const item=RL.itemBy(p.id),el=document.createElement('div');el.className='placed'+(s.selected===p.uid?' active':'');el.dataset.uid=p.uid;el.dataset.layer=p.layer;
-        el.style.cssText=`left:${p.x}%;top:${p.y}%;width:${p.size}%;height:${api.height(p)}%;transform:rotate(${p.angle}deg);z-index:${20+s.layers.indexOf(p.uid)}`;
-        el.setAttribute('aria-label',item.name);el.innerHTML=RL.sprite(p.id);root.appendChild(el);let drag=null,pointer=null;
-        el.addEventListener('pointerdown',ev=>{if(s.done||pointer!==null||!canMutate())return;ev.preventDefault();pointer=ev.pointerId;s.selected=p.uid;api.save();drag={cx:ev.clientX,cy:ev.clientY,x:p.x,y:p.y};el.setPointerCapture(ev.pointerId);root.querySelectorAll('.placed').forEach(node=>node.classList.remove('active'));el.classList.add('active');onSelection()});
-        el.addEventListener('pointermove',ev=>{if(!drag||ev.pointerId!==pointer||!canMutate())return;const box=root.getBoundingClientRect();p.x=drag.x+(ev.clientX-drag.cx)*100/box.width;p.y=drag.y+(ev.clientY-drag.cy)*100/box.height;api.keepVisible(p);el.style.left=p.x+'%';el.style.top=p.y+'%'});
-        const stop=ev=>{if(!drag||ev.pointerId!==pointer)return;drag=null;pointer=null;onSelection()};el.addEventListener('pointerup',stop);el.addEventListener('pointercancel',stop);el.addEventListener('lostpointercapture',stop);
+        const item=RL.itemBy(p.id),uid=p.uid;
+        let el=existing.get(uid),fresh=!el;
+        if(fresh){el=document.createElement('div');el.dataset.uid=uid;el.innerHTML=RL.sprite(p.id);root.appendChild(el)}
+        el.className='placed'+(s.selected===uid?' active':'');el.dataset.layer=p.layer;
+        el.style.cssText=`left:${p.x}%;top:${p.y}%;width:${p.size}%;height:${api.height(p)}%;transform:rotate(${p.angle}deg);z-index:${20+s.layers.indexOf(uid)}`;
+        el.setAttribute('aria-label',item.name);
+        if(!fresh)return;
+        // Keep this element during unrelated redraws, preserving pointer capture.
+        let drag=null,pointer=null;
+        el.addEventListener('pointerdown',ev=>{
+          const state=getState(),piece=state.placed.find(p=>p.uid===uid);
+          if((ev.pointerType==='mouse'&&ev.button!==0)||state.done||pointer!==null||!piece||!canMutate()||!el.isConnected)return;
+          ev.preventDefault();pointer=ev.pointerId;state.selected=uid;api.save();
+          drag={cx:ev.clientX,cy:ev.clientY,x:piece.x,y:piece.y};el.setPointerCapture(ev.pointerId);
+          root.querySelectorAll('.placed').forEach(node=>node.classList.remove('active'));el.classList.add('active');onSelection();
+        });
+        el.addEventListener('pointermove',ev=>{
+          if(!drag||ev.pointerId!==pointer||!canMutate())return;
+          const piece=getState().placed.find(p=>p.uid===uid);if(!piece)return;
+          ev.preventDefault();const box=root.getBoundingClientRect();
+          piece.x=drag.x+(ev.clientX-drag.cx)*100/box.width;piece.y=drag.y+(ev.clientY-drag.cy)*100/box.height;
+          api.keepVisible(piece);el.style.left=piece.x+'%';el.style.top=piece.y+'%';
+        });
+        const stop=ev=>{
+          if(!drag||ev.pointerId!==pointer)return;
+          const ended=pointer;drag=null;pointer=null;
+          if(el.hasPointerCapture(ended))el.releasePointerCapture(ended);onSelection();
+        };
+        ['pointerup','pointercancel','lostpointercapture'].forEach(type=>el.addEventListener(type,stop));
       });
     }
+
   };return api;
 };
 RL.assembly=RL.createAssembly({state:()=>RL.state,scene:()=>document.querySelector('#robot-scene'),onChange:()=>RL.onAssemblyChanged?.(),onSelection:()=>RL.onSelectionChanged?.(),message:text=>RL.message?.(text),isUnlocked:item=>RL.isUnlocked?.(item)});
