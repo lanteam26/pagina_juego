@@ -2,12 +2,12 @@
 RL.turnModel = {
   maxParticipants: 12,
   maxTeams: 5,
-  label(i, team = false) { return (team ? 'Equipo ' : 'Jugador ') + (i + 1); },
+  label(i, team = false) { return team ? ['Equipo Azul','Equipo Rojo','Equipo Dorado','Equipo Verde','Equipo Violeta'][i] : 'Jugador ' + (i + 1); },
   draft() {
     return {
       format: 'individual', count: 2, names: Array(12).fill(''),
       teams: [{ name: '', members: Array(6).fill('') }, { name: '', members: Array(6).fill('') }],
-      variant: 'timed', minutes: 5, turnSeconds: 60, missionIndex: 0
+      variant: 'timed', minutes: 2, missionIndex: 0
     };
   },
   resizeTeams(draft, count) {
@@ -35,10 +35,20 @@ RL.turnModel = {
     if (step >= 2) {
       if (!['timed', 'finish'].includes(draft.variant)) errors.push('Elige una modalidad.');
       if (draft.variant === 'timed' && (!Number.isInteger(draft.minutes) || draft.minutes < 1 || draft.minutes > 60)) errors.push('El tiempo propio debe ser de 1 a 60 minutos.');
-      if (!Number.isInteger(draft.turnSeconds) || draft.turnSeconds < 10 || draft.turnSeconds > 300) errors.push('Cada turno debe durar entre 10 y 300 segundos.');
     }
     if (step >= 3 && !RL.missions[draft.missionIndex]) errors.push('Elige una referencia.');
     return errors;
+  },
+  schedule(settings) {
+    if (settings.format !== 'teams') return settings.entities.map((entity, i) => ({name:entity.name, teamId:null, teamName:'', memberIndex:0}));
+    const order = [];
+    const rounds = Math.max(...settings.entities.map(entity => entity.members.length));
+    for (let memberIndex = 0; memberIndex < rounds; memberIndex++) {
+      settings.entities.forEach((entity, teamId) => {
+        if (entity.members[memberIndex] !== undefined) order.push({name:entity.members[memberIndex], teamId, teamName:entity.name, memberIndex});
+      });
+    }
+    return order;
   },
   settings(draft) {
     const errors = this.errors(draft);
@@ -58,7 +68,7 @@ RL.turnModel = {
       format: draft.format, names: entities.map(e => e.name), entities,
       participantCount: this.participants(draft), variant: draft.variant,
       durationSeconds: draft.variant === 'timed' ? draft.minutes * 60 : 300,
-      turnSeconds: draft.turnSeconds
+      maxHints: 3
     };
   }
 };

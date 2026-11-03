@@ -126,7 +126,7 @@ Todas llevan un botón azul, uno verde, uno rojo y uno naranja.
 Los botones y la lengüita son piezas SVG adicionales incluidas en el proyecto.
 
 EVALUACIÓN Y SONIDO
-Solitario y Hasta completar: tiempo realizado + 15 segundos por error.
+Solitario y Hasta completar del duelo simultáneo: tiempo +15 segundos por error.
 Puntos visuales: max(0, 1200 - 3*tiempo_ajustado).
 Contra reloj: max(0, 100*tipos_desbloqueados - 20*errores).
 Las reglas y los desempates aparecen en el panel antes de comenzar.
@@ -141,72 +141,83 @@ Se conserva la paleta azul noche/morado con acentos cian y violeta.
 RECURSOS_VISUALES.md contiene ideas de imágenes y prompts para nuevos fondos,
 avatares e insignias. Rugged y Ludio siguen como Próximamente. Secundaria está disponible.
 
-COMPETITIVO POR TURNOS · INDIVIDUAL O POR EQUIPOS
-Competitivo > Por turnos. La configuración tiene cuatro paneles:
-1. Formato: individual o equipos.
-2. Participantes: nombres, cantidad de jugadores o distribución por equipos.
-3. Reglas: Contra reloj o Hasta completar; tiempos comunes para todos.
-4. Referencia: modelo compartido y resumen del orden de participación.
-Los datos se conservan al avanzar y retroceder entre paneles.
+COMPETITIVO POR TURNOS · PARTICIPACIONES COMPLETAS
+El acceso Por turnos está junto a Diseño libre y Competitivo en cada nivel
+de Primaria y Secundaria; también permanece dentro de Competitivo.
+La configuración tiene cuatro pasos: Formato, Participantes, Reglas y Referencia.
+Admite de 2 a 12 participantes en total, individuales o en 2 a 5 equipos.
+Los nombres y reglas se conservan al avanzar y volver entre los paneles.
 
 INDIVIDUAL
-De 2 a 12 jugadores. Cada uno tiene su robot, problemas, errores y tiempo.
+Jugador 1 realiza toda su participación; después Jugador 2, etc.
+Contra reloj: todos tienen el mismo límite, configurable de 1 a 60 minutos
+(2 por defecto). No hay un segundo límite de 30/60 segundos.
+Cada niño puede resolver varios problemas, volver a intentar una respuesta
+incorrecta, dibujar y editar su robot durante todo su tiempo.
+Al agotarse, su resultado se guarda y aparece Siguiente jugador.
+El siguiente niño debe pulsar Comenzar mi participación: mientras espera,
+ningún reloj avanza. No se muestran puntajes hasta terminar todos.
+Comprobar y finalizar permite terminar antes si ya colocó todas las piezas.
+Hasta completar: no hay cuenta atrás. Se registra el tiempo individual;
+Comprobar y finalizar exige todas las cantidades de piezas necesarias.
 
 EQUIPOS
-De 2 a 5 equipos, con un máximo de 12 participantes en total.
-Cada equipo tiene al menos un integrante. Los tamaños pueden ser diferentes.
-Accesos rápidos: 6 contra 6, 5 contra 5 y tres equipos de cuatro.
-Puedes cambiar los nombres y la cantidad de integrantes de cada equipo.
-No se permite confirmar una configuración que supere los 12 participantes.
-Cada equipo comparte robot, piezas, preguntas, pizarra, errores y reloj.
-Los equipos se alternan (1, 2, 3...). Dentro de cada equipo rota su lista de
-integrantes: primera ronda, integrante 1; segunda ronda, integrante 2, etc.
-Todos los equipos reciben un turno por ronda, independientemente de su tamaño.
-La pantalla de cambio indica equipo e integrante. No cuenta tiempo de espera.
-En los resultados se puede desplegar la participación de cada integrante:
-turnos utilizados, respuestas correctas y errores.
+Cada integrante tiene un intento independiente: robot, preguntas, errores,
+trazos, tiempo y pistas propios. Los robots de los demás no se modifican.
+Orden: Azul 1, Rojo 1, Azul 2, Rojo 2... hasta que jueguen todos.
+Con más equipos se sigue el mismo orden por rondas de integrantes.
+Cada niño participa una vez. Con equipos desiguales, al final continúan
+los integrantes pendientes. El equipo con más integrantes tendrá más
+participaciones; la puntuación de equipo es una SUMA, no un promedio.
+Los accesos rápidos permiten 6 contra 6, 5 contra 5 o 3 equipos de 4.
+Los resultados muestran el total de cada equipo y un detalle por integrante.
 
-REGLAS Y TIEMPOS
-Cada turno dura de 10 a 300 segundos (60 por defecto).
-Solo se admite una respuesta por turno. Tras un error puedes reintentar
-el mismo problema en tu próximo turno. Las preguntas y trazos se conservan.
-Las copias de piezas desbloqueadas son ilimitadas y no añaden puntuación.
-Se permite ajustar el diseño o añadir copias antes de Terminar turno.
-Al agotar el límite de turno, el juego pasa a la siguiente persona o equipo.
+PISTAS Y PUNTUACIÓN DEL MODO POR TURNOS
+Cada participante dispone de un máximo de 3 pistas para toda su participación.
+Una pista descarta una opción incorrecta. Si solo queda la respuesta correcta,
+no se gasta ninguna. Cerrar un problema no repone las pistas.
+Puntaje individual:
+  +100 por problema resuelto correctamente.
+  -20 por respuesta incorrecta.
+  Al completar todas las cantidades: hasta +30 por rapidez;
+    bono = max(0, 30 - parte_entera(segundos_utilizados / 10)).
+  +10 si no usó pistas Y resolvió al menos un problema.
+  Puntaje mínimo: 0.
+Las copias repetidas de una pieza no dan más puntos.
+No se evalúan semejanza visual, posición, orientación ni tamaño del robot.
+Las cantidades de piezas se usan únicamente para permitir finalizar antes.
 
-Contra reloj: cada jugador/equipo tiene de 1 a 60 minutos acumulados propios.
-Su reloj solo se consume durante sus turnos. Al agotarse, queda bloqueado;
-los demás siguen hasta consumir el suyo. No hay finalización anticipada.
-Gana el mayor puntaje: 100 por tipo de pieza desbloqueado menos 20 por error.
-Desempate: más tipos desbloqueados y, después, menos errores.
-Las copias repetidas no dan puntos adicionales.
+CLASIFICACIÓN
+Se ordena por puntos, sin criterios ocultos de desempate.
+Igual puntaje = mismo puesto. Se usa la numeración 1, 1, 3 si hay dos primeros.
+Coronas doradas, plateadas y bronceadas identifican los puestos 1, 2 y 3.
+En equipos se suman los puntajes individuales completos, incluidos sus bonos.
+La clasificación se revela únicamente cuando terminan todas las participaciones.
+Revancha conserva participantes y reglas, y reinicia robots, preguntas y pistas.
 
-Hasta completar: Comprobar exige todas las cantidades de piezas de la
-referencia. Se guarda la participación y deja de recibir turnos.
-Gana el menor tiempo de sus turnos más 15 segundos por error.
-Desempate: menos errores. Los empates exactos comparten posición.
-Los resultados y el ganador se muestran cuando terminan todos.
-Revancha conserva participantes y reglas pero reinicia diseños y problemas.
-Otra referencia abre el último panel de configuración y conserva sus datos.
+PIZARRA Y REFERENCIA EN TURNOS
+La referencia ocupa más espacio en el panel y se puede ampliar sin abrir
+otra página. El reloj sigue corriendo mientras se consulta la ampliación.
+Al resolver, una pizarra grande ocupa el área completa del juego, junto
+al problema, respuestas y control de pistas. Mantiene colores, goma,
+deshacer y limpiar; los trazos se guardan al cerrar y volver al problema.
+
+SECUNDARIA
+Disponible con 10 niveles: Enteros, Operaciones combinadas, Fracciones,
+Potencias, Ecuaciones, Paréntesis, Fracciones con x, Expresiones algebraicas,
+Variables en ambos lados y Desafío final.
+En fracciones se elige el numerador solicitado. Todos los niveles conectan
+con diseño libre, solitario, duelo simultáneo y participaciones por turnos.
 
 CÓDIGO
-js/turn-model.js: límites, validación y participantes/equipos.
-js/turn-setup.js: paneles de configuración con un único borrador de partida.
-js/turns.js: reloj, rotación de equipos/integrantes, tableros y resultados.
-css/turn-setup.css: paneles, resumen, lista de participación y ajustes adaptables.
-La construcción, herramientas, operaciones y pizarra reutilizan los módulos
-compartidos del resto del juego, sin abrir ventanas o páginas secundarias.
+js/turn-model.js: validación, participantes y orden de participación.
+js/turn-score.js: puntajes, bonos, suma de equipos, clasificación y coronas.
+js/turn-setup.js: configuración por pasos con un único borrador de partida.
+js/turns.js: participaciones, reloj, problemas, pistas, tableros y resultados.
+css/participation.css: referencia ampliada, pizarra grande y clasificación.
+Se reutilizan la construcción, capas, herramientas y pizarra del resto del juego.
 
 ACTUALIZAR EN EL PORTAL
 Reemplaza Juegos/RobotLab por la carpeta RobotLab completa incluida.
-No modifiques rayet.html, rayet.css ni rayet.js para instalar esta versión.
-Abre de nuevo el juego y, si conserva una versión anterior, usa Ctrl+F5.
-
-SECUNDARIA HABILITADA
-10 niveles: Enteros, Operaciones combinadas, Fracciones, Potencias, Ecuaciones,
-Paréntesis, Fracciones con x, Expresiones algebraicas, Variables en ambos lados
-y Desafío final. Todos conectan con libre, solitario, duelo y turnos/equipos.
-En fracciones, el denominador se muestra en el enunciado y se elige el
-numerador que falta. En álgebra, se elige el valor o coeficiente solicitado.
-Las miniaturas se reutilizan sin rutas inválidas. La cuadrícula de niveles
-se adapta para mostrar los diez retos.
+No necesitas cambiar rayet.html, rayet.css ni rayet.js.
+Si el navegador conserva la versión anterior, recarga con Ctrl+F5.
