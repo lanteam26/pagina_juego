@@ -1,4 +1,4 @@
-ROBOTLAB · NIGHT ARCADE · DUELO SIMULTÁNEO
+ROBOTLAB · NIGHT ARCADE · DUELO Y TURNOS
 
 ABRIR
 Descomprime RobotLab.zip y abre RobotLab/index.html en Chrome, Edge o Firefox.
@@ -86,18 +86,13 @@ comparte el cursor; conectar dos ratones normales no crea dos cursores en el
 navegador. Esta versión no enlaza dos equipos por internet.
 Salir a Inicio o Elegir modo detiene el duelo actual.
 
-PIZARRA CON LA OPERACIÓN DENTRO
-Las sumas, restas y multiplicaciones simples muestran los números alineados,
-el signo y una línea horizontal dentro de la propia pizarra. Bajo esa línea
-hay una fila vacía para escribir el resultado. Ejemplo: 9 encima de 5, con
-el signo menos, la raya y espacio para escribir 4 debajo.
-Las divisiones, incógnitas y operaciones combinadas muestran la expresión
-con espacio rayado para desarrollar el cálculo.
-La plantilla es fija: la goma o «Limpiar» borran los trazos, no la operación.
+PIZARRA LIBRE
+La superficie de dibujo está vacía: no contiene operaciones, renglones,
+plantillas ni etiquetas de resultado. Se conserva el fondo cuadriculado.
+La operación aparece fuera de la pizarra y permanece visible mientras dibujan.
 Incluye tres tizas, goma, deshacer y limpiar; también se puede deshacer una
 limpieza. Los trazos se guardan mientras dura ese problema en la partida.
-La pizarra es un borrador: la respuesta se elige con los botones; el juego
-no interpreta ni califica la escritura.
+La respuesta se elige con los botones; no hay reconocimiento de escritura.
 
 CAPAS Y COPIAS
 Selecciona una copia y usa los controles para moverla, girarla, cambiar su
@@ -145,3 +140,64 @@ RECURSOS
 Se conserva la paleta azul noche/morado con acentos cian y violeta.
 RECURSOS_VISUALES.md contiene ideas de imágenes y prompts para nuevos fondos,
 avatares e insignias. Rugged, Ludio y Secundaria siguen como Próximamente.
+
+COMPETITIVO POR TURNOS · INDIVIDUAL O POR EQUIPOS
+Competitivo > Por turnos. La configuración tiene cuatro paneles:
+1. Formato: individual o equipos.
+2. Participantes: nombres, cantidad de jugadores o distribución por equipos.
+3. Reglas: Contra reloj o Hasta completar; tiempos comunes para todos.
+4. Referencia: modelo compartido y resumen del orden de participación.
+Los datos se conservan al avanzar y retroceder entre paneles.
+
+INDIVIDUAL
+De 2 a 12 jugadores. Cada uno tiene su robot, problemas, errores y tiempo.
+
+EQUIPOS
+De 2 a 5 equipos, con un máximo de 12 participantes en total.
+Cada equipo tiene al menos un integrante. Los tamaños pueden ser diferentes.
+Accesos rápidos: 6 contra 6, 5 contra 5 y tres equipos de cuatro.
+Puedes cambiar los nombres y la cantidad de integrantes de cada equipo.
+No se permite confirmar una configuración que supere los 12 participantes.
+Cada equipo comparte robot, piezas, preguntas, pizarra, errores y reloj.
+Los equipos se alternan (1, 2, 3...). Dentro de cada equipo rota su lista de
+integrantes: primera ronda, integrante 1; segunda ronda, integrante 2, etc.
+Todos los equipos reciben un turno por ronda, independientemente de su tamaño.
+La pantalla de cambio indica equipo e integrante. No cuenta tiempo de espera.
+En los resultados se puede desplegar la participación de cada integrante:
+turnos utilizados, respuestas correctas y errores.
+
+REGLAS Y TIEMPOS
+Cada turno dura de 10 a 300 segundos (60 por defecto).
+Solo se admite una respuesta por turno. Tras un error puedes reintentar
+el mismo problema en tu próximo turno. Las preguntas y trazos se conservan.
+Las copias de piezas desbloqueadas son ilimitadas y no añaden puntuación.
+Se permite ajustar el diseño o añadir copias antes de Terminar turno.
+Al agotar el límite de turno, el juego pasa a la siguiente persona o equipo.
+
+Contra reloj: cada jugador/equipo tiene de 1 a 60 minutos acumulados propios.
+Su reloj solo se consume durante sus turnos. Al agotarse, queda bloqueado;
+los demás siguen hasta consumir el suyo. No hay finalización anticipada.
+Gana el mayor puntaje: 100 por tipo de pieza desbloqueado menos 20 por error.
+Desempate: más tipos desbloqueados y, después, menos errores.
+Las copias repetidas no dan puntos adicionales.
+
+Hasta completar: Comprobar exige todas las cantidades de piezas de la
+referencia. Se guarda la participación y deja de recibir turnos.
+Gana el menor tiempo de sus turnos más 15 segundos por error.
+Desempate: menos errores. Los empates exactos comparten posición.
+Los resultados y el ganador se muestran cuando terminan todos.
+Revancha conserva participantes y reglas pero reinicia diseños y problemas.
+Otra referencia abre el último panel de configuración y conserva sus datos.
+
+CÓDIGO
+js/turn-model.js: límites, validación y participantes/equipos.
+js/turn-setup.js: paneles de configuración con un único borrador de partida.
+js/turns.js: reloj, rotación de equipos/integrantes, tableros y resultados.
+css/turn-setup.css: paneles, resumen, lista de participación y ajustes adaptables.
+La construcción, herramientas, operaciones y pizarra reutilizan los módulos
+compartidos del resto del juego, sin abrir ventanas o páginas secundarias.
+
+ACTUALIZAR EN EL PORTAL
+Reemplaza Juegos/RobotLab por la carpeta RobotLab completa incluida.
+No modifiques rayet.html, rayet.css ni rayet.js para instalar esta versión.
+Abre de nuevo el juego y, si conserva una versión anterior, usa Ctrl+F5.
