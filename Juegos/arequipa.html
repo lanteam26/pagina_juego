@@ -114,7 +114,7 @@ button:disabled{cursor:not-allowed;opacity:.58}
       </div></div>
       <div class="setup-section"><h3>02 · Resistencia del explorador</h3><div class="time-input-group"><label for="setup-lives">❤️ Número de vidas</label><input id="setup-lives" type="number" min="0" max="99" value="3" inputmode="numeric"></div><div class="tiny-hint">Escribe 0 para jugar sin límite de vidas.</div></div>
       <button class="start-btn" onclick="startGame()">⛰️ ¡Comenzar expedición!</button>
-      <div class="sellar-note">✦ Cada respuesta correcta te acerca a la cima.</div>
+      <div class="sellar-note">✦ 24 preguntas por categoría, sin repeticiones hasta agotar el banco.</div>
     </div>
   </div>
 </section>
@@ -144,30 +144,594 @@ button:disabled{cursor:not-allowed;opacity:.58}
 <canvas id="confetti-canvas" aria-hidden="true"></canvas>
 <script>
 const triviaDB = {
-            'historia': [
-                { q: "¿Fundador español de Arequipa en 1540?", a: "Garcí Manuel de Carbajal", fakes: ["Francisco Pizarro", "Simón Bolívar"] },
-                { q: "Prócer y poeta arequipeño fusilado en 1815", a: "Mariano Melgar", fakes: ["Mario Vargas Llosa", "César Vallejo"] },
-                { q: "Apodo histórico de la ciudad", a: "El León del Sur", fakes: ["La Incontrastable", "El Ombligo del Mundo"] },
-                { q: "¿En qué año se fundó Arequipa?", a: "1540", fakes: ["1532", "1821"] }
-            ],
-            'gastro': [
-                { q: "Plato tradicional de domingo por la mañana", a: "Adobo", fakes: ["Rocoto Relleno", "Pachamanca"] },
-                { q: "Postre tradicional que irónicamente NO lleva queso", a: "Queso Helado", fakes: ["Arroz Zambito", "Mazamorra Morada"] },
-                { q: "Hierba principal usada en la Ocopa", a: "Huacatay", fakes: ["Culantro", "Orégano"] },
-                { q: "Bebida fermentada tradicional arequipeña", a: "Chicha de Güiñapo", fakes: ["Pisco Sour", "Chicha de Jora"] }
-            ],
-            'cultura': [
-                { q: "Material volcánico de construcción", a: "Sillar", fakes: ["Adobe", "Ladrillo"] },
-                { q: "Volcanes tutelares: Misti, Pichu Pichu y...", a: "Chachani", fakes: ["Sabancaya", "Coropuna"] },
-                { q: "Famoso monasterio colonial en la ciudad", a: "Santa Catalina", fakes: ["Santa Teresa", "San Francisco"] },
-                { q: "¿Qué cañón profundo se ubica en Arequipa?", a: "Cañón del Colca", fakes: ["Cañón del Pato", "Cañón de Cotahuasi"] }
-            ]
-        };
+  "historia": [
+    {
+      "q": "¿Quién fundó la ciudad española de Arequipa en 1540?",
+      "a": "Garcí Manuel de Carbajal",
+      "fakes": [
+        "Francisco Pizarro",
+        "Simón Bolívar"
+      ]
+    },
+    {
+      "q": "¿Qué poeta y prócer arequipeño fue fusilado en 1815?",
+      "a": "Mariano Melgar",
+      "fakes": [
+        "Mario Vargas Llosa",
+        "César Vallejo"
+      ]
+    },
+    {
+      "q": "¿Qué apodo histórico recibe Arequipa?",
+      "a": "El León del Sur",
+      "fakes": [
+        "La Incontrastable",
+        "El Ombligo del Mundo"
+      ]
+    },
+    {
+      "q": "¿En qué año se fundó Arequipa?",
+      "a": "1540",
+      "fakes": [
+        "1532",
+        "1821"
+      ]
+    },
+    {
+      "q": "¿Qué día se celebra la fundación española de Arequipa?",
+      "a": "15 de agosto",
+      "fakes": [
+        "28 de julio",
+        "6 de enero"
+      ]
+    },
+    {
+      "q": "¿En qué mes se celebra el aniversario de Arequipa?",
+      "a": "Agosto",
+      "fakes": [
+        "Enero",
+        "Diciembre"
+      ]
+    },
+    {
+      "q": "¿En qué año recibió Arequipa el título oficial de ciudad?",
+      "a": "1541",
+      "fakes": [
+        "1821",
+        "1600"
+      ]
+    },
+    {
+      "q": "¿Qué rey concedió a Arequipa el título de ciudad?",
+      "a": "Carlos V",
+      "fakes": [
+        "Felipe V",
+        "Fernando VII"
+      ]
+    },
+    {
+      "q": "¿Cómo se llamó la villa al fundarse en 1540?",
+      "a": "Villa Hermosa de Nuestra Señora de la Asunta",
+      "fakes": [
+        "Villa de San Martín",
+        "Villa Real del Sol"
+      ]
+    },
+    {
+      "q": "¿En qué año fue inscrito el centro histórico en la lista de Patrimonio Mundial?",
+      "a": "2000",
+      "fakes": [
+        "1980",
+        "2020"
+      ]
+    },
+    {
+      "q": "¿Qué organismo reconoció el centro histórico como Patrimonio Mundial?",
+      "a": "UNESCO",
+      "fakes": [
+        "UNICEF",
+        "OMS"
+      ]
+    },
+    {
+      "q": "¿En qué siglo ocurrió la fundación española de Arequipa?",
+      "a": "Siglo XVI",
+      "fakes": [
+        "Siglo XIII",
+        "Siglo XIX"
+      ]
+    },
+    {
+      "q": "¿Cómo se llama la plaza central del casco histórico?",
+      "a": "Plaza de Armas",
+      "fakes": [
+        "Plaza San Martín",
+        "Plaza de Acho"
+      ]
+    },
+    {
+      "q": "¿Qué gran templo se alza frente a la Plaza de Armas?",
+      "a": "Catedral de Arequipa",
+      "fakes": [
+        "Catedral de Lima",
+        "Basílica de Guadalupe"
+      ]
+    },
+    {
+      "q": "¿Qué iglesia del centro histórico es célebre por su fachada barroca mestiza?",
+      "a": "La Compañía de Jesús",
+      "fakes": [
+        "Iglesia de Las Nazarenas",
+        "Catedral de Cusco"
+      ]
+    },
+    {
+      "q": "¿Qué estilo destaca en varias fachadas coloniales arequipeñas?",
+      "a": "Barroco mestizo",
+      "fakes": [
+        "Gótico francés",
+        "Art déco"
+      ]
+    },
+    {
+      "q": "¿Qué dos tradiciones se fusionan en la arquitectura del centro histórico?",
+      "a": "Europea e indígena",
+      "fakes": [
+        "Japonesa y china",
+        "Egipcia y romana"
+      ]
+    },
+    {
+      "q": "¿Qué barrio conserva huellas de un antiguo poblado cerca del centro?",
+      "a": "San Lázaro",
+      "fakes": [
+        "Miraflores de Lima",
+        "Barranco"
+      ]
+    },
+    {
+      "q": "¿Qué fenómeno natural obligó a reconstruir varias veces edificios antiguos?",
+      "a": "Terremotos",
+      "fakes": [
+        "Tornados",
+        "Huracanes"
+      ]
+    },
+    {
+      "q": "¿Qué museo arequipeño es conocido por conservar a Juanita?",
+      "a": "Museo Santuarios Andinos",
+      "fakes": [
+        "Museo Larco",
+        "Museo de la Nación"
+      ]
+    },
+    {
+      "q": "¿Con qué nombre se conoce también a la momia Juanita?",
+      "a": "Dama de Ampato",
+      "fakes": [
+        "Dama de Cao",
+        "Señora de Sipán"
+      ]
+    },
+    {
+      "q": "¿En qué nevado fue hallada la Dama de Ampato?",
+      "a": "Ampato",
+      "fakes": [
+        "Huascarán",
+        "Ausangate"
+      ]
+    },
+    {
+      "q": "¿En qué año fue fundado el Monasterio de Santa Catalina?",
+      "a": "1579",
+      "fakes": [
+        "1824",
+        "1945"
+      ]
+    },
+    {
+      "q": "¿Qué monasterio histórico arequipeño parece una pequeña ciudad con calles y patios?",
+      "a": "Santa Catalina",
+      "fakes": [
+        "San Francisco de Lima",
+        "Santo Toribio"
+      ]
+    }
+  ],
+  "gastro": [
+    {
+      "q": "¿Qué plato arequipeño se acostumbra desayunar los domingos?",
+      "a": "Adobo",
+      "fakes": [
+        "Rocoto relleno",
+        "Pachamanca"
+      ]
+    },
+    {
+      "q": "¿Qué postre tradicional arequipeño no lleva queso pese a su nombre?",
+      "a": "Queso helado",
+      "fakes": [
+        "Arroz zambito",
+        "Mazamorra morada"
+      ]
+    },
+    {
+      "q": "¿Qué hierba aromática es característica de la ocopa arequipeña?",
+      "a": "Huacatay",
+      "fakes": [
+        "Culantro",
+        "Romero"
+      ]
+    },
+    {
+      "q": "¿Qué bebida fermentada tradicional es típica de las picanterías?",
+      "a": "Chicha de güiñapo",
+      "fakes": [
+        "Pisco sour",
+        "Emoliente"
+      ]
+    },
+    {
+      "q": "¿Qué ingrediente picante se rellena en el rocoto relleno?",
+      "a": "Rocoto",
+      "fakes": [
+        "Pimiento dulce",
+        "Tomate"
+      ]
+    },
+    {
+      "q": "¿Qué preparación de papa suele acompañar al rocoto relleno?",
+      "a": "Pastel de papa",
+      "fakes": [
+        "Papas fritas",
+        "Puré de yuca"
+      ]
+    },
+    {
+      "q": "¿Qué sopa arequipeña lleva camarones como ingrediente principal?",
+      "a": "Chupe de camarones",
+      "fakes": [
+        "Caldo de gallina",
+        "Sopa de quinua"
+      ]
+    },
+    {
+      "q": "¿Cómo se llaman los restaurantes tradicionales de cocina arequipeña?",
+      "a": "Picanterías",
+      "fakes": [
+        "Cevicherías",
+        "Heladerías"
+      ]
+    },
+    {
+      "q": "¿Qué utensilio de piedra se emplea tradicionalmente para moler ajíes?",
+      "a": "Batán",
+      "fakes": [
+        "Colador",
+        "Rodillo"
+      ]
+    },
+    {
+      "q": "¿Qué ensalada típica mezcla habas, choclo, verduras y queso?",
+      "a": "Solterito de queso",
+      "fakes": [
+        "Ensalada César",
+        "Ensalada rusa"
+      ]
+    },
+    {
+      "q": "¿Qué tubérculo se sirve con la crema de ocopa?",
+      "a": "Papa",
+      "fakes": [
+        "Camote",
+        "Olluco"
+      ]
+    },
+    {
+      "q": "¿Qué fruto seco se usa con frecuencia en la salsa de ocopa?",
+      "a": "Maní",
+      "fakes": [
+        "Avellana",
+        "Castaña"
+      ]
+    },
+    {
+      "q": "¿De qué animal suele ser la carne del adobo arequipeño?",
+      "a": "Cerdo",
+      "fakes": [
+        "Pato",
+        "Pescado"
+      ]
+    },
+    {
+      "q": "¿Qué tipo de maíz se emplea para preparar el güiñapo tradicional?",
+      "a": "Maíz negro",
+      "fakes": [
+        "Maíz morado cocido",
+        "Trigo"
+      ]
+    },
+    {
+      "q": "¿Qué ingrediente lácteo se utiliza para preparar queso helado?",
+      "a": "Leche",
+      "fakes": [
+        "Yogur griego",
+        "Crema agria"
+      ]
+    },
+    {
+      "q": "¿Qué especia aromática se espolvorea sobre el queso helado?",
+      "a": "Canela",
+      "fakes": [
+        "Comino",
+        "Pimienta"
+      ]
+    },
+    {
+      "q": "¿Qué animal se prepara en el plato llamado cuy chactado?",
+      "a": "Cuy",
+      "fakes": [
+        "Conejo",
+        "Pollo"
+      ]
+    },
+    {
+      "q": "¿Qué pan tradicional suele acompañar al adobo arequipeño?",
+      "a": "Pan de tres puntas",
+      "fakes": [
+        "Pan baguette",
+        "Pan de molde"
+      ]
+    },
+    {
+      "q": "¿Qué sopa tradicional arequipeña se conoce como caldo blanco?",
+      "a": "Caldo blanco",
+      "fakes": [
+        "Chupe verde",
+        "Sancochado limeño"
+      ]
+    },
+    {
+      "q": "¿Qué dulce de masa frita se sirve con miel de chancaca?",
+      "a": "Buñuelos",
+      "fakes": [
+        "Alfajores",
+        "Suspiros"
+      ]
+    },
+    {
+      "q": "¿Qué bebida de maíz se utiliza tradicionalmente en la preparación de adobo?",
+      "a": "Chicha de jora",
+      "fakes": [
+        "Agua de cebada",
+        "Limonada"
+      ]
+    },
+    {
+      "q": "¿Qué ají amarillo seco aparece en recetas de salsa de ocopa?",
+      "a": "Ají mirasol",
+      "fakes": [
+        "Ají limo fresco",
+        "Pimiento morrón"
+      ]
+    },
+    {
+      "q": "¿Qué verdura es la base de muchos locros tradicionales?",
+      "a": "Zapallo",
+      "fakes": [
+        "Pepino",
+        "Lechuga"
+      ]
+    },
+    {
+      "q": "¿Cómo se llama la entrada de papas con crema de ají, maní y queso?",
+      "a": "Ocopa arequipeña",
+      "fakes": [
+        "Papa a la huancaína",
+        "Causa limeña"
+      ]
+    }
+  ],
+  "cultura": [
+    {
+      "q": "¿Qué piedra volcánica se usa mucho en la arquitectura arequipeña?",
+      "a": "Sillar",
+      "fakes": [
+        "Adobe",
+        "Granito"
+      ]
+    },
+    {
+      "q": "¿Qué volcán completa la terna Misti, Pichu Pichu y...?",
+      "a": "Chachani",
+      "fakes": [
+        "Sabancaya",
+        "Coropuna"
+      ]
+    },
+    {
+      "q": "¿Qué monasterio histórico se visita en la ciudad de Arequipa?",
+      "a": "Santa Catalina",
+      "fakes": [
+        "Las Nazarenas de Lima",
+        "San Francisco de Quito"
+      ]
+    },
+    {
+      "q": "¿Qué cañón famoso se encuentra en la provincia arequipeña de Caylloma?",
+      "a": "Cañón del Colca",
+      "fakes": [
+        "Cañón del Pato",
+        "Cañón del Chicamocha"
+      ]
+    },
+    {
+      "q": "¿En qué parte del Perú se encuentra Arequipa?",
+      "a": "Sur",
+      "fakes": [
+        "Norte",
+        "Extremo oriente"
+      ]
+    },
+    {
+      "q": "¿Qué río atraviesa la ciudad de Arequipa?",
+      "a": "Chili",
+      "fakes": [
+        "Rímac",
+        "Mantaro"
+      ]
+    },
+    {
+      "q": "¿Qué distrito es famoso por su mirador y sus arcos de sillar?",
+      "a": "Yanahuara",
+      "fakes": [
+        "Chorrillos",
+        "Magdalena del Mar"
+      ]
+    },
+    {
+      "q": "¿A qué cordillera pertenecen los principales nevados de Arequipa?",
+      "a": "Los Andes",
+      "fakes": [
+        "Los Alpes",
+        "Los Pirineos"
+      ]
+    },
+    {
+      "q": "¿Cómo se llama la reserva nacional que protege vicuñas cerca de Arequipa?",
+      "a": "Salinas y Aguada Blanca",
+      "fakes": [
+        "Paracas",
+        "Pacaya Samiria"
+      ]
+    },
+    {
+      "q": "¿Qué laguna da nombre a una importante reserva arequipeña?",
+      "a": "Laguna de Salinas",
+      "fakes": [
+        "Laguna de Llanganuco",
+        "Laguna Humantay"
+      ]
+    },
+    {
+      "q": "¿Qué camélido de la puna es famoso por su fibra muy fina?",
+      "a": "Vicuña",
+      "fakes": [
+        "Dromedario",
+        "Camello bactriano"
+      ]
+    },
+    {
+      "q": "¿Qué aves de tonos rosados viven en las lagunas altoandinas?",
+      "a": "Parihuanas",
+      "fakes": [
+        "Pelícanos",
+        "Tucanes"
+      ]
+    },
+    {
+      "q": "¿Qué volcán se ve muy cerca de la ciudad de Arequipa?",
+      "a": "Misti",
+      "fakes": [
+        "Etna",
+        "Fuji"
+      ]
+    },
+    {
+      "q": "¿A qué departamento peruano pertenece el valle del Colca?",
+      "a": "Arequipa",
+      "fakes": [
+        "Loreto",
+        "Tumbes"
+      ]
+    },
+    {
+      "q": "¿En qué provincia arequipeña se ubica el valle del Colca?",
+      "a": "Caylloma",
+      "fakes": [
+        "Camaná",
+        "Islay"
+      ]
+    },
+    {
+      "q": "¿Qué gran ave puede observarse en el mirador Cruz del Cóndor?",
+      "a": "Cóndor andino",
+      "fakes": [
+        "Águila calva",
+        "Flamenco caribeño"
+      ]
+    },
+    {
+      "q": "¿Qué valle arequipeño es conocido por sus andenes y terrazas agrícolas?",
+      "a": "Valle del Colca",
+      "fakes": [
+        "Valle del Mantaro",
+        "Valle Sagrado del Cusco"
+      ]
+    },
+    {
+      "q": "¿En qué distrito se encuentra la Laguna de Salinas?",
+      "a": "San Juan de Tarucani",
+      "fakes": [
+        "Lince",
+        "Barranco"
+      ]
+    },
+    {
+      "q": "¿Qué localidad sirve de acceso hacia la Laguna de Salinas?",
+      "a": "Chiguata",
+      "fakes": [
+        "Pisco",
+        "Huanchaco"
+      ]
+    },
+    {
+      "q": "¿Cómo se llama el ecosistema altoandino de pastizales fríos?",
+      "a": "Puna",
+      "fakes": [
+        "Manglar",
+        "Bosque tropical"
+      ]
+    },
+    {
+      "q": "¿Qué árbol andino forma bosques protegidos en Salinas y Aguada Blanca?",
+      "a": "Queñua",
+      "fakes": [
+        "Caoba",
+        "Palmera cocotera"
+      ]
+    },
+    {
+      "q": "¿Qué otro gran cañón se encuentra en la región Arequipa además del Colca?",
+      "a": "Cotahuasi",
+      "fakes": [
+        "Chicamocha",
+        "Sumidero"
+      ]
+    },
+    {
+      "q": "¿Qué volcán activo está vinculado al valle del Colca?",
+      "a": "Sabancaya",
+      "fakes": [
+        "Kilimanjaro",
+        "Vesubio"
+      ]
+    },
+    {
+      "q": "¿En qué nevado de Arequipa se halló a la Dama de Ampato?",
+      "a": "Ampato",
+      "fakes": [
+        "Huascarán",
+        "Salkantay"
+      ]
+    }
+  ]
+};
 const audioCtor=window.AudioContext||window.webkitAudioContext;
 let audioCtx=null,isMuted=true;
 function tone(freq,duration=.13,type='sine',gain=.065,delay=0){if(isMuted||!audioCtor)return;try{audioCtx??=new audioCtor();audioCtx.resume();const o=audioCtx.createOscillator(),g=audioCtx.createGain(),t=audioCtx.currentTime+delay;o.type=type;o.frequency.setValueAtTime(freq,t);g.gain.setValueAtTime(gain,t);g.gain.exponentialRampToValueAtTime(.001,t+duration);o.connect(g);g.connect(audioCtx.destination);o.start(t);o.stop(t+duration+.01)}catch(e){}}
 function sfxClick(){tone(610,.08)}function sfxStep(){tone(600,.16,'sine',.07);tone(880,.18,'sine',.06,.12)}function sfxSlip(){tone(240,.22,'triangle',.1);tone(150,.25,'triangle',.07,.1)}function sfxSummit(){[523,659,784,1046].forEach((f,i)=>tone(f,.28,'sine',.09,i*.13))}
-let currentDict='historia',isGameActive=false,altitud=2335,lives=3,infiniteLives=false,animFrameId=null,currentQuestion=null,recentQuestions=[];
+let currentDict='historia',isGameActive=false,altitud=2335,lives=3,infiniteLives=false,animFrameId=null,currentQuestion=null,questionDeck=[],lastQuestionId=null,questionRound=0;
 const altitudBase=2335,altitudMeta=5822;
 const canvas=document.getElementById('gameCanvas'),ctx=canvas.getContext('2d'),wrapper=document.getElementById('canvas-wrapper');
 let W=600,H=560,viewRatio=0,targetRatio=0,walkFrom=0,walkStart=0,walkDuration=870,isWalking=false,particles=[],roundToken=0,roundTimeout=null,confetti=[];
@@ -179,8 +743,35 @@ function backToMenu(){roundToken++;clearTimeout(roundTimeout);isGameActive=false
 function updateMountainHUD(){document.getElementById('score-display').textContent=Math.round(altitud);const p=Math.max(0,Math.min(100,(altitud-altitudBase)/(altitudMeta-altitudBase)*100));document.getElementById('progress-fill').style.width=p+'%';document.getElementById('progress-percent').textContent=Math.round(p)+'%';document.getElementById('lives-display').textContent=infiniteLives?'∞':lives}
 function resizeCanvas(){const r=wrapper.getBoundingClientRect();W=Math.max(100,r.width);H=Math.max(100,r.height);const dpr=Math.min(2,window.devicePixelRatio||1);canvas.width=Math.round(W*dpr);canvas.height=Math.round(H*dpr);ctx.setTransform(dpr,0,0,dpr,0,0)}
 window.addEventListener('resize',()=>{if(document.getElementById('game-screen').style.display==='flex')resizeCanvas()});
-function resetGame(){roundToken++;clearTimeout(roundTimeout);altitud=altitudBase;viewRatio=targetRatio=walkFrom=0;isWalking=false;recentQuestions=[];particles=[];let val=parseInt(document.getElementById('setup-lives').value,10);lives=Number.isFinite(val)?Math.min(99,Math.max(0,val)):3;infiniteLives=lives===0;isGameActive=true;updateMountainHUD();generateBifurcation();cancelAnimationFrame(animFrameId);animFrameId=requestAnimationFrame(gameLoop)}
-function generateBifurcation(){if(!isGameActive)return;const pool=currentDict==='mix'?[...triviaDB.historia,...triviaDB.gastro,...triviaDB.cultura]:triviaDB[currentDict];let available=pool.filter(q=>!recentQuestions.includes(q.q));if(!available.length){recentQuestions=[];available=pool}currentQuestion=available[Math.floor(Math.random()*available.length)];recentQuestions.push(currentQuestion.q);if(recentQuestions.length>2)recentQuestions.shift();document.getElementById('question-display').textContent=currentQuestion.q;document.getElementById('category-label').textContent='· '+({historia:'HISTORIA',gastro:'GASTRONOMÍA',cultura:'GEOGRAFÍA',mix:'RUTA MIXTA'}[currentDict]);const c=document.getElementById('options-container');c.innerHTML='';const answers=[{text:currentQuestion.a,correct:true},{text:currentQuestion.fakes[0],correct:false},{text:currentQuestion.fakes[1],correct:false}].sort(()=>Math.random()-.5);answers.forEach((a,i)=>{const b=document.createElement('button');b.className='option-btn';b.innerHTML='<span class="answer-letter">'+['A','B','C'][i]+'</span><span></span>';b.lastElementChild.textContent=a.text;b.addEventListener('click',()=>handleAnswer(a.correct,b));c.appendChild(b)});setFeedback('Elige una respuesta para continuar el ascenso.','')}
+function resetGame(){roundToken++;clearTimeout(roundTimeout);altitud=altitudBase;viewRatio=targetRatio=walkFrom=0;isWalking=false;questionDeck=[];lastQuestionId=null;questionRound=0;particles=[];let val=parseInt(document.getElementById('setup-lives').value,10);lives=Number.isFinite(val)?Math.min(99,Math.max(0,val)):3;infiniteLives=lives===0;isGameActive=true;updateMountainHUD();generateBifurcation();cancelAnimationFrame(animFrameId);animFrameId=requestAnimationFrame(gameLoop)}
+function shuffleQuestions(items){
+  // Fisher-Yates: cada pregunta aparece una sola vez antes de volver a mezclar.
+  const result=[...items];
+  for(let i=result.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[result[i],result[j]]=[result[j],result[i]]}
+  return result;
+}
+function generateBifurcation(){
+  if(!isGameActive)return;
+  const pool=currentDict==='mix'?[...triviaDB.historia,...triviaDB.gastro,...triviaDB.cultura]:triviaDB[currentDict];
+  if(!questionDeck.length){
+    questionDeck=shuffleQuestions(pool);
+    questionRound++;
+    // Si el banco se agotó, evita al menos que la última pregunta se repita inmediatamente.
+    if(questionDeck.length>1 && questionDeck[questionDeck.length-1].q===lastQuestionId){
+      [questionDeck[0],questionDeck[questionDeck.length-1]]=[questionDeck[questionDeck.length-1],questionDeck[0]];
+    }
+  }
+  currentQuestion=questionDeck.pop();
+  lastQuestionId=currentQuestion.q;
+  const questionNumber=pool.length-questionDeck.length;
+  document.getElementById('question-display').textContent=currentQuestion.q;
+  const categoryNames={historia:'HISTORIA',gastro:'GASTRONOMÍA',cultura:'GEOGRAFÍA',mix:'RUTA MIXTA'};
+  document.getElementById('category-label').textContent='· '+categoryNames[currentDict]+' · PREGUNTA '+questionNumber+'/'+pool.length+(questionRound>1?' · RONDA '+questionRound:'');
+  const c=document.getElementById('options-container');c.innerHTML='';
+  const answers=shuffleQuestions([{text:currentQuestion.a,correct:true},{text:currentQuestion.fakes[0],correct:false},{text:currentQuestion.fakes[1],correct:false}]);
+  answers.forEach((a,i)=>{const b=document.createElement('button');b.className='option-btn';b.innerHTML='<span class="answer-letter">'+['A','B','C'][i]+'</span><span></span>';b.lastElementChild.textContent=a.text;b.addEventListener('click',()=>handleAnswer(a.correct,b));c.appendChild(b)});
+  setFeedback('Elige una respuesta para continuar el ascenso.','');
+}
 function setFeedback(text,state=''){const f=document.getElementById('feedback-line');f.textContent=text;f.className='feedback-line '+state}
 function handleAnswer(correct,button){if(!isGameActive||isWalking)return;isGameActive=false;const token=++roundToken;document.querySelectorAll('.option-btn').forEach(b=>b.disabled=true);const newAlt=correct?Math.min(altitudMeta,altitud+350):Math.max(altitudBase,altitud-200);if(correct){sfxStep();button.classList.add('correct');setFeedback('✨ ¡Excelente! +350 metros de altitud.','good');spawnParticles('#ffe0a0')}else{sfxSlip();button.classList.add('wrong');setFeedback('💨 ¡Resbalón! -200 metros de altitud.','bad');wrapper.classList.remove('damage-shake');void wrapper.offsetWidth;wrapper.classList.add('damage-shake');spawnParticles('#fcb4a1')}
 const oldAlt=altitud;altitud=newAlt;walkFrom=viewRatio;targetRatio=(newAlt-altitudBase)/(altitudMeta-altitudBase);walkStart=performance.now();isWalking=true;
