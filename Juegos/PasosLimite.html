@@ -1,213 +1,497 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>¡El Vuelo Exacto! 🐝</title>
-    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&display=swap" rel="stylesheet">
-    <style>
-        :root { --p1-main: #3498db; --p1-dark: #2980b9; --grid-bg: #8d6e63; }
-        body { font-family: 'Fredoka', sans-serif; display: flex; flex-direction: column; align-items: center; margin: 0; padding: 10px; min-height: 100vh; touch-action: none; color: #333; background-color: transparent; }
-        .decorations { position: fixed; top: 0; left: 0; right: 0; bottom: 0; z-index: -1; pointer-events: none; overflow: hidden; background: linear-gradient(180deg, #74ebd5 0%, #ACB6E5 100%); }
-        .decorations::before { content: ''; position: absolute; inset: 0; background-image: url("data:image/svg+xml,%3Csvg width='60' height='104' viewBox='0 0 60 104' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M30 52l15-26 15 26v52l-15 26-15-26zM0 0l15 26v52L0 104V0zm60 0v104L45 78V26z' fill='%23ffffff' fill-opacity='0.15' fill-rule='evenodd'/%3E%3C/svg%3E"); z-index: 1; }
-        .sun { position: absolute; top: 3%; right: 5%; font-size: 70px; z-index: 2; filter: drop-shadow(0 0 25px rgba(255, 215, 0, 0.8)); animation: pulse-sun 3s infinite alternate; }
-        @keyframes pulse-sun { 0% { transform: scale(1) rotate(0deg); } 100% { transform: scale(1.1) rotate(10deg); } }
-        .grass { position: absolute; bottom: -5vh; left: -10vw; width: 120vw; height: 25vh; background: #a9dfbf; border-radius: 50% 50% 0 0; z-index: 2; box-shadow: inset 0 15px 0 #82e0aa, 0 -30px 50px rgba(46,204,113,0.3); }
-        h1 { color: #2c3e50; margin: 0px 0 5px 0; text-align: center; font-size: 26px; text-shadow: 2px 2px 0px #fff; position: relative; }
-        
-        .prompt-box { text-align: center; background: rgba(255, 255, 255, 0.95); padding: 10px 20px; border-radius: 15px; font-size: 16px; font-weight: 600; max-width: 550px; margin-bottom: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); position: relative; border: 3px solid #ffb74d; }
-        #target-steps-display { font-size: 26px; color: #e74c3c; display: block; margin-top: 5px; }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#b8e9ed">
+<title>¡El Vuelo Exacto! — Aventura en el Jardín 🐝</title>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--ink:#58462e;--soft:#8b7c61;--honey:#ffcb5d;--tangerine:#f6a638;--green:#66bc78;--mint:#e8ffdc;--cream:#fffdf4;--sky:#bde9f6}
+*{box-sizing:border-box}
+html,body{margin:0;min-height:100%;width:100%}
+body{background:#bcebf5;color:var(--ink);font-family:'Fredoka','Trebuchet MS',sans-serif;overflow-x:hidden;-webkit-font-smoothing:antialiased}
+button{font:inherit;cursor:pointer;-webkit-tap-highlight-color:transparent}
+button:focus-visible{outline:3px solid #35a9ce;outline-offset:3px}
+button:disabled{opacity:.55;cursor:not-allowed}
+#app{position:relative;z-index:3;min-height:100dvh;max-width:1190px;margin:auto;padding:22px 24px 26px;display:flex;flex-direction:column;gap:17px}
+/* Pastel illustrated sky */
+.decorations{position:fixed;inset:0;z-index:0;overflow:hidden;pointer-events:none;background:linear-gradient(180deg,#a8e3f7 0%,#dbf8ed 59%,#ecf6cd 100%)}
+.decorations::before{content:'';position:absolute;inset:0;opacity:.45;background-image:radial-gradient(circle at 20% 20%,#fff 0 2px,transparent 3px),radial-gradient(circle at 76% 72%,#fff 0 2px,transparent 3px);background-size:170px 160px,140px 130px}
+.sun{position:absolute;right:9%;top:4%;width:100px;aspect-ratio:1;border-radius:50%;background:radial-gradient(circle at 33% 28%,#fff9c3,#ffdb78 65%,#ffc55e);box-shadow:0 0 0 17px #fff2ad55,0 0 0 41px #fff2ae1e;animation:sunBob 5s ease-in-out infinite}
+.sun:after{content:'•   •';position:absolute;inset:26px 0 0;font-size:25px;color:#ac7037;letter-spacing:3px;text-align:center}
+.sun:before{content:'◡';position:absolute;inset:27px 0 0;text-align:center;font-size:49px;color:#b4783a;z-index:1}
+@keyframes sunBob{50%{transform:translateY(8px) rotate(6deg)}}
+.cloud{position:absolute;width:174px;height:60px;background:#fff;border-radius:80px;box-shadow:0 6px 0 #d8f3f496;opacity:.86;animation:cloudDrift 22s ease-in-out infinite alternate}
+.cloud:before{content:'';position:absolute;width:87px;height:87px;left:24px;bottom:12px;background:#fff;border-radius:50%}
+.cloud:after{content:'';position:absolute;width:66px;height:66px;right:20px;bottom:8px;background:#fff;border-radius:50%}
+.cloud.c1{top:13%;left:-4%;transform:scale(.82)}.cloud.c2{top:21%;right:24%;transform:scale(.52);animation-delay:-8s}.cloud.c3{top:40%;left:37%;transform:scale(.42);animation-delay:-11s}
+@keyframes cloudDrift{50%{margin-left:25px}100%{margin-left:-20px}}
+.hill{position:absolute;width:100vw;height:42vh;bottom:-28vh;border-radius:50% 50% 0 0}
+.hill.a{left:-28vw;background:#b7e69c;bottom:-20vh;box-shadow:inset 0 14px 0 #c9f3b3}
+.hill.b{right:-31vw;background:#9fda8d;bottom:-23vh;box-shadow:inset 0 14px 0 #bceda6}
+.hill.c{left:-12vw;width:130vw;background:#80c97c;bottom:-34vh;box-shadow:inset 0 13px 0 #a0e092}
+.scenery-flower{position:absolute;bottom:9%;left:10%;width:20px;height:20px;border-radius:50%;background:#ffcc56;box-shadow:0 -13px 0 1px #fff9f9,0 13px 0 1px #fff9f9,13px 0 0 1px #fff9f9,-13px 0 0 1px #fff9f9,0 0 0 3px #f4b65c;animation:sway 4s ease-in-out infinite}
+.scenery-flower:after{content:'';position:absolute;width:5px;height:35px;left:8px;top:21px;border-radius:6px;background:#408d56}
+.scenery-flower.f2{left:93%;bottom:12%;transform:scale(.75);animation-delay:-1.6s}.scenery-flower.f3{left:76%;bottom:4%;transform:scale(.65);animation-delay:-2.5s}
+@keyframes sway{50%{margin-left:7px}}
+.pollen{position:absolute;width:6px;height:6px;border-radius:50%;background:#fff9c1;box-shadow:0 0 9px #fffbc4;animation:pollenDrift var(--duration,9s) ease-in-out infinite;animation-delay:var(--delay,0s)}
+@keyframes pollenDrift{0%,100%{transform:translate(0,0);opacity:0}25%,75%{opacity:.9}50%{transform:translate(20px,-60px)}}
+/* Game header */
+.topbar{display:flex;align-items:center;justify-content:space-between;gap:13px;border:3px solid #fff9e8;border-radius:24px;padding:11px 17px;background:#fffef4ed;box-shadow:0 6px 0 #b5d7b8a6,0 15px 35px #4c91832d}
+.brand{display:flex;align-items:center;gap:12px;min-width:0}
+.brand-mark{flex:0 0 52px;display:grid;place-items:center;width:52px;height:52px;border-radius:18px;background:linear-gradient(145deg,#fff3bd,#ffdb74);box-shadow:inset 0 0 0 2px #fff8dc,0 4px 0 #efc36f;font-size:30px;transform:rotate(-7deg)}
+.eyebrow{display:block;text-transform:uppercase;letter-spacing:.16em;font-size:10px;font-weight:700;color:#b39865}
+h1{margin:1px 0 0;font-size:clamp(24px,3vw,34px);line-height:1;color:#59462e;letter-spacing:-.035em}
+h1 span{color:#dc922b}
+.top-right{display:flex;align-items:center;gap:8px}
+.chip{background:#e9f8e5;border:2px solid #c9e8c3;border-radius:13px;color:#568456;padding:8px 12px;font-size:12px;font-weight:700;white-space:nowrap}
+.icon-btn{width:41px;height:41px;border:2px solid #e9ddc1;border-radius:14px;background:#fff8e7;color:#8c7652;box-shadow:0 3px 0 #dfd1b1;font-size:20px;transition:transform .15s}
+.icon-btn:hover{transform:translateY(-2px)}
+/* Challenge bar */
+.challenge-bar{position:relative;display:flex;align-items:center;justify-content:center;gap:22px;min-height:100px;padding:15px 22px;border:3px solid #fff9e5;border-radius:25px;background:linear-gradient(105deg,#fffef5 0%,#fff3d7 100%);box-shadow:0 5px 0 #e5c991,0 11px 27px #74966d33;overflow:hidden}
+.challenge-bar::after{content:'✿';font-size:115px;color:#ffe8a6a0;position:absolute;right:-3px;top:-35px;transform:rotate(-20deg);pointer-events:none}
+.challenge-icon{flex:0 0 69px;width:69px;height:69px;display:grid;place-items:center;background:#fff3c0;border:3px solid #fff;border-radius:23px;font-size:37px;box-shadow:0 4px 0 #e9c879;transform:rotate(-8deg)}
+.challenge-copy{flex:1;min-width:0;z-index:1}
+.challenge-copy strong{display:block;font-size:22px;line-height:1.15;letter-spacing:-.02em}
+.challenge-copy p{font-size:13px;color:#998263;margin:4px 0 0;font-weight:500}
+.target-pill{flex:0 0 auto;z-index:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:8px 18px;border-radius:20px;background:linear-gradient(160deg,#ffe08b,#ffbf53);border:3px solid #fff7dc;color:#7d511d;box-shadow:0 4px 0 #e1a146,0 6px 15px #e5b3604f;min-width:145px;transform:rotate(3deg)}
+.target-pill small{font-size:10px;letter-spacing:.13em;text-transform:uppercase;font-weight:700;opacity:.73}
+#target-steps-display{font-size:25px;white-space:nowrap;line-height:1.17}
+/* Content */
+.main{flex:1;display:grid;grid-template-columns:minmax(390px,1.14fr) minmax(350px,.86fr);gap:23px;align-items:start;min-width:0}
+.board-card,.panel{min-width:0;position:relative;padding:16px 20px 18px;border:4px solid #fffdf5;border-radius:29px;background:#fffdf3ed;box-shadow:0 8px 0 #b5cead,0 21px 37px #62907046}
+.board-card{display:flex;flex-direction:column;align-items:center;gap:12px}
+.section-heading{width:100%;display:flex;align-items:center;justify-content:space-between;gap:8px}
+.section-heading h2,.panel h3{display:flex;align-items:center;gap:8px;margin:0;font-size:19px;font-weight:700;color:#685038}
+.small-label{color:#9c8b6e;font-size:12px;font-weight:500}
+.grid-wrapper{position:relative;--pad:12px;width:min(100%,435px);aspect-ratio:1;padding:var(--pad);border:5px solid #fff7de;border-radius:27px;background:linear-gradient(140deg,#f9dd95,#f1bc60);box-shadow:0 6px 0 #c78b3b,0 13px 20px #9a86475c,inset 0 0 0 2px #d9a451;isolation:isolate}
+.grid-wrapper:after{content:'';position:absolute;inset:-9px;border:2px dashed #fff3cfb9;border-radius:32px;pointer-events:none}
+#grid{display:grid;position:relative;grid-template-columns:repeat(4,minmax(0,1fr));grid-template-rows:repeat(4,minmax(0,1fr));width:100%;height:100%;gap:5px;padding:6px;border-radius:16px;background:#79bc74;box-shadow:inset 0 3px 12px #408a4266;overflow:hidden}
+.cell{position:relative;min-width:0;min-height:0;display:flex;align-items:center;justify-content:center;overflow:hidden;border-radius:12px;background:linear-gradient(145deg,#def6a8,#bbe58d);box-shadow:inset 0 2px 0 #f4ffd2,inset 0 -5px 0 #90c67577;user-select:none}
+.cell:before{content:'';position:absolute;bottom:10%;left:9%;width:28%;height:22%;border-right:2px solid #84c57c;transform:rotate(-20deg);border-radius:50%;opacity:.38}
+.cell:nth-child(3n):before{left:70%;transform:rotate(28deg)}
+.cell[data-start="true"]{background:linear-gradient(145deg,#e1f7ed,#bbecce);box-shadow:inset 0 2px 0 #f2fff2,inset 0 -5px 0 #92cdb1}
+.cell[data-start="true"]:after{content:'INICIO';position:absolute;left:5px;bottom:4px;color:#7cac93;font-size:clamp(7px,.9vw,10px);font-weight:700;letter-spacing:.08em}
+.target-cell{background:linear-gradient(145deg,#fff2be,#f9dda0)!important;box-shadow:inset 0 2px 0 #fffde8,inset 0 -5px 0 #e6c778!important}
+.flower-art{width:88%;height:88%;display:grid;place-items:center;filter:drop-shadow(0 5px 2px #aa8c4c54);animation:flowerPulse 2s ease-in-out infinite}
+.flower-art svg{width:100%;height:100%;overflow:visible}
+@keyframes flowerPulse{0%,100%{transform:rotate(-7deg) scale(.92)}50%{transform:rotate(7deg) scale(1.05)}}
+#drawing-canvas{position:absolute;z-index:8;top:calc(var(--pad) + 5px);left:calc(var(--pad) + 5px);touch-action:none;cursor:crosshair;border-radius:16px}
+.bee-container{position:absolute;left:0;top:0;z-index:15;pointer-events:none;display:flex;align-items:center;justify-content:center;transform:translate(-50%,-50%);transition:left .48s cubic-bezier(.2,.8,.25,1),top .48s cubic-bezier(.2,.8,.25,1);filter:drop-shadow(0 4px 3px #638d556b)}
+.bee-orientation{width:100%;height:100%;display:grid;place-items:center;transition:transform .4s cubic-bezier(.15,.8,.25,1)}
+.bee-sprite{width:86%;height:91%;animation:beeBob 1.35s ease-in-out infinite;display:grid;place-items:center}
+.bee-sprite svg{width:100%;height:100%;overflow:visible}
+.bee-sprite .wing-left{transform-box:fill-box;transform-origin:90% 80%;animation:wingL .19s ease-in-out infinite alternate}
+.bee-sprite .wing-right{transform-box:fill-box;transform-origin:10% 80%;animation:wingR .19s ease-in-out infinite alternate}
+@keyframes wingL{to{transform:rotate(-22deg) scale(.91)}}@keyframes wingR{to{transform:rotate(22deg) scale(.91)}}@keyframes beeBob{50%{transform:translateY(-5px)}}
+.bee-container.is-flying .bee-sprite{animation:beeDash .45s ease-out}@keyframes beeDash{35%{transform:translateY(-10px) scale(1.07)}}
+.bee-trail{position:absolute;z-index:9;pointer-events:none;width:9px;height:9px;border-radius:50%;background:#fff1a3;box-shadow:0 0 10px #ffde75;animation:trailPop .55s ease-out forwards}
+@keyframes trailPop{to{transform:translate(-10px,15px) scale(.1);opacity:0}}
+.board-tools{display:flex;width:100%;max-width:435px;align-items:center;justify-content:space-between;gap:10px}
+.board-hint{display:flex;align-items:center;gap:5px;color:#9c896d;font-size:12px;line-height:1.3}
+.clear-btn{flex:0 0 auto;padding:8px 12px;border:2px solid #e8d9b8;border-radius:11px;background:#fff9e8;color:#94714b;font-weight:700;font-size:12px;box-shadow:0 3px 0 #e7d7b8}
+.clear-btn:hover{transform:translateY(-2px)}
+/* side panel */
+.panel{padding:22px;display:flex;flex-direction:column;gap:16px}
+.panel-top{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.panel-badge{flex:0 0 auto;padding:6px 10px;background:#e8f9e4;border:2px solid #ceebc5;border-radius:12px;color:#67976a;font-size:11px;font-weight:700}
+.panel-description{font-size:13px;line-height:1.42;color:#9b896e;margin:-5px 0 0}
+.counter-display{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:12px 14px;background:#f4f7e8;border:2px solid #e0eac9;border-radius:17px;color:#7f8661;font-size:14px;font-weight:700}
+.counter-value{background:#fff;padding:6px 12px;border-radius:11px;color:#69916e;border:1px solid #d8eac9;box-shadow:0 2px 0 #dbe6ca;font-size:19px;font-variant-numeric:tabular-nums;white-space:nowrap}
+.counter-display.limit{animation:wobble .35s ease;color:#d35d4c!important;border-color:#f5b8ae;background:#fff2ee}
+@keyframes wobble{25%,75%{transform:translateX(-5px)}50%{transform:translateX(5px)}}
+.progress-track{height:10px;border-radius:20px;background:#e7e9d0;overflow:hidden;margin-top:-10px;box-shadow:inset 0 2px 2px #bacba074}
+.progress-fill{width:0;height:100%;border-radius:20px;background:linear-gradient(90deg,#9fdf86,#53bc8c);transition:width .25s ease}
+.controls-title{font-size:12px;color:#a28e6e;letter-spacing:.12em;text-transform:uppercase;font-weight:700;margin-bottom:-6px}
+.btn-group{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.cmd-btn{display:flex;align-items:center;justify-content:center;flex-direction:column;gap:3px;min-width:0;min-height:83px;border-radius:18px;border:3px solid #fff8e3;color:#6a5130;background:linear-gradient(#ffe6a0,#ffcb64);box-shadow:0 5px 0 #d8a155,0 8px 15px #ddaa7e3d;font-weight:700;transition:transform .15s,box-shadow .15s,filter .15s}
+.cmd-btn:hover{transform:translateY(-3px);filter:brightness(1.03);box-shadow:0 8px 0 #d8a155,0 10px 16px #ddaa7e3d}
+.cmd-btn:active{transform:translateY(3px);box-shadow:0 1px 0 #d8a155}
+.cmd-btn .cmd-icon{font-size:31px;line-height:1}.cmd-btn .cmd-label{font-size:12px}
+.cmd-btn.forward{background:linear-gradient(#b6eeb2,#76cc8a);color:#276845;box-shadow:0 5px 0 #5aa975,0 8px 15px #609f7566}
+.cmd-btn.forward:hover{box-shadow:0 8px 0 #5aa975,0 10px 16px #609f7566}.cmd-btn.forward:active{box-shadow:0 1px 0 #5aa975}
+.command-head{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.undo-btn{border:2px solid #f2d9c9;padding:6px 11px;border-radius:11px;color:#c87960;background:#fff1e8;font-size:12px;font-weight:700;box-shadow:0 3px 0 #f2d9c9}
+.undo-btn:hover{transform:translateY(-2px)}.undo-btn:active{transform:translateY(2px)}
+.seq-container{min-height:102px;max-height:180px;display:flex;align-content:flex-start;flex-wrap:wrap;gap:7px;padding:12px;background:linear-gradient(#f5f6e8,#eff0dd);border:2px dashed #d5d8b8;border-radius:18px;overflow:auto}
+.seq-container:empty:after{content:'Los movimientos de tu abejita aparecerán aquí...';font-size:13px;font-weight:500;color:#b6b49a;align-self:center;line-height:1.4}
+.cmd-block{position:relative;display:grid;place-items:center;width:35px;height:35px;flex:0 0 auto;border:2px solid #fff9df;border-radius:11px;background:linear-gradient(#fbd987,#efb656);color:#795326;font-size:22px;font-weight:700;box-shadow:0 3px 0 #d89c50;animation:popIn .24s cubic-bezier(.2,1.5,.35,1) both}
+.cmd-block.forward{background:linear-gradient(#ace5a8,#6ec78a);color:#276844;box-shadow:0 3px 0 #58a672}
+.cmd-block.active{transform:scale(1.12)!important;outline:3px solid #ffe7a1;box-shadow:0 0 15px #ffdb6a!important}
+@keyframes popIn{from{opacity:0;transform:scale(.2) rotate(-24deg)}to{opacity:1;transform:scale(1)}}
+.global-controls{display:flex;gap:11px;margin-top:auto}
+.global-btn{display:flex;align-items:center;justify-content:center;gap:7px;min-height:54px;border:3px solid #fff7da;border-radius:16px;padding:12px 14px;color:#694522;font-size:17px;font-weight:700;transition:transform .15s,filter .15s,box-shadow .15s}
+.global-btn:hover{transform:translateY(-2px);filter:brightness(1.04)}
+.global-btn:active{transform:translateY(3px)!important}
+#go-btn{flex:1.5;background:linear-gradient(#ffdd75,#ffb641);box-shadow:0 5px 0 #d88f2c,0 8px 13px #e5ad544d}
+#go-btn:active{box-shadow:0 2px 0 #d88f2c}
+.reset-btn{flex:1;background:linear-gradient(#e5ebdc,#ccd9be);box-shadow:0 5px 0 #a9bc99,0 8px 13px #9cb59733;color:#607b56;font-size:15px}
+.reset-btn:active{box-shadow:0 2px 0 #a9bc99}
+.tips{text-align:center;color:#9f927c;font-size:11px;font-weight:500;line-height:1.4;margin:0}
+/* Result */
+.modal-overlay{position:fixed;inset:0;z-index:40;display:flex;align-items:center;justify-content:center;padding:15px;background:#285f4a70;backdrop-filter:blur(8px);opacity:0;visibility:hidden;transition:opacity .25s,visibility .25s}
+.modal-overlay.active{opacity:1;visibility:visible}
+.modal-box{width:min(450px,95%);padding:28px 28px 27px;border:5px solid #fff;border-radius:32px;background:linear-gradient(145deg,#fffefa,#fff4d4);box-shadow:0 10px 0 #c8a165,0 28px 65px #3c675e81;text-align:center;transform:translateY(25px) scale(.86);transition:transform .38s cubic-bezier(.17,1.35,.28,1)}
+.modal-overlay.active .modal-box{transform:translateY(0) scale(1)}
+.modal-illustration{font-size:65px;line-height:1;margin:0 0 12px;animation:heroBob 1.8s ease-in-out infinite}
+@keyframes heroBob{50%{transform:translateY(-8px) rotate(5deg)}}
+.modal-title{margin:0 0 10px;font-size:29px;line-height:1.1;color:#b47a31}
+.modal-msg{white-space:pre-line;font-size:17px;line-height:1.4;color:#806d53;margin:0 0 20px}
+.modal-btn{border:3px solid #fff5d5;border-radius:16px;padding:12px 31px;background:linear-gradient(#ffe28a,#ffbd4a);color:#744d22;font-size:17px;font-weight:700;box-shadow:0 5px 0 #d69a4b}
+.modal-btn:hover{transform:translateY(-2px)}
+.confetti{position:fixed;top:-18px;left:var(--x,50%);width:10px;height:17px;z-index:50;border-radius:3px;background:var(--color,#ffca57);pointer-events:none;animation:confettiFall var(--duration,2s) linear forwards}
+@keyframes confettiFall{to{transform:translate(var(--dx,0px),115vh) rotate(var(--rot,600deg));opacity:0}}
+/* Responsive */
+@media(min-width:1050px) and (min-height:800px){#app{justify-content:flex-start;padding-top:30px;gap:21px}.main{gap:28px}.grid-wrapper{width:min(100%,480px)}.board-card,.panel{padding:22px 25px 26px}.panel{gap:21px}.seq-container{min-height:119px}}
+@media(max-width:800px){#app{padding:13px 12px 25px;gap:12px}.main{grid-template-columns:1fr;gap:13px}.board-card,.panel{max-width:620px;width:100%;margin:auto}.board-card{padding:13px}.panel{padding:17px}.grid-wrapper{width:min(100%,400px)}.seq-container{min-height:75px}.global-controls{margin-top:0}}
+@media(max-width:500px){#app{padding:9px 9px 22px;gap:11px}.topbar{border-radius:18px;padding:9px 10px}.brand-mark{width:42px;height:42px;flex-basis:42px;font-size:24px;border-radius:13px}.eyebrow{font-size:8px}h1{font-size:clamp(21px,6.4vw,27px)}.chip{display:none}.challenge-bar{gap:9px;padding:11px;border-radius:19px;min-height:88px}.challenge-icon{width:48px;height:48px;flex-basis:48px;font-size:26px;border-radius:15px}.challenge-copy strong{font-size:clamp(15px,4vw,18px)}.challenge-copy p{font-size:10px}.target-pill{min-width:105px;padding:7px 8px;border-radius:14px}.target-pill small{font-size:8px}#target-steps-display{font-size:18px}.board-card,.panel{border-radius:21px;padding:12px;gap:11px}.section-heading h2,.panel h3{font-size:17px}.small-label{font-size:10px}.grid-wrapper{width:min(100%,370px);--pad:8px;border-width:4px;border-radius:21px}#grid{gap:4px;padding:4px;border-radius:12px}.cell{border-radius:9px}.board-hint{font-size:10px}.board-tools{gap:6px}.clear-btn{font-size:11px;padding:7px}.panel{padding:15px}.btn-group{gap:6px}.cmd-btn{min-height:66px;border-radius:14px}.cmd-btn .cmd-icon{font-size:25px}.cmd-btn .cmd-label{font-size:10px}.global-btn{font-size:14px;min-height:51px;padding:9px 8px}.reset-btn{font-size:13px}.panel-description{font-size:12px}.seq-container{min-height:72px}.sun{transform:scale(.7);right:0;top:0}.modal-title{font-size:25px}}
+@media(max-height:780px) and (min-width:801px){#app{padding-top:12px;padding-bottom:13px;gap:10px}.challenge-bar{min-height:78px;padding:9px 15px}.challenge-icon{height:52px;width:52px;flex-basis:52px;font-size:29px}.challenge-copy strong{font-size:20px}.target-pill{padding:4px 10px}#target-steps-display{font-size:22px}.board-card,.panel{padding:12px 16px 13px;gap:10px}.grid-wrapper{width:min(100%, min(48vw,calc(100dvh - 282px)))}.panel{gap:11px}.seq-container{min-height:75px}.cmd-btn{min-height:69px}.global-btn{min-height:51px}}
+@media(prefers-reduced-motion:reduce){*,*:before,*:after{animation-duration:.001ms!important;animation-iteration-count:1!important;transition-duration:.001ms!important}}
 
-        .grid-wrapper { position: relative; margin-bottom: 15px; padding: 10px; background: #ffe0b2; border-radius: 15px; box-shadow: 0 8px 0 #ffb74d, 0 15px 25px rgba(0,0,0,0.25); }
-        #grid { display: grid; grid-template-columns: repeat(4, 75px); grid-template-rows: repeat(4, 75px); gap: 6px; background-color: var(--grid-bg); border-radius: 10px; padding: 6px; }
-        #drawing-canvas { position: absolute; top: 10px; left: 10px; z-index: 10; cursor: crosshair; border-radius: 10px; }
-        
-        .cell { background-color: #fff9c4; border-radius: 8px; display: flex; justify-content: center; align-items: center; position: relative; user-select: none; box-shadow: inset 0 -4px 0 rgba(0,0,0,0.1); }
-        .cell[data-start="true"] { background-color: #e2f1f8; box-shadow: inset 0 -4px 0 rgba(0,0,0,0.05); }
-        .target-cell { background-color: #fcf3cf !important; box-shadow: inset 0 0 15px #f1c40f !important; }
-        .target-cell::after { content: '🌺'; font-size: 45px; position: absolute; animation: pulse-flower 1.5s infinite alternate; }
-        @keyframes pulse-flower { 0% { transform: scale(1); } 100% { transform: scale(1.15); } }
+@media(min-width:1050px) and (min-height:800px){.panel{padding:17px 22px 20px;gap:14px}.panel .seq-container{min-height:103px}.board-card{padding:20px}}
+@media(max-height:780px) and (min-width:801px){.panel{gap:8px;padding:10px 13px}.panel-description{line-height:1.22}.seq-container{min-height:63px;max-height:95px}.cmd-btn{min-height:57px}.counter-display{padding:7px 10px}.global-btn{min-height:47px;padding:8px 10px}.panel h3{font-size:17px}}
 
-        .bee-container { position: absolute; z-index: 15; width: 55px; height: 55px; display: flex; justify-content: center; align-items: center; }
-        .bee-orientation { transition: transform 0.2s ease; display: flex; justify-content: center; align-items: center; }
-        .bee-sprite { display: flex; justify-content: center; align-items: center; animation: float 2s ease-in-out infinite; filter: drop-shadow(0 4px 6px rgba(0,0,0,0.3)); }
+/* Distribución clásica: misión > tablero centrado > controles debajo */
+#app{max-width:870px;padding:12px 17px 22px;gap:11px;justify-content:flex-start}
+.topbar{padding:8px 14px;border-radius:21px}
+.brand-mark{width:44px;height:44px;flex-basis:44px;font-size:26px;border-radius:14px}
+h1{font-size:clamp(23px,3vw,30px)}
+.challenge-bar{width:100%;max-width:740px;align-self:center;min-height:74px;padding:9px 16px;border-radius:21px}
+.challenge-icon{width:51px;height:51px;flex-basis:51px;font-size:28px;border-radius:16px}
+.challenge-copy strong{font-size:20px}
+.target-pill{min-width:130px;padding:6px 14px;border-radius:16px}
+#target-steps-display{font-size:22px}
+.main{display:flex;flex:0 0 auto;flex-direction:column;align-items:center;gap:12px;width:100%;min-width:0}
+.board-card{width:100%;max-width:620px;margin:0 auto;padding:12px 18px 14px;gap:9px;border-radius:24px}
+.grid-wrapper{width:min(100%,clamp(282px,39dvh,340px));flex:0 0 auto}
+.board-tools{max-width:430px}
+.panel{width:100%;max-width:720px;margin:0 auto;padding:13px 20px 16px;gap:9px;border-radius:25px;display:flex;flex-direction:column}
+.panel-description{margin:0;font-size:12px}
+.counter-display{padding:7px 10px}
+.progress-track{margin-top:-4px;height:8px}
+.program-workspace{display:grid;grid-template-columns:1.15fr 1fr;gap:15px;align-items:stretch;min-width:0}
+.movement-area,.sequence-area{display:flex;flex-direction:column;gap:8px;min-width:0}
+.controls-title{margin:0;font-size:11px}
+.btn-group{gap:6px;flex:1}
+.cmd-btn{min-height:65px;border-radius:14px}
+.cmd-btn .cmd-icon{font-size:26px}
+.cmd-btn .cmd-label{font-size:11px}
+.command-head{min-height:18px}
+.undo-btn{padding:5px 8px}
+.seq-container{flex:1;min-height:75px;max-height:104px;padding:9px;border-radius:13px}
+.global-controls{margin-top:1px;gap:10px}
+.global-btn{min-height:46px;padding:8px 12px}
+.tips{font-size:11px}
+@media (max-width:800px){
+ #app{max-width:870px;padding:12px 12px 20px;gap:11px}
+ .main{display:flex;flex-direction:column;gap:12px}
+ .board-card{max-width:620px;padding:12px 18px 14px}
+ .panel{max-width:720px;padding:13px 18px 16px;gap:9px}
+ .grid-wrapper{width:min(100%,clamp(280px,39dvh,340px))}
+ .seq-container{min-height:75px}
+}
+@media (max-width:540px){
+ #app{padding:9px 9px 22px;gap:11px}
+ .topbar{padding:8px 10px;border-radius:18px}
+ .brand-mark{width:42px;height:42px;flex-basis:42px}
+ h1{font-size:clamp(21px,5.5vw,26px)}
+ .challenge-bar{gap:9px;min-height:82px;padding:11px;border-radius:19px}
+ .challenge-copy strong{font-size:clamp(14px,3.9vw,18px)}
+ .challenge-copy p{font-size:10px}
+ .target-pill{min-width:104px;padding:7px 8px}
+ #target-steps-display{font-size:18px}
+ .board-card{padding:11px;gap:10px;border-radius:21px}
+ .grid-wrapper{width:min(100%,360px);--pad:8px}
+ .panel{padding:13px;gap:10px;border-radius:21px}
+ .program-workspace{grid-template-columns:1fr;gap:12px}
+ .movement-area,.sequence-area{gap:7px}
+ .cmd-btn{min-height:62px}
+ .seq-container{min-height:58px;max-height:100px}
+ .panel-description{font-size:11px}
+ .global-controls{gap:8px}
+ .global-btn{min-height:50px}
+ .board-hint{font-size:10px}
+ .clear-btn{font-size:11px}
+}
+@media(max-height:760px) and (min-width:541px){
+ #app{gap:8px;padding-top:8px}
+ .challenge-bar{min-height:68px}
+ .grid-wrapper{width:min(100%,clamp(260px,38dvh,320px))}
+ .board-card{gap:7px;padding:10px 14px 12px}
+ .panel{gap:6px;padding:10px 16px 12px}
+ .panel-description{display:none}
+ .seq-container{min-height:65px}
+ .cmd-btn{min-height:55px}
+ .global-btn{min-height:44px}
+}
 
-        .panels-container { display: flex; justify-content: center; width: 100%; max-width: 450px; margin-bottom: 20px; position: relative; }
-        .panel { box-sizing: border-box; background: rgba(255, 255, 255, 0.95); padding: 15px; border-radius: 18px; box-shadow: 0 8px 20px rgba(0,0,0,0.15); width: 95%; display: flex; flex-direction: column; align-items: center; border: 4px solid var(--p1-main); }
-        .panel h3 { margin: 0 0 5px 0; font-size: 18px; color: var(--p1-dark); }
-        .counter-display { font-weight: 700; color: #555; margin-bottom: 12px; font-size: 15px; transition: color 0.3s; }
-        .btn-group { display: flex; gap: 6px; justify-content: space-between; width: 100%; margin-bottom: 15px; }
-        button { font-family: 'Fredoka', sans-serif; font-weight: 700; border: none; border-radius: 10px; cursor: pointer; transition: all 0.1s; user-select: none; }
-        button:active { transform: translateY(4px); box-shadow: 0 0px 0 transparent !important; }
-        .cmd-btn { padding: 10px 2px; font-size: 13px; color: white; flex: 1; background-color: var(--p1-main); box-shadow: 0 5px 0 var(--p1-dark); white-space: nowrap; }
-        .undo-btn { background-color: #e74c3c; box-shadow: 0 5px 0 #c0392b; flex: 0.8; }
-        
-        .seq-container { display: flex; flex-wrap: wrap; gap: 5px; min-height: 45px; background: rgba(255,255,255,0.7); padding: 8px; border-radius: 10px; width: 95%; border: 2px dashed rgba(0,0,0,0.1); }
-        .cmd-block { display: inline-flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 6px; color: white; font-weight: bold; font-size: 18px; box-shadow: 0 3px 0 rgba(0,0,0,0.2); animation: popIn 0.2s ease-out; background: var(--p1-main); }
-
-        .global-controls { display: flex; gap: 15px; margin-bottom: 20px; position: relative; }
-        .global-btn { padding: 12px 20px; font-size: 18px; color: white; border-radius: 15px; }
-        #go-btn { background-color: #ff9800; box-shadow: 0 5px 0 #f57c00; }
-        .reset-btn { background-color: #95a5a6; box-shadow: 0 5px 0 #7f8c8d; }
-
-        .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); display: flex; justify-content: center; align-items: center; z-index: 100; visibility: hidden; opacity: 0; transition: all 0.3s; }
-        .modal-overlay.active { visibility: visible; opacity: 1; }
-        .modal-box { background: white; padding: 25px; border-radius: 20px; text-align: center; max-width: 80%; transform: scale(0.7); transition: 0.3s; box-shadow: 0 10px 30px rgba(0,0,0,0.3); }
-        .modal-overlay.active .modal-box { transform: scale(1); }
-        .modal-title { font-size: 24px; margin-bottom: 10px; color: #ff9800; }
-        .modal-msg { font-size: 16px; margin-bottom: 20px; color: #555; white-space: pre-line;}
-        .modal-btn { background: #4CAF50; box-shadow: 0 5px 0 #388E3C; padding: 10px 20px; font-size: 16px; color: white; }
-    </style>
+/* Panel inferior compacto en la distribución vertical */
+.panel-top{min-height:42px;gap:10px}
+.panel-top h3{flex:1;min-width:0}
+.panel-top .counter-display{flex:0 0 auto;padding:3px 5px 3px 10px;font-size:12px;gap:9px;border-radius:13px}
+.panel-top .counter-value{font-size:17px;padding:4px 9px}
+.panel-description{margin:0;font-size:11px}
+.panel .progress-track{height:6px;margin-top:-4px}
+.panel .program-workspace{gap:13px}
+.panel .btn-group{flex:0 0 auto}
+.panel .cmd-btn{min-height:63px}
+.panel .seq-container{flex:0 1 auto;min-height:71px;max-height:85px}
+.panel .global-btn{min-height:45px}
+@media (min-width:541px){
+ .grid-wrapper{width:min(100%,clamp(250px,36dvh,330px))}
+ .panel{gap:7px;padding:10px 16px 12px}
+ .panel-description,.tips{display:none}
+ .board-card{gap:7px;padding:10px 15px 11px}
+ .board-tools{min-height:26px}
+ .main{gap:10px}
+}
+@media (max-width:540px){
+ .panel-top{flex-wrap:wrap}
+ .panel-top .counter-display{font-size:12px}
+ .panel-description{display:block}
+ .tips{display:block}
+ .panel .seq-container{min-height:57px}
+}
+</style>
 </head>
 <body>
-    <div class="decorations"><div class="sun">☀️</div><div class="grass"></div></div>
-    <h1>¡El Vuelo Exacto! 🐝</h1>
-    <div class="prompt-box">
-        Lleva a la abeja hasta la flor 🌺 usando exactamente:
-        <strong id="target-steps-display">X comandos</strong>
-        <div style="font-size: 12px; font-weight: normal; margin-top: 5px;">(Dibuja tu ruta en el mapa para planear)</div>
+<div class="decorations" aria-hidden="true">
+ <div class="sun"></div><div class="cloud c1"></div><div class="cloud c2"></div><div class="cloud c3"></div>
+ <div class="hill a"></div><div class="hill b"></div><div class="hill c"></div>
+ <div class="scenery-flower"></div><div class="scenery-flower f2"></div><div class="scenery-flower f3"></div>
+ <i class="pollen" style="left:13%;top:60%;--delay:-2s"></i><i class="pollen" style="left:40%;top:55%;--duration:10s;--delay:-5s"></i>
+ <i class="pollen" style="left:76%;top:42%;--duration:8s;--delay:-3s"></i><i class="pollen" style="left:91%;top:76%;--duration:11s;--delay:-7s"></i>
+</div>
+<div id="app">
+ <header class="topbar">
+  <div class="brand"><div class="brand-mark" aria-hidden="true">🐝</div><div><span class="eyebrow">AVENTURAS DEL JARDÍN · MISIÓN 02</span><h1>¡El Vuelo <span>Exacto!</span></h1></div></div>
+  <div class="top-right"><span class="chip">✿ Piensa · Programa · Vuela</span><button class="icon-btn" type="button" id="sound-toggle" onclick="toggleSound()" title="Activar/desactivar sonido" aria-label="Activar o desactivar sonido">🔈</button></div>
+ </header>
+ <section class="challenge-bar" aria-label="Objetivo de la misión">
+  <div class="challenge-icon" aria-hidden="true">🌸</div>
+  <div class="challenge-copy"><strong>¡Ayuda a la abejita a llegar a la flor!</strong><p>Encuentra el camino perfecto. ¡Ni un comando de más!</p></div>
+  <div class="target-pill"><small>TU DESAFÍO</small><strong id="target-steps-display">0 comandos</strong></div>
+ </section>
+ <main class="main">
+  <section class="board-card" aria-label="Tablero de vuelo">
+   <div class="section-heading"><h2>🌿 Tu pequeño jardín</h2><span class="small-label">Mapa 4 × 4</span></div>
+   <div class="grid-wrapper" id="board-wrapper"><div id="grid" aria-label="Mapa de cuatro por cuatro"></div><canvas id="drawing-canvas" aria-label="Dibuja tu ruta de planificación aquí"></canvas></div>
+   <div class="board-tools"><span class="board-hint">✏️ Dibuja con el dedo o el ratón para planear tu ruta.</span><button type="button" class="clear-btn" onclick="clearSketch()">🧽 Borrar trazo</button></div>
+  </section>
+  <section class="panel" aria-label="Programador de la abejita">
+   <div class="panel-top"><h3>🎮 Programa tu vuelo</h3><div class="counter-display" id="counter-display"><span>🧩 Comandos</span><span class="counter-value"><span id="cmd-count">0</span> / <span id="cmd-max">0</span></span></div></div>
+   <p class="panel-description">Elige los giros y avances en orden. Tu abejita ejecutará exactamente los pasos indicados.</p>
+   <div class="progress-track" aria-hidden="true"><div class="progress-fill" id="cmd-progress"></div></div>
+   <div class="program-workspace">
+    <div class="movement-area">
+     <div class="controls-title">TUS MOVIMIENTOS</div>
+     <div class="btn-group">
+      <button class="cmd-btn" id="btn-left" onclick="addCommand('L')" title="Girar a la izquierda"><span class="cmd-icon">↶</span><span class="cmd-label">Gira izquierda</span></button>
+      <button class="cmd-btn forward" id="btn-forward" onclick="addCommand('F')" title="Avanzar"><span class="cmd-icon">↑</span><span class="cmd-label">Avanza</span></button>
+      <button class="cmd-btn" id="btn-right" onclick="addCommand('R')" title="Girar a la derecha"><span class="cmd-icon">↷</span><span class="cmd-label">Gira derecha</span></button>
+     </div>
     </div>
-
-    <div class="grid-wrapper">
-        <div id="grid"></div><canvas id="drawing-canvas"></canvas>
+    <div class="sequence-area">
+     <div class="command-head"><span class="controls-title">TU SECUENCIA</span><button class="undo-btn" onclick="undoCommand()">↩ Borrar último</button></div>
+     <div class="seq-container" id="seq" aria-live="polite"></div>
     </div>
-
-    <div class="panels-container">
-        <div class="panel">
-            <h3>🐝 Programar Abeja</h3>
-            <div class="counter-display" id="counter-display">
-                Comandos: <span id="cmd-count">0</span> / <span id="cmd-max">0</span>
-            </div>
-            <div class="btn-group">
-                <button class="cmd-btn" onclick="addCommand('L')">↺ Giro Izq</button>
-                <button class="cmd-btn" onclick="addCommand('F')">⬆️ Avanza</button>
-                <button class="cmd-btn" onclick="addCommand('R')">↻ Giro Der</button>
-                <button class="cmd-btn undo-btn" onclick="undoCommand()">🔙 Borrar</button>
-            </div>
-            <div class="seq-container" id="seq"></div>
-        </div>
-    </div>
-    
-    <div class="global-controls">
-        <button class="global-btn" onclick="executeCommands()" id="go-btn">🚀 ¡VOLAR!</button>
-        <button class="global-btn reset-btn" onclick="resetGame()">🔄 Otro Nivel</button>
-    </div>
-
-    <div class="modal-overlay" id="modal">
-        <div class="modal-box">
-            <h2 class="modal-title" id="m-title">Título</h2><p class="modal-msg" id="m-msg">Mensaje</p>
-            <button class="modal-btn" onclick="closeModal()">¡Entendido!</button>
-        </div>
-    </div>
-
-    <script>
-        const gridSize = 4; let isExecuting = false;
-        let bee = { pos: {x: 0, y: 0}, dir: 0, commands: [] }; let targetPos = {x: 0, y: 0}; let targetSteps = 0;
-        const gridEl = document.getElementById('grid'); const canvas = document.getElementById('drawing-canvas'); const ctx = canvas.getContext('2d');
-        let isDrawing = false; let startX = 0, startY = 0;
-
-        function getOptimalCommands(tx, ty) {
-            let queue = [{x: 0, y: 0, dir: 0, dist: 0}]; let visited = new Set(['0,0,0']);
-            while(queue.length > 0) {
-                let curr = queue.shift();
-                if (curr.x === tx && curr.y === ty) return curr.dist;
-                let nx = curr.x, ny = curr.y;
-                if (curr.dir === 0) nx++; else if (curr.dir === 1) ny++; else if (curr.dir === 2) nx--; else if (curr.dir === 3) ny--;
-                if (nx >= 0 && nx < gridSize && ny >= 0 && ny < gridSize) {
-                    let stateF = `${nx},${ny},${curr.dir}`; if (!visited.has(stateF)) { visited.add(stateF); queue.push({x: nx, y: ny, dir: curr.dir, dist: curr.dist + 1}); }
-                }
-                let rDir = (curr.dir + 1) % 4; let stateR = `${curr.x},${curr.y},${rDir}`;
-                if (!visited.has(stateR)) { visited.add(stateR); queue.push({x: curr.x, y: curr.y, dir: rDir, dist: curr.dist + 1}); }
-                let lDir = (curr.dir + 3) % 4; let stateL = `${curr.x},${curr.y},${lDir}`;
-                if (!visited.has(stateL)) { visited.add(stateL); queue.push({x: curr.x, y: curr.y, dir: lDir, dist: curr.dist + 1}); }
+   </div>
+   <div class="global-controls"><button class="global-btn" id="go-btn" onclick="executeCommands()">🚀 ¡VOLAR!</button><button class="global-btn reset-btn" onclick="resetGame()">🔄 Otro nivel</button></div>
+   <p class="tips">💡 Los giros cuentan como un paso. ¡Usa el número exacto!</p>
+  </section>
+ </main>
+</div>
+<div class="modal-overlay" id="modal" role="dialog" aria-modal="true" aria-labelledby="m-title">
+ <div class="modal-box"><div id="modal-icon" class="modal-illustration">🐝</div><h2 class="modal-title" id="m-title">¡Bien!</h2><p class="modal-msg" id="m-msg"></p><button class="modal-btn" onclick="closeModal()">¡Entendido!</button></div>
+</div>
+<script>
+'use strict';
+const gridSize = 4;
+let isExecuting = false;
+let bee = {pos:{x:0,y:0},dir:0,commands:[]};
+let targetPos = {x:0,y:0},targetSteps=0;
+const gridEl=document.getElementById('grid');
+const wrapper=document.getElementById('board-wrapper');
+const canvas=document.getElementById('drawing-canvas');
+const ctx=canvas.getContext('2d');
+let isDrawing=false,moveInterval=null,checkTimeout=null;
+let soundOn=false,audioCtx=null;
+function sound(frequency=620,duration=.08,type='sine'){
+ if(!soundOn)return;
+ try { const AC=window.AudioContext||window.webkitAudioContext;if(!AC)return;
+ audioCtx=audioCtx||new AC();if(audioCtx.state==='suspended')audioCtx.resume();
+ const o=audioCtx.createOscillator(),g=audioCtx.createGain(),t=audioCtx.currentTime;
+ o.type=type;o.frequency.setValueAtTime(frequency,t);g.gain.setValueAtTime(.065,t);g.gain.exponentialRampToValueAtTime(.001,t+duration);
+ o.connect(g);g.connect(audioCtx.destination);o.start(t);o.stop(t+duration);
+ }catch(e){}
+}
+function toggleSound(){soundOn=!soundOn;document.getElementById('sound-toggle').textContent=soundOn?'🔊':'🔈';sound(720,.12);}
+function victorySound(){[523,659,784,1046].forEach((f,i)=>setTimeout(()=>sound(f,.18,'triangle'),i*110))}
+// Same shortest-path BFS as the original game.
+function getOptimalCommands(tx,ty){
+ let queue=[{x:0,y:0,dir:0,dist:0}],visited=new Set(['0,0,0']);
+ while(queue.length){
+  const c=queue.shift();if(c.x===tx&&c.y===ty)return c.dist;
+  let nx=c.x,ny=c.y;
+  if(c.dir===0)nx++;else if(c.dir===1)ny++;else if(c.dir===2)nx--;else ny--;
+  if(nx>=0&&nx<gridSize&&ny>=0&&ny<gridSize){const state=`${nx},${ny},${c.dir}`;if(!visited.has(state)){visited.add(state);queue.push({x:nx,y:ny,dir:c.dir,dist:c.dist+1})}}
+  const rd=(c.dir+1)%4,rs=`${c.x},${c.y},${rd}`;
+  if(!visited.has(rs)){visited.add(rs);queue.push({x:c.x,y:c.y,dir:rd,dist:c.dist+1})}
+  const ld=(c.dir+3)%4,ls=`${c.x},${c.y},${ld}`;
+  if(!visited.has(ls)){visited.add(ls);queue.push({x:c.x,y:c.y,dir:ld,dist:c.dist+1})}
+ }
+ return 0;
+}
+function generateLevel(){
+ do{targetPos={x:Math.floor(Math.random()*gridSize),y:Math.floor(Math.random()*gridSize)};targetSteps=getOptimalCommands(targetPos.x,targetPos.y)}while(targetSteps<3 ||(targetPos.x===0&&targetPos.y===0));
+ document.getElementById('target-steps-display').textContent=`${targetSteps} comandos`;
+ document.getElementById('cmd-max').textContent=targetSteps;
+}
+        function beeSVG(conf) {
+            return `<svg viewBox="0 0 100 112" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                <path d="M44 90 L50 105 L56 90" fill="#a56b30" stroke="#714321" stroke-width="2.7"/>
+                <g class="wing-left"><ellipse cx="32" cy="53" rx="21" ry="27" transform="rotate(-25 32 53)" fill="#edfcff" fill-opacity=".91" stroke="#98d5e2" stroke-width="3"/></g>
+                <g class="wing-right"><ellipse cx="68" cy="53" rx="21" ry="27" transform="rotate(25 68 53)" fill="#edfcff" fill-opacity=".91" stroke="#98d5e2" stroke-width="3"/></g>
+                <ellipse cx="50" cy="69" rx="31" ry="35" fill="#ffca48" stroke="#85552d" stroke-width="4"/>
+                <path d="M22 59 Q50 48 79 59 L79 69 Q50 58 21 70Z" fill="#80512d"/>
+                <path d="M24 80 Q50 69 76 81 L71 90 Q50 80 29 91Z" fill="#80512d"/>
+                <ellipse cx="50" cy="37" rx="30" ry="28" fill="#ffe07c" stroke="#85552d" stroke-width="4"/>
+                <path d="M35 16 Q27 3 22 4" fill="none" stroke="#85552d" stroke-width="3" stroke-linecap="round"/>
+                <path d="M65 16 Q73 3 78 4" fill="none" stroke="#85552d" stroke-width="3" stroke-linecap="round"/>
+                <circle cx="22" cy="4" r="4" fill="${conf.color}" stroke="#85552d" stroke-width="1.5"/>
+                <circle cx="78" cy="4" r="4" fill="${conf.color}" stroke="#85552d" stroke-width="1.5"/>
+                <path d="M25 27 Q50 13 75 27" fill="none" stroke="${conf.color}" stroke-width="8" stroke-linecap="round"/>
+                <ellipse cx="40" cy="41" rx="4.2" ry="5.6" fill="#654129"/>
+                <ellipse cx="60" cy="41" rx="4.2" ry="5.6" fill="#654129"/>
+                <circle cx="28" cy="51" r="6.3" fill="#ffa4a1" opacity=".9"/>
+                <circle cx="72" cy="51" r="6.3" fill="#ffa4a1" opacity=".9"/>
+                <path d="M46 53 Q50 57 54 53" stroke="#7a4826" stroke-width="2.6" stroke-linecap="round" fill="none"/>
+                <ellipse cx="35" cy="33" rx="7" ry="3" fill="#fff4b5" opacity=".7"/>
+            </svg>`;
+        }
+        function flowerSVG(conf) {
+            const petal = conf.color, outline = conf.dark;
+            let petals='';
+            for (let i=0;i<7;i++) {
+                const angle=i*360/7;
+                petals += `<ellipse cx="50" cy="23" rx="12" ry="19" fill="${petal}" stroke="${outline}" stroke-width="2" transform="rotate(${angle} 50 50)"/>`;
             }
-            return 0;
+            return `<svg class="nectar-svg" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">${petals}<circle cx="50" cy="50" r="22" fill="#ffdb63" stroke="#e6ac48" stroke-width="3"/><circle cx="43" cy="45" r="4" fill="#fff6cc" opacity=".9"/><path d="M45 57 Q50 61 55 57" fill="none" stroke="#bd7d36" stroke-width="2" stroke-linecap="round"/></svg>`;
         }
-
-        function generateLevel() {
-            do { targetPos.x = Math.floor(Math.random() * gridSize); targetPos.y = Math.floor(Math.random() * gridSize); targetSteps = getOptimalCommands(targetPos.x, targetPos.y);
-            } while (targetSteps < 3 || (targetPos.x === 0 && targetPos.y === 0));
-            document.getElementById('target-steps-display').innerText = `${targetSteps} comandos`; document.getElementById('cmd-max').innerText = targetSteps;
-        }
-
-        function initGrid() {
-            gridEl.innerHTML = '';
-            for (let y = 0; y < gridSize; y++) {
-                for (let x = 0; x < gridSize; x++) {
-                    const cell = document.createElement('div'); cell.className = 'cell'; cell.id = `cell-${x}-${y}`;
-                    if (x === 0 && y === 0) cell.dataset.start = "true";
-                    if (x === targetPos.x && y === targetPos.y) cell.classList.add('target-cell');
-                    gridEl.appendChild(cell);
-                }
-            }
-            setTimeout(() => { canvas.width = gridEl.offsetWidth; canvas.height = gridEl.offsetHeight; ctx.lineWidth = 8; ctx.lineCap = 'round'; ctx.lineJoin = 'round'; ctx.setLineDash([12, 15]); ctx.strokeStyle = 'rgba(255, 152, 0, 0.8)'; }, 50);
-        }
-
-        function getCursorPos(cX, cY) { const r = canvas.getBoundingClientRect(); return { x: cX - r.left, y: cY - r.top }; }
-        function startDraw(e) { if (isExecuting) return; isDrawing = true; let cX = e.touches?e.touches[0].clientX:e.clientX; let cY = e.touches?e.touches[0].clientY:e.clientY; const p = getCursorPos(cX, cY); ctx.beginPath(); ctx.moveTo(p.x, p.y); if(e.cancelable) e.preventDefault(); }
-        function draw(e) { if (!isDrawing || isExecuting) return; let cX = e.touches?e.touches[0].clientX:e.clientX; let cY = e.touches?e.touches[0].clientY:e.clientY; const p = getCursorPos(cX, cY); ctx.lineTo(p.x, p.y); ctx.stroke(); if(e.cancelable) e.preventDefault(); }
-        canvas.addEventListener('mousedown', startDraw); canvas.addEventListener('mousemove', draw); window.addEventListener('mouseup', ()=>isDrawing=false);
-        canvas.addEventListener('touchstart', startDraw, {passive:false}); canvas.addEventListener('touchmove', draw, {passive:false}); window.addEventListener('touchend', ()=>isDrawing=false);
-
-        // NUEVA ORIENTACIÓN HACIA ARRIBA
-        function getTransform(dir) { 
-            if (dir === 0) return 'rotate(90deg)';
-            if (dir === 1) return 'rotate(180deg)';
-            if (dir === 2) return 'rotate(-90deg)';
-            if (dir === 3) return 'rotate(0deg)';
-        }
-
-        function drawBee() {
-            document.querySelectorAll('.bee-container').forEach(b => b.remove());
-            const cell = document.getElementById(`cell-${bee.pos.x}-${bee.pos.y}`);
-            const container = document.createElement('div'); container.className = `bee-container`;
-            const orient = document.createElement('div'); orient.className = 'bee-orientation'; orient.style.transform = getTransform(bee.dir);
-            const sprite = document.createElement('div'); sprite.className = 'bee-sprite'; 
-            sprite.innerHTML = '<img src="../assets/robots/BeebotEmoji.png" alt="BeeBot" style="width: 48px; height: 48px; object-fit: contain; pointer-events: none;">';
-            orient.appendChild(sprite); container.appendChild(orient); cell.appendChild(container);
-        }
-
-        function addCommand(cmd) {
-            if(isExecuting) return;
-            if(bee.commands.length >= targetSteps) { const cd = document.getElementById('counter-display'); cd.style.color = '#e74c3c'; setTimeout(() => cd.style.color = '#555', 400); return; }
-            bee.commands.push(cmd); updateSequenceUI();
-        }
-
-        function undoCommand() { if(isExecuting || bee.commands.length === 0) return; bee.commands.pop(); updateSequenceUI(); }
-        function updateSequenceUI() {
-            const sym = { 'F': '⬆️', 'R': '↻', 'L': '↺' }; const container = document.getElementById(`seq`); container.innerHTML = ''; 
-            bee.commands.forEach(cmd => { const span = document.createElement('span'); span.className = 'cmd-block'; span.innerText = sym[cmd]; container.appendChild(span); });
-            document.getElementById('cmd-count').innerText = bee.commands.length;
-        }
-
-        function executeCommands() {
-            if (bee.commands.length !== targetSteps || isExecuting) { if(!isExecuting) showModal("¡Faltan Pasos! 🤔", `Debes programar EXACTAMENTE ${targetSteps} comandos para poder volar.`); return; }
-            isExecuting = true; document.getElementById('go-btn').style.opacity = "0.5";
-            let step = 0;
-            const interval = setInterval(() => {
-                if (step >= bee.commands.length) { clearInterval(interval); checkWin(); return; }
-                const cmd = bee.commands[step];
-                if (cmd === 'F') {
-                    let nx = bee.pos.x, ny = bee.pos.y;
-                    if (bee.dir === 0) nx++; else if (bee.dir === 1) ny++; else if (bee.dir === 2) nx--; else if (bee.dir === 3) ny--; 
-                    if (nx >= 0 && nx < gridSize && ny >= 0 && ny < gridSize) { bee.pos.x = nx; bee.pos.y = ny; }
-                } else if (cmd === 'R') bee.dir = (bee.dir + 1) % 4; else if (cmd === 'L') bee.dir = (bee.dir + 3) % 4; 
-                drawBee(); step++;
-            }, 600); 
-        }
-
-        function showModal(t, m) { document.getElementById('m-title').innerText = t; document.getElementById('m-msg').innerText = m; document.getElementById('modal').classList.add('active'); }
-        function closeModal() { document.getElementById('modal').classList.remove('active'); }
-        function checkWin() {
-            setTimeout(() => {
-                if (bee.pos.x === targetPos.x && bee.pos.y === targetPos.y) showModal("¡Perfecto! 🎉", "¡Programaste la ruta exacta y llegaste a la flor!");
-                else showModal("¡Oh no! 😟", "Usaste los comandos, pero la abeja se perdió.\n¡Intenta cambiar la ruta!");
-                document.getElementById('go-btn').style.opacity = "1"; isExecuting = false;
-            }, 400);
-        }
-
-        function resetGame() { bee = { pos: {x: 0, y: 0}, dir: 0, commands: [] }; isExecuting = false; generateLevel(); updateSequenceUI(); document.getElementById('go-btn').style.opacity = "1"; ctx.clearRect(0, 0, canvas.width, canvas.height); initGrid(); drawBee(); }
-        resetGame();
-    </script>
+function initGrid(){
+ gridEl.innerHTML='';
+ for(let y=0;y<gridSize;y++)for(let x=0;x<gridSize;x++){
+  const cell=document.createElement('div');cell.className='cell';cell.id=`cell-${x}-${y}`;
+  if(x===0&&y===0)cell.dataset.start='true';
+  if(x===targetPos.x&&y===targetPos.y){cell.classList.add('target-cell');cell.innerHTML=`<div class="flower-art">${flowerSVG({color:'#ff9da8',dark:'#e67884'})}</div>`}
+  gridEl.appendChild(cell);
+ }
+ fitCanvas();
+}
+function fitCanvas(){
+ const rect=gridEl.getBoundingClientRect(),parent=wrapper.getBoundingClientRect();
+ if(!rect.width||!rect.height)return;
+ const oldW=canvas.width,oldH=canvas.height;
+ let oldImage=null;
+ if(oldW>0&&oldH>0){try{oldImage=ctx.getImageData(0,0,oldW,oldH)}catch(e){}}
+ canvas.style.left=(rect.left-parent.left-wrapper.clientLeft)+'px';canvas.style.top=(rect.top-parent.top-wrapper.clientTop)+'px';
+ canvas.style.width=rect.width+'px';canvas.style.height=rect.height+'px';
+ const dpr=Math.min(window.devicePixelRatio||1,2);
+ canvas.width=Math.max(1,Math.round(rect.width*dpr));canvas.height=Math.max(1,Math.round(rect.height*dpr));
+ ctx.setTransform(dpr,0,0,dpr,0,0);
+ ctx.lineWidth=7;ctx.lineCap='round';ctx.lineJoin='round';ctx.setLineDash([8,12]);ctx.strokeStyle='rgba(255,142,54,.87)';ctx.shadowColor='rgba(255,229,120,.6)';ctx.shadowBlur=5;
+ if(oldImage){const tmp=document.createElement('canvas');tmp.width=oldW;tmp.height=oldH;tmp.getContext('2d').putImageData(oldImage,0,0);ctx.drawImage(tmp,0,0,rect.width,rect.height)}
+ drawBee(false);
+}
+function clearSketch(){ctx.clearRect(0,0,canvas.clientWidth,canvas.clientHeight);sound(420,.05)}
+function getCursorPos(cX,cY){const r=canvas.getBoundingClientRect();return{x:cX-r.left,y:cY-r.top}}
+function startDraw(e){if(isExecuting)return;isDrawing=true;
+ const p=getCursorPos(e.clientX,e.clientY);ctx.beginPath();ctx.moveTo(p.x,p.y);if(e.cancelable)e.preventDefault();
+ try{canvas.setPointerCapture(e.pointerId)}catch(err){} }
+function draw(e){if(!isDrawing||isExecuting)return;const p=getCursorPos(e.clientX,e.clientY);ctx.lineTo(p.x,p.y);ctx.stroke();if(e.cancelable)e.preventDefault()}
+canvas.addEventListener('pointerdown',startDraw);
+canvas.addEventListener('pointermove',draw);
+canvas.addEventListener('pointerup',e=>{isDrawing=false;try{canvas.releasePointerCapture(e.pointerId)}catch(err){}});
+canvas.addEventListener('pointercancel',()=>isDrawing=false);
+window.addEventListener('pointerup',()=>isDrawing=false);
+function getTransform(dir){if(dir===0)return'rotate(90deg)';if(dir===1)return'rotate(180deg)';if(dir===2)return'rotate(-90deg)';return'rotate(0deg)'}
+function drawBee(animate=true){
+ const cell=document.getElementById(`cell-${bee.pos.x}-${bee.pos.y}`);if(!cell)return;
+ let container=document.querySelector('.bee-container');
+ if(!container){container=document.createElement('div');container.className='bee-container';container.innerHTML=`<div class="bee-orientation"><div class="bee-sprite">${beeSVG({color:'#ffba49'})}</div></div>`;wrapper.appendChild(container)}
+ const wrapperRect=wrapper.getBoundingClientRect(),cellRect=cell.getBoundingClientRect();
+ const x=cellRect.left-wrapperRect.left-wrapper.clientLeft+cellRect.width/2,y=cellRect.top-wrapperRect.top-wrapper.clientTop+cellRect.height/2;
+ container.style.width=(cellRect.width*.9)+'px';container.style.height=(cellRect.height*.9)+'px';
+ if(!animate){container.style.transition='none';container.style.left=x+'px';container.style.top=y+'px';void container.offsetWidth;container.style.transition='';}
+ else{
+  if(container.style.left){const t=document.createElement('span');t.className='bee-trail';t.style.left=container.style.left;t.style.top=container.style.top;wrapper.appendChild(t);t.addEventListener('animationend',()=>t.remove(),{once:true})}
+  container.style.left=x+'px';container.style.top=y+'px';container.classList.remove('is-flying');void container.offsetWidth;container.classList.add('is-flying');
+ }
+ container.querySelector('.bee-orientation').style.transform=getTransform(bee.dir);
+}
+function addCommand(cmd){
+ if(isExecuting)return;
+ if(bee.commands.length>=targetSteps){const cd=document.getElementById('counter-display');cd.classList.remove('limit');void cd.offsetWidth;cd.classList.add('limit');setTimeout(()=>cd.classList.remove('limit'),420);sound(160,.16,'sawtooth');return;}
+ bee.commands.push(cmd);sound(cmd==='F'?680:530,.07,'sine');updateSequenceUI();
+}
+function undoCommand(){if(isExecuting||bee.commands.length===0)return;bee.commands.pop();sound(350,.06);updateSequenceUI()}
+function updateSequenceUI(activeIndex=-1){
+ const symbols={F:'↑',R:'↷',L:'↶'},seq=document.getElementById('seq');seq.innerHTML='';
+ bee.commands.forEach((cmd,i)=>{const el=document.createElement('span');el.className='cmd-block'+(cmd==='F'?' forward':'')+(i===activeIndex?' active':'');el.textContent=symbols[cmd];el.title=({F:'Avanza',R:'Gira derecha',L:'Gira izquierda'})[cmd];seq.appendChild(el)});
+ document.getElementById('cmd-count').textContent=bee.commands.length;
+ document.getElementById('cmd-progress').style.width=(targetSteps?100*bee.commands.length/targetSteps:0)+'%';
+}
+function executeCommands(){
+ if(isExecuting)return;
+ if(bee.commands.length!==targetSteps){showModal('¡Faltan pasos! 🤔',`Debes programar EXACTAMENTE ${targetSteps} comandos para poder volar.`);return;}
+ clearInterval(moveInterval);clearTimeout(checkTimeout);
+ bee.pos={x:0,y:0};bee.dir=0;drawBee(false);
+ isExecuting=true;document.getElementById('go-btn').disabled=true;document.getElementById('go-btn').textContent='🐝 ¡Volando!';
+ let step=0;
+ moveInterval=setInterval(()=>{
+  if(step>=bee.commands.length){clearInterval(moveInterval);moveInterval=null;checkWin();return;}
+  const cmd=bee.commands[step];
+  if(cmd==='F'){
+   let nx=bee.pos.x,ny=bee.pos.y;
+   if(bee.dir===0)nx++;else if(bee.dir===1)ny++;else if(bee.dir===2)nx--;else ny--;
+   if(nx>=0&&nx<gridSize&&ny>=0&&ny<gridSize){bee.pos.x=nx;bee.pos.y=ny;}
+   sound(570,.07,'triangle');
+  }else if(cmd==='R'){bee.dir=(bee.dir+1)%4;sound(710,.07)}
+  else if(cmd==='L'){bee.dir=(bee.dir+3)%4;sound(440,.07)}
+  updateSequenceUI(step);drawBee(true);step++;
+ },600);
+}
+function showModal(title,message,win=false){
+ document.getElementById('m-title').textContent=title;
+ document.getElementById('m-msg').textContent=message;
+ document.getElementById('modal-icon').textContent=win?'🏆🐝':'🐝🌼';
+ document.getElementById('modal').classList.add('active');if(win){victorySound();confettiBurst()}
+}
+function closeModal(){document.getElementById('modal').classList.remove('active');sound(650,.08)}
+function confettiBurst(){for(let i=0;i<45;i++){const p=document.createElement('i');p.className='confetti';p.style.cssText=`--x:${Math.random()*100}%;--dx:${Math.random()*260-130}px;--color:${['#ffbd66','#89d48a','#ff9baa','#80cee8','#c69be8'][i%5]};--duration:${1.8+Math.random()*1.1}s;--rot:${Math.random()*1000-500}deg`;document.body.appendChild(p);p.addEventListener('animationend',()=>p.remove(),{once:true})}}
+function checkWin(){
+ checkTimeout=setTimeout(()=>{
+  if(bee.pos.x===targetPos.x&&bee.pos.y===targetPos.y)showModal('¡Perfecto! 🎉','¡Programaste la ruta exacta y llegaste a la flor!',true);
+  else showModal('¡Oh, no! 🌼','Usaste los comandos, pero la abeja se perdió.\n¡Intenta cambiar la ruta!');
+  document.getElementById('go-btn').disabled=false;document.getElementById('go-btn').textContent='🚀 ¡VOLAR!';
+  isExecuting=false;updateSequenceUI();
+ },420);
+}
+function resetGame(){
+ clearInterval(moveInterval);clearTimeout(checkTimeout);moveInterval=null;checkTimeout=null;
+ isExecuting=false;isDrawing=false;
+ bee={pos:{x:0,y:0},dir:0,commands:[]};
+ document.getElementById('modal').classList.remove('active');
+ document.getElementById('go-btn').disabled=false;document.getElementById('go-btn').textContent='🚀 ¡VOLAR!';
+ const prevBee=document.querySelector('.bee-container');if(prevBee)prevBee.remove();
+ generateLevel();initGrid();clearSketch();updateSequenceUI();drawBee(false);
+ sound(640,.075);
+}
+// Refit responsive board while keeping the drawing layer aligned.
+let resizePending=false;
+window.addEventListener('resize',()=>{if(resizePending)return;resizePending=true;requestAnimationFrame(()=>{resizePending=false;fitCanvas()})});
+resetGame();
+</script>
 </body>
 </html>

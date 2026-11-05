@@ -1,599 +1,114 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>¡Palabras Desordenadas! 🐝</title>
-    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&display=swap" rel="stylesheet">
-    
-    <style>
-        :root { 
-            --p1-main: #3498db; --p1-dark: #2980b9; 
-            --p2-main: #2ecc71; --p2-dark: #27ae60;
-        }
-
-        body, html { 
-            font-family: 'Fredoka', sans-serif; 
-            display: flex; flex-direction: column; align-items: center; justify-content: flex-start;
-            margin: 0; padding: 0; width: 100vw; height: 100vh; 
-            touch-action: manipulation; color: #333; background-color: transparent; 
-            overflow: hidden; box-sizing: border-box;
-        }
-
-        /* PAISAJE DE FONDO */
-        .decorations { position: fixed; top: 0; left: 0; right: 0; bottom: 0; z-index: -1; pointer-events: none; overflow: hidden; background: linear-gradient(180deg, #74ebd5 0%, #ACB6E5 100%); }
-        .decorations::before { content: ''; position: absolute; inset: 0; background-image: url("data:image/svg+xml,%3Csvg width='60' height='104' viewBox='0 0 60 104' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M30 52l15-26 15 26v52l-15 26-15-26zM0 0l15 26v52L0 104V0zm60 0v104L45 78V26z' fill='%23ffffff' fill-opacity='0.15' fill-rule='evenodd'/%3E%3C/svg%3E"); z-index: 1; }
-        .sun { position: absolute; top: 2%; right: 4%; font-size: clamp(40px, 8vh, 80px); z-index: 2; filter: drop-shadow(0 0 25px rgba(255, 215, 0, 0.8)); animation: pulse-sun 3s infinite alternate; }
-        @keyframes pulse-sun { 0% { transform: scale(1) rotate(0deg); } 100% { transform: scale(1.1) rotate(10deg); } }
-        .grass { position: absolute; bottom: -5vh; left: -10vw; width: 120vw; height: 25vh; background: #a9dfbf; border-radius: 50% 50% 0 0; z-index: 2; box-shadow: inset 0 15px 0 #82e0aa, 0 -30px 50px rgba(46,204,113,0.3); }
-
-        /* BOTÓN DE SONIDO FLOTANTE */
-        .sound-toggle { position: absolute; top: 15px; left: 15px; background: rgba(255, 255, 255, 0.9); border: 3px solid #3498db; border-radius: 50%; width: 45px; height: 45px; font-size: 20px; display: flex; justify-content: center; align-items: center; cursor: pointer; z-index: 1000; box-shadow: 0 4px 10px rgba(0,0,0,0.1); transition: all 0.2s;}
-        .sound-toggle:active { transform: translateY(4px); box-shadow: none; }
-
-        /* ============================================================
-           PANTALLA DE CONFIGURACIÓN PREVIA (LOBBY)
-           ============================================================ */
-        #setup-screen {
-            position: absolute; inset: 0; z-index: 500;
-            display: flex; flex-direction: column; justify-content: center; align-items: center;
-            background: rgba(0,0,0,0.6); backdrop-filter: blur(8px);
-        }
-
-        .setup-card {
-            background: white; padding: 40px; border-radius: 30px;
-            box-shadow: 0 20px 50px rgba(0,0,0,0.4); border: 8px solid #ffb74d;
-            text-align: center; max-width: 90%; width: 550px;
-            display: flex; flex-direction: column; gap: 20px;
-        }
-
-        .setup-card h1 { font-size: 34px; color: #ff9800; margin: 0; text-shadow: none;}
-        
-        .setup-section {
-            background: #fff9c4; padding: 15px; border-radius: 20px; border: 3px dashed #f1c40f;
-            display: flex; flex-direction: column; gap: 12px; align-items: center;
-        }
-        .setup-section h3 { margin: 0; color: #d35400; font-size: 18px; text-transform: uppercase;}
-        
-        .setup-row { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; width: 100%;}
-        
-        .setup-btn { background: #fff; border: 3px solid #bdc3c7; padding: 10px 20px; border-radius: 15px; font-size: 16px; font-weight: bold; color: #7f8c8d; cursor: pointer; transition: all 0.2s; font-family: 'Fredoka', sans-serif;}
-        .setup-btn.active.theme { background: #9b59b6; border-color: #8e44ad; color: #fff; box-shadow: 0 4px 0 #8e44ad; transform: translateY(-2px); }
-
-        .time-input-group { display: flex; align-items: center; gap: 10px; background: #fff; padding: 8px 15px; border-radius: 15px; border: 3px solid #3498db;}
-        .time-input-group label { color: #2980b9; font-weight: bold; font-size: 18px; }
-        .time-input-group input { width: 70px; border: 2px solid #2980b9; border-radius: 10px; text-align: center; font-weight: bold; font-family: 'Fredoka', sans-serif; font-size: 18px; padding: 5px; outline: none;}
-        
-        .start-btn {
-            background: #4CAF50; border: none; box-shadow: 0 8px 0 #388E3C; padding: 15px 40px; font-size: 24px; color: white; border-radius: 20px; text-transform: uppercase; font-weight: bold; font-family: 'Fredoka', sans-serif; cursor:pointer; margin-top: 10px; transition: all 0.1s;
-        }
-        .start-btn:active { transform: translateY(6px); box-shadow: 0 2px 0 #388E3C; }
-
-        /* ============================================================
-           PANTALLA DE JUEGO (GAME SCREEN)
-           ============================================================ */
-        #game-screen {
-            display: none; flex-direction: column; align-items: center; justify-content: flex-start;
-            width: 100vw; height: 100vh; padding: 1.5vh 2vw; box-sizing: border-box; overflow: hidden;
-        }
-
-        .game-header {
-            flex: 0 0 auto; display: flex; justify-content: space-between; align-items: center; 
-            width: 100%; max-width: 1000px; margin-bottom: 2vh; z-index: 10;
-        }
-        
-        .back-menu-btn { background: #ecf0f1; border: 3px solid #bdc3c7; padding: 8px 16px; border-radius: 15px; font-size: clamp(12px, 2vh, 16px); font-weight: bold; color: #2c3e50; cursor: pointer; transition: all 0.2s; font-family: 'Fredoka', sans-serif; box-shadow: 0 5px 0 #bdc3c7;}
-        .back-menu-btn:active { transform: translateY(4px); box-shadow: none; }
-
-        h1 { color: #2c3e50; margin: 0 0 1vh 0; text-align: center; font-size: clamp(22px, 4vh, 36px); text-shadow: 2px 2px 0px #fff; z-index: 10; }
-        
-        .hud-group { display: flex; gap: 15px; align-items: center; }
-
-        .score-box {
-            background: white; padding: 6px 20px; border-radius: 20px;
-            border: 4px solid #ff80ab; box-shadow: 0 4px 0 #c2185b;
-            font-weight: bold; color: #5d4037; font-size: clamp(16px, 2.5vh, 22px); display: flex; align-items: center; gap: 5px;
-        }
-
-        .timer-container {
-            display: flex; align-items: center; justify-content: center; gap: 10px;
-            background: #fff; border: 4px solid #3498db; color: #2980b9; padding: 6px 20px;
-            border-radius: 25px; font-size: clamp(16px, 2.5vh, 22px); font-weight: 900; box-shadow: 0 4px 0 #2980b9;
-        }
-        .timer-container.warning { border-color: #e74c3c; color: #c0392b; box-shadow: 0 4px 0 #e74c3c; animation: pulseTimer 0.5s infinite alternate; }
-        @keyframes pulseTimer { 0% { transform: scale(1); } 100% { transform: scale(1.05); } }
-        
-        /* CAJA DE INSTRUCCIONES */
-        .prompt-box { 
-            text-align: center; background: rgba(255, 255, 255, 0.95); padding: 8px 15px; 
-            border-radius: 15px; font-size: clamp(14px, 2.2vh, 18px); font-weight: 600; 
-            width: 100%; max-width: 600px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); 
-            border: 3px solid #ffb74d; box-sizing: border-box; line-height: 1.3; margin-bottom: 2vh; z-index: 10;
-        }
-
-        /* ============================================================
-           ZONA DE ARMAR PALABRAS (DRAG & DROP)
-           ============================================================ */
-        .game-area {
-            flex: 1 1 auto; width: 100%; max-width: 900px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4vh; z-index: 10;
-        }
-
-        .drop-zone {
-            display: flex; gap: 15px; justify-content: center; flex-wrap: wrap;
-            background: rgba(255, 255, 255, 0.6); padding: 20px; border-radius: 20px; border: 4px dashed #bdc3c7;
-            min-height: 100px; min-width: 300px;
-        }
-
-        .drop-slot {
-            width: clamp(50px, 8vh, 80px); height: clamp(50px, 8vh, 80px);
-            background: rgba(255, 255, 255, 0.9); border: 4px dashed #95a5a6; border-radius: 15px;
-            display: flex; justify-content: center; align-items: center;
-        }
-
-        .letters-tray {
-            display: flex; gap: 15px; justify-content: center; flex-wrap: wrap;
-            background: #ffe0b2; padding: 20px; border-radius: 20px; border: 4px solid #ffb74d;
-            box-shadow: 0 10px 0 #ffb74d; min-height: 100px; width: 100%;
-        }
-
-        .letter-tile {
-            width: clamp(50px, 8vh, 80px); height: clamp(50px, 8vh, 80px);
-            background: #3498db; border: 4px solid #2980b9; border-radius: 15px;
-            display: flex; justify-content: center; align-items: center;
-            font-size: clamp(24px, 4vh, 45px); font-weight: 900; color: white;
-            cursor: grab; box-shadow: 0 6px 0 #2980b9;
-            text-shadow: 2px 2px 0 rgba(0,0,0,0.3);
-            font-family: 'Fredoka', sans-serif;
-            transition: transform 0.1s;
-        }
-
-        .letter-tile.dragging {
-            opacity: 0.8; transform: scale(1.1); box-shadow: 0 10px 20px rgba(0,0,0,0.3); z-index: 1000;
-        }
-
-        .shake-error { animation: shakeError 0.4s; border-color: #e74c3c !important; }
-        @keyframes shakeError { 0%, 100% { transform: translateX(0); } 25%, 75% { transform: translateX(-5px); } 50% { transform: translateX(5px); } }
-
-        /* CONTROLES GLOBALES */
-        .global-controls { flex: 0 0 auto; display: flex; justify-content: center; gap: 15px; margin-top: 2vh; margin-bottom: 2vh; position: relative; z-index: 10; width: 100%; max-width: 600px;}
-        button.global-btn { padding: 1.2vh 25px; font-size: clamp(16px, 2.5vh, 20px); color: white; border-radius: 15px; font-weight: bold; font-family: 'Fredoka', sans-serif; border:none; cursor:pointer;}
-        button.reset-btn { background-color: #e74c3c; box-shadow: 0 6px 0 #c0392b; transition: all 0.1s;}
-        button.global-btn:active { transform: translateY(4px); box-shadow: none !important; }
-
-        /* MODAL */
-        .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.7); display: flex; justify-content: center; align-items: center; z-index: 1000; visibility: hidden; opacity: 0; transition: all 0.3s; backdrop-filter: blur(5px);}
-        .modal-overlay.active { visibility: visible; opacity: 1; }
-        .modal-box { background: white; padding: 40px; border-radius: 25px; text-align: center; max-width: 85%; width: 450px; transform: scale(0.7); transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); box-shadow: 0 15px 40px rgba(0,0,0,0.3); border: 8px solid #ff9800;}
-        .modal-overlay.active .modal-box { transform: scale(1); }
-        .modal-title { font-size: 32px; margin-top: 0; margin-bottom: 15px; color: #ff9800; }
-        .modal-msg { font-size: 20px; margin-bottom: 25px; color: #555; white-space: pre-line; line-height: 1.4; font-weight: 600;}
-        .modal-btn { background: #4CAF50; border: none; box-shadow: 0 6px 0 #388E3C; padding: 15px 35px; font-size: 20px; color: white; border-radius: 15px; text-transform: uppercase; font-weight: bold; font-family: 'Fredoka', sans-serif; cursor:pointer;}
-        .modal-btn:active { transform: translateY(4px); box-shadow: none; }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#f8edda">
+<title>¡Palabras Desordenadas! · El Correo Mágico 🐝</title>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Nunito:wght@600;700;800;900&display=swap" rel="stylesheet">
+<style>
+:root{--ink:#3c3851;--muted:#7b7691;--berry:#e05d7a;--berry-dark:#b94163;--violet:#8b75d4;--violet-dark:#6c58b3;--sky:#86c7ed;--sun:#ffe38e;--mint:#83d6bb;--paper:#fffdf8;--shadow:rgba(93,73,121,.16);--line:#eee3da}
+*{box-sizing:border-box}html{min-height:100%;font-family:'Fredoka',system-ui,sans-serif}body{margin:0;min-height:100vh;min-height:100dvh;color:var(--ink);overflow-x:hidden;background:#f9eedc;user-select:none;-webkit-tap-highlight-color:transparent}button,input{font:inherit}button{cursor:pointer}button:focus-visible,input:focus-visible{outline:4px solid #5b93fa;outline-offset:3px}
+.world{position:fixed;inset:0;z-index:-1;overflow:hidden;pointer-events:none;background:radial-gradient(circle at 77% 0%,#fffbd0 0%,transparent 36%),linear-gradient(180deg,#b7e4f2 0%,#e5f3ea 53%,#fff2df 100%)}.world:after{content:"";position:absolute;inset:0;opacity:.12;background-image:radial-gradient(#fff 1.5px,transparent 1.5px);background-size:24px 24px}.sunball{position:absolute;right:7%;top:5%;width:138px;height:138px;border-radius:50%;background:radial-gradient(circle at 35% 35%,#fffadb,#ffd77c);box-shadow:0 0 0 25px #fff4c63a,0 0 0 53px #fff4c41c;animation:sunPulse 6s ease-in-out infinite}.cloud{position:absolute;width:215px;height:56px;background:rgba(255,255,255,.68);border-radius:90px;filter:drop-shadow(0 6px 14px #87babb20);animation:cloudDrift 26s ease-in-out infinite alternate}.cloud:before,.cloud:after{content:"";position:absolute;border-radius:50%;background:inherit}.cloud:before{width:96px;height:96px;left:38px;bottom:7px}.cloud:after{width:125px;height:85px;left:91px;bottom:2px}.cloud.a{left:5%;top:11%}.cloud.b{right:3%;top:37%;transform:scale(.64);animation-delay:-10s}.cloud.c{left:-6%;bottom:27%;transform:scale(.57);animation-delay:-5s}.hill{position:absolute;bottom:-125px;width:130%;height:260px;border-radius:50% 50% 0 0;background:#a5d7b4;left:-15%;box-shadow:inset 0 18px 0 #bae5c4}.hill.back{bottom:-84px;left:28%;height:215px;background:#cce9ca;box-shadow:none}.spark{position:absolute;color:#fff9d4;font-size:20px;animation:starFloat 7s ease-in-out infinite}.spark.s1{top:24%;left:9%}.spark.s2{top:39%;right:15%;animation-delay:-2s}.spark.s3{bottom:22%;left:12%;animation-delay:-3s}.spark.s4{top:64%;right:10%;animation-delay:-5s}
+@keyframes sunPulse{50%{transform:scale(1.06)}}@keyframes cloudDrift{to{translate:55px 8px}}@keyframes starFloat{50%{transform:translateY(-18px) rotate(35deg);opacity:.4}}
+.screen{width:100%;min-height:100dvh}.setup-screen{position:relative;display:flex;align-items:center;justify-content:center;padding:34px 16px;z-index:2}.setup-screen.hidden{display:none}.setup-card{display:grid;grid-template-columns:.94fr 1.06fr;width:min(940px,100%);background:var(--paper);border:7px solid #fff;border-radius:37px;box-shadow:0 18px 0 #bc9f9461,0 28px 85px #647e8a35;overflow:hidden;animation:cardEnter .65s cubic-bezier(.2,1.2,.4,1) both}.setup-art{background:linear-gradient(160deg,#a9dcf4,#c6e7db 60%,#ffedc1);padding:35px 20px 19px;display:flex;flex-direction:column;align-items:center;justify-content:space-between;position:relative;overflow:hidden}.setup-art:before{content:"";position:absolute;inset:-20%;opacity:.25;background:repeating-linear-gradient(135deg,transparent 0 22px,#fff 23px 25px,transparent 26px 49px);mask-image:linear-gradient(to bottom,#000,transparent)}.eyebrow{position:relative;background:#ffffffb9;padding:8px 16px;border-radius:99px;color:#9469ad;font-size:12px;font-weight:700;letter-spacing:2px;box-shadow:0 3px 0 #ffffff8a}.setup-art h1{position:relative;font-size:clamp(33px,4vw,54px);line-height:1.02;text-align:center;color:#594c82;text-shadow:2px 3px #ffffff7c;margin:20px 0 2px;letter-spacing:-1.2px}.setup-art h1 em{font-style:normal;color:#f36f8b}.intro-illustration{position:relative;max-height:265px;width:100%;display:flex;align-items:center;justify-content:center}.intro-illustration svg{width:min(300px,100%);height:auto;filter:drop-shadow(0 13px 7px #366b7763)}.art-sub{position:relative;font-weight:600;text-align:center;color:#526883;font-size:15px;line-height:1.3;margin:8px 5px 2px}.setup-form{padding:39px clamp(20px,4vw,44px) 32px;display:flex;flex-direction:column;gap:17px;justify-content:center}.setup-form h2{font-size:32px;line-height:1.08;margin:0;color:#514770}.setup-form .subline{color:#92889e;font-size:15px;margin:-6px 0 0}.config-card{border:2px solid #f0e6e3;background:#fff9f0;border-radius:21px;padding:16px}.config-card h3{margin:0 0 12px;font-size:14px;color:#87768e;letter-spacing:.7px;text-transform:uppercase}.choice-row{display:flex;gap:7px;flex-wrap:wrap}.theme-choice{border:2px solid #e5dfe3;border-radius:15px;padding:10px 12px;background:#fff;color:#746b80;font-size:14px;font-weight:600;flex:1;min-width:102px;box-shadow:0 4px 0 #efe7e3;transition:transform .2s,background .2s,border-color .2s}.theme-choice .theme-icon{display:block;font-size:23px;margin-bottom:4px}.theme-choice:hover{transform:translateY(-3px)}.theme-choice.active{background:#f1e8ff;color:#67519e;border-color:#b19ce5;box-shadow:0 4px 0 #9278d1;transform:translateY(-2px)}.timer-config{display:flex;align-items:center;gap:13px;justify-content:space-between}.timer-config .tiny-text{font-size:12px;color:#9c8fa3;display:block;margin-top:3px}.time-input-wrap{display:flex;align-items:center;background:#fff;border:2px solid #e5dfe3;border-radius:12px;padding:4px 11px;gap:6px}.time-input-wrap input{width:69px;height:36px;font-size:21px;font-weight:700;text-align:center;border:0;outline:0;background:transparent;color:#605283}.time-input-wrap span{font-size:12px;color:#9c8fa3}.primary-btn{border:0;color:#fff;border-radius:17px;padding:15px 18px;font-size:20px;font-weight:700;background:linear-gradient(180deg,#f38d9d,#df6085);box-shadow:0 6px 0 #b74367,0 12px 18px #e0688136;transition:transform .15s,filter .15s;display:inline-flex;align-items:center;justify-content:center;gap:9px}.primary-btn:hover{transform:translateY(-3px);filter:brightness(1.04)}.primary-btn:active{transform:translateY(4px);box-shadow:0 2px 0 #b74367}
+.game-screen{display:none;flex-direction:column;align-items:center;padding:15px 18px 20px;gap:14px}.game-screen.active{display:flex}.game-header{width:min(990px,100%);display:flex;align-items:center;gap:10px;justify-content:space-between}.brand{display:flex;align-items:center;gap:9px;min-width:0}.brand-mark{height:48px;width:48px;border:3px solid #fff;border-radius:15px;background:#ffdb83;box-shadow:0 4px 0 #e8b963;display:grid;place-items:center;font-size:27px;flex-shrink:0}.brand-copy{display:flex;flex-direction:column;line-height:1.1}.brand-copy small{color:#8c7690;letter-spacing:1.5px;font-size:10px;font-weight:700}.brand-copy strong{font-size:clamp(18px,2.7vw,26px);color:#554572;white-space:nowrap}.header-right{display:flex;gap:8px;align-items:center}.stat-bubble{display:flex;align-items:center;gap:8px;border:3px solid #fff;border-radius:16px;background:#fffaf6;padding:6px 13px;box-shadow:0 4px 0 #d9cbd0;color:#625875;font-size:15px;font-weight:700;white-space:nowrap}.stat-bubble strong{font-size:24px;color:#d45c7b}.stat-bubble.timer{color:#69639a}.stat-bubble.timer strong{color:#6a7eb8;font-size:19px;font-variant-numeric:tabular-nums}.stat-bubble.warning{border-color:#ff9c9c;animation:timerPulse .65s infinite alternate}.header-btn{border:2px solid #fff;background:#fff9f3;color:#806c95;padding:10px 14px;border-radius:15px;box-shadow:0 4px 0 #d9cbd0;font-size:14px;font-weight:700}.header-btn:hover{background:#fff}.sound-btn{width:43px;height:43px;padding:0;font-size:22px}.header-btn:active{transform:translateY(3px);box-shadow:0 1px 0 #d9cbd0}.game-content{width:min(920px,100%);display:flex;flex-direction:column;align-items:stretch;gap:13px}.mission-card{position:relative;overflow:hidden;background:linear-gradient(120deg,#fffefa,#fff4e1);border:4px solid #fff;border-radius:26px;box-shadow:0 6px 0 #e5cfc4,0 11px 21px #876b8630;padding:16px 24px;display:flex;align-items:center;gap:16px;min-height:108px}.mission-card:before{content:"";position:absolute;right:-30px;top:-44px;width:215px;height:215px;border-radius:50%;border:25px solid #ffe5c970}.mission-icon{width:67px;height:67px;flex:0 0 67px;background:#fee7b1;border:3px solid #fff;display:grid;place-items:center;border-radius:20px;font-size:40px;box-shadow:0 4px 0 #efd59a;transform:rotate(-6deg)}.mission-text{position:relative;flex:1;min-width:0}.mission-kicker{font-size:11px;font-weight:700;letter-spacing:1.7px;color:#b78a87}.mission-text h2{font-size:clamp(21px,3vw,30px);margin:1px 0 1px;color:#57446c;line-height:1.1}.mission-text p{color:#877b8d;margin:2px 0 0;font-size:14px}.mission-pill{position:relative;font-weight:700;background:#e7f5f0;color:#4f9c8d;padding:9px 13px;border-radius:99px;white-space:nowrap;font-size:13px}.play-stage{background:linear-gradient(145deg,#faf3ff,#fffdfb 45%,#fff5ec);border:5px solid #fff;border-radius:29px;box-shadow:0 8px 0 #d5bfbf,0 16px 40px #81749229;position:relative;overflow:hidden;padding:21px clamp(12px,3vw,30px) 19px;display:flex;flex-direction:column;align-items:center;gap:15px}.play-stage:before,.play-stage:after{content:"✦";position:absolute;color:#f3d5d0;font-size:60px;top:-19px;left:15px;transform:rotate(-13deg);opacity:.5}.play-stage:after{top:auto;left:auto;right:24px;bottom:-27px;color:#c0e8c9}.stage-title{text-align:center;font-size:12px;letter-spacing:1.5px;color:#917c9a;text-transform:uppercase;font-weight:700;position:relative}.stage-title span{background:#f6ebff;border:1px solid #e4d6f2;border-radius:20px;padding:5px 15px}.drop-zone{width:100%;min-height:100px;display:flex;align-items:center;justify-content:center;gap:clamp(5px,1.3vw,12px);padding:12px 5px;background:linear-gradient(0deg,#fff8e6,#fffdf4);border:2px dashed #eecaa7;border-radius:21px;position:relative}.drop-zone:before{content:"";position:absolute;inset:7px;border:1px solid #fff;border-radius:13px;pointer-events:none}.drop-slot{position:relative;width:clamp(42px,8.4vw,75px);height:clamp(51px,9.7vw,84px);border:3px dashed #d7c3bd;border-radius:15px;background:linear-gradient(165deg,#fff,#fff5ec);display:flex;align-items:center;justify-content:center;transition:border-color .18s,background .18s,transform .18s;flex-shrink:1;min-width:0}.drop-slot:after{content:"";position:absolute;left:23%;right:23%;height:4px;bottom:8px;border-radius:9px;background:#ecd9d2;pointer-events:none}.drop-slot.filled{border-color:#b5d5c7;background:#f0fff7}.drop-slot.filled:after{display:none}.drop-slot.hovered{transform:translateY(-5px);border-color:#caa4fa;background:#f3e5ff;box-shadow:0 0 0 4px #ceabff4d}.drop-slot .letter-tile{width:100%;height:100%;border-radius:12px;margin:-1px}.stage-arrow{height:21px;display:flex;align-items:center;gap:11px;font-size:12px;color:#baa9b1;font-weight:700;letter-spacing:1.3px}.stage-arrow i{width:22px;height:1px;background:#dfcfd9}.stage-arrow svg{color:#d7a9cb}.letters-tray{width:100%;min-height:108px;display:flex;align-items:center;justify-content:center;gap:clamp(6px,1.3vw,13px);padding:13px 9px;border:3px solid #f5dca8;background:linear-gradient(145deg,#fff2d5,#ffe9c6);border-radius:21px;box-shadow:inset 0 5px 12px #fffcf366;flex-wrap:wrap}.letter-tile{touch-action:none;position:relative;display:flex;align-items:center;justify-content:center;width:clamp(42px,8.4vw,75px);height:clamp(51px,9.7vw,84px);border:3px solid #fff9;font-family:'Fredoka',sans-serif;font-size:clamp(25px,4.7vw,41px);font-weight:700;color:#fff;text-shadow:0 2px 0 #593e754a;border-radius:15px;background:var(--tile-color,#849cda);box-shadow:inset 0 6px 0 #ffffff42,inset 0 -6px 0 #43347a28,0 5px 0 var(--tile-dark,#667ca9),0 9px 13px #5a53772d;transition:transform .15s,filter .15s,box-shadow .15s;flex-shrink:0}.letter-tile:before{content:"✧";font-family:serif;font-size:13px;position:absolute;top:2px;left:8px;opacity:.7}.letter-tile:not(.dragging):hover{transform:translateY(-4px) rotate(-2deg);filter:brightness(1.04)}.letter-tile:active{transform:translateY(1px)}.letter-tile.origin-drag{opacity:.2}.letter-tile.ghost{position:fixed!important;z-index:5000;pointer-events:none;transform:translate(-50%,-60%) rotate(-7deg) scale(1.12);box-shadow:0 14px 28px #614b8966;transition:none;opacity:.98}.letter-tile.success-tile{animation:tileWin .6s ease both;box-shadow:0 0 0 4px #6ec9a26c,0 10px 24px #5ebc9b8a}.stage-foot{width:100%;display:flex;justify-content:space-between;align-items:center;gap:12px;font-size:12px;color:#a18c9c;font-weight:600;min-height:21px}.feedback{font-weight:700;color:#9f8197}.feedback.good{color:#43a67d}.feedback.bad{color:#db6381}.progress-dots{display:flex;gap:5px;align-items:center}.progress-dots span{display:block;width:8px;height:8px;border-radius:50%;background:#e4d4d4}.progress-dots span.on{background:#82cdb6;box-shadow:0 0 0 2px #83cdb33a}.game-actions{display:flex;justify-content:center;gap:11px}.action-btn{border:3px solid #fff;display:flex;align-items:center;justify-content:center;gap:9px;background:linear-gradient(180deg,#90c6ed,#689ed8);color:white;box-shadow:0 5px 0 #517db7,0 9px 18px #5a7f9c2b;padding:11px 24px;border-radius:16px;font-weight:700;font-size:16px;transition:transform .15s}.action-btn:hover{transform:translateY(-3px)}.action-btn:active{transform:translateY(3px);box-shadow:0 2px 0 #517db7}.action-btn.secondary{background:linear-gradient(180deg,#b9abe5,#8d7acc);box-shadow:0 5px 0 #7463b0}.action-btn.secondary:active{box-shadow:0 2px 0 #7463b0}.game-footer{text-align:center;color:#6b84928c;font-size:12px;padding-bottom:6px}.game-footer b{color:#6b7f95}
+.modal-overlay{position:fixed;inset:0;z-index:1000;display:flex;align-items:center;justify-content:center;background:#30233e90;backdrop-filter:blur(8px);opacity:0;visibility:hidden;transition:opacity .22s,visibility .22s;padding:20px}.modal-overlay.active{opacity:1;visibility:visible}.modal-box{width:min(440px,100%);background:var(--paper);border:7px solid #fff;box-shadow:0 16px 0 #ba8c9b79,0 30px 65px #332d5573;border-radius:32px;text-align:center;padding:30px 28px 33px;transform:translateY(20px) scale(.92);transition:transform .3s cubic-bezier(.2,1.25,.3,1)}.modal-overlay.active .modal-box{transform:translateY(0) scale(1)}.modal-icon{font-size:64px;line-height:1;margin-bottom:13px;display:block}.modal-title{color:#6c5b96;font-size:31px;margin:0 0 8px;line-height:1.14}.modal-msg{font-size:18px;line-height:1.45;color:#84788d;white-space:pre-line;margin:0 0 23px}.modal-btn{border:0;background:linear-gradient(180deg,#f38d9d,#df6085);color:#fff;font-weight:700;font-size:18px;border-radius:16px;padding:12px 34px;box-shadow:0 5px 0 #b74367}.modal-btn:active{transform:translateY(3px);box-shadow:0 2px 0 #b74367}.confetti-layer{position:fixed;z-index:1500;inset:0;overflow:hidden;pointer-events:none}.confetti{position:absolute;width:10px;height:15px;top:-30px;border-radius:3px;background:var(--c);animation:confettiFall var(--dur) ease-in forwards;transform:translateZ(0) rotate(var(--angle))}.mail-pop{position:fixed;z-index:1400;pointer-events:none;color:#51ac82;font-weight:700;font-size:27px;text-shadow:0 3px 0 #fff;animation:scoreFly 1s ease-out forwards}.stage-shake{animation:stageShake .38s ease-in-out}.score-bump{animation:scoreBump .55s ease-out}.intro-bee,.mission-bee{animation:beeHover 3s ease-in-out infinite}.bee-wing-left,.bee-wing-right{pointer-events:none}
+@keyframes cardEnter{from{opacity:0;transform:translateY(22px) scale(.97)}to{opacity:1;transform:translateY(0) scale(1)}}@keyframes beeHover{50%{transform:translateY(-9px) rotate(2deg)}}@keyframes scoreFly{to{transform:translateY(-75px) scale(.7);opacity:0}}@keyframes confettiFall{to{top:105vh;left:calc(var(--x) + var(--drift));transform:rotate(790deg);opacity:0}}@keyframes tileWin{0%{transform:scale(1)}40%{transform:translateY(-13px) rotate(4deg) scale(1.12)}100%{transform:scale(1)}}@keyframes stageShake{0%,100%{transform:translateX(0)}25%{transform:translateX(-7px)}50%{transform:translateX(7px)}75%{transform:translateX(-4px)}}@keyframes timerPulse{to{transform:scale(1.05)}}@keyframes scoreBump{40%{transform:scale(1.24)}100%{transform:scale(1)}}
+@media(max-width:690px){.setup-card{display:flex;flex-direction:column;width:min(470px,100%)}.setup-art{padding:20px 20px 10px}.setup-art h1{font-size:34px;margin:12px 0 0}.intro-illustration{max-height:130px}.intro-illustration svg{width:160px}.art-sub{font-size:12px}.setup-form{padding:18px 21px 24px;gap:11px}.setup-form h2{font-size:25px}.config-card{padding:12px}.config-card h3{margin-bottom:8px}.setup-screen{align-items:flex-start;padding:15px 12px 30px}.game-screen{padding:10px 10px 16px;gap:11px}.brand-mark{width:38px;height:38px;font-size:22px;border-radius:11px}.brand-copy strong{font-size:17px}.brand-copy small{font-size:8px}.header-btn{font-size:12px;padding:8px 9px;border-radius:12px}.sound-btn{height:37px;width:37px}.stat-bubble{padding:5px 9px;border-radius:11px;gap:4px;font-size:11px}.stat-bubble strong{font-size:19px}.stat-bubble.timer strong{font-size:14px}.mission-card{padding:12px 13px;min-height:92px;gap:10px;border-radius:20px}.mission-icon{width:51px;height:51px;flex-basis:51px;font-size:31px;border-radius:15px}.mission-text h2{font-size:19px}.mission-text p{font-size:12px}.mission-kicker{font-size:9px}.mission-pill{font-size:10px;padding:6px 8px}.play-stage{padding:15px 9px 13px;border-radius:22px;gap:12px}.drop-zone{min-height:85px;padding:10px 3px;gap:5px}.drop-slot{border-radius:11px}.letters-tray{padding:10px 7px;min-height:86px;gap:7px}.letter-tile{border-radius:11px}.game-footer{font-size:11px}}@media(max-width:410px){.game-header{flex-wrap:wrap}.brand{flex:1}.header-right{gap:5px}.header-btn.back-btn{font-size:0;width:37px;height:37px;padding:0}.header-btn.back-btn:before{content:'←';font-size:21px}.mission-pill{display:none}.mission-text h2{font-size:18px}.mission-text p{font-size:11px}.stage-foot{font-size:10px}.action-btn{padding:10px 13px;font-size:14px}.theme-choice{min-width:90px;padding:8px 5px;font-size:12px}}@media(max-height:720px) and (min-width:691px){.game-screen{gap:8px;padding:8px 14px}.mission-card{min-height:84px;padding:10px 18px}.mission-icon{width:52px;height:52px;flex-basis:52px;font-size:30px}.play-stage{padding:12px 22px;gap:7px}.drop-zone,.letters-tray{min-height:81px;padding:8px}.drop-slot,.letter-tile{width:60px;height:68px;font-size:32px}.game-footer{display:none}}
+@media(max-width:500px){.game-header{flex-wrap:wrap;row-gap:6px}.brand{width:100%}.header-right{width:100%;justify-content:flex-end}.theme-choice{min-width:0;flex:1 1 0;font-size:12px;padding:8px 3px}.setup-art{padding:14px 17px 8px}.setup-art h1{font-size:31px;margin:9px 0 0}.intro-illustration{max-height:116px}.intro-illustration svg{width:145px}.setup-form{padding:15px 18px 20px;gap:9px}.config-card{padding:10px}.setup-form .subline{font-size:13px}.art-sub{font-size:11px;margin:5px 0 0}}
+@media(prefers-reduced-motion:reduce){*,*:before,*:after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}
+</style>
 </head>
 <body>
-
-    <audio id="bgm" loop>
-        <source src="../assets/musicaFondo/cancion1.mp3" type="audio/mpeg">
-    </audio>
-
-    <button id="soundToggle" class="sound-toggle" aria-label="Activar o desactivar sonido" title="Sonido">🔇</button>
-
-    <div class="decorations">
-        <div class="sun">☀️</div>
-        <div class="grass"></div>
+<audio id="bgm" loop preload="none"><source src="../assets/musicaFondo/cancion1.mp3" type="audio/mpeg"></audio>
+<div class="world" aria-hidden="true"><div class="sunball"></div><div class="cloud a"></div><div class="cloud b"></div><div class="cloud c"></div><div class="hill back"></div><div class="hill"></div><span class="spark s1">✦</span><span class="spark s2">✧</span><span class="spark s3">✦</span><span class="spark s4">✧</span></div>
+<section id="setup-screen" class="screen setup-screen">
+  <div class="setup-card">
+    <div class="setup-art">
+      <span class="eyebrow">✦ EL CORREO MÁGICO ✦</span>
+      <h1>¡Palabras<br><em>Desordenadas!</em></h1>
+      <div class="intro-illustration" id="intro-illustration" aria-hidden="true"></div>
+      <p class="art-sub">¡Ayuda a la abejita cartero a ordenar todas las letras!</p>
     </div>
-
-    <!-- ============================================================
-         PANTALLA DE CONFIGURACIÓN (LOBBY)
-         ============================================================ -->
-    <div id="setup-screen">
-        <div class="setup-card">
-            <h1>Configuración ⚙</h1>
-            
-            <div class="setup-section">
-                <h3>Temática de Palabras</h3>
-                <div class="setup-row">
-                    <button id="setup-theme-animales" class="setup-btn theme active" onclick="selectTheme('animales')">🐶 Animales</button>
-                    <button id="setup-theme-cosas" class="setup-btn theme" onclick="selectTheme('cosas')">🛋️ Cosas</button>
-                    <button id="setup-theme-colores" class="setup-btn theme" onclick="selectTheme('colores')">🎨 Colores</button>
-                </div>
-            </div>
-
-            <div class="setup-section">
-                <h3>Límite de Tiempo</h3>
-                <div class="time-input-group">
-                    <label>⏳ Segundos:</label>
-                    <input type="number" id="setup-time" value="0" min="0" max="999">
-                </div>
-                <span style="font-size:13px; color:#7f8c8d; font-weight:bold;">(Escribe 0 para jugar sin límite de tiempo)</span>
-            </div>
-
-            <button class="start-btn" onclick="startGame()">¡A Ordenar!</button>
-        </div>
+    <div class="setup-form">
+      <h2>¡Prepara tu aventura! 💌</h2><p class="subline">Escoge una temática y empieza a jugar.</p>
+      <div class="config-card"><h3>📬 ¿Qué palabras entregaremos?</h3><div class="choice-row">
+        <button type="button" class="theme-choice active" id="setup-theme-animales" onclick="selectTheme('animales')"><span class="theme-icon">🐶</span>Animales</button>
+        <button type="button" class="theme-choice" id="setup-theme-cosas" onclick="selectTheme('cosas')"><span class="theme-icon">🧸</span>Cosas</button>
+        <button type="button" class="theme-choice" id="setup-theme-colores" onclick="selectTheme('colores')"><span class="theme-icon">🎨</span>Colores</button>
+      </div></div>
+      <div class="config-card"><div class="timer-config"><div><h3 style="margin:0">⏰ Tiempo de juego</h3><span class="tiny-text">Escribe 0 para jugar sin límite.</span></div><label class="time-input-wrap"><input type="number" id="setup-time" value="0" min="0" max="9999" aria-label="Tiempo en segundos"><span>seg.</span></label></div></div>
+      <button type="button" class="primary-btn" onclick="startGame()">¡EMPEZAR A JUGAR! <span>✈️</span></button>
     </div>
-
-    <!-- ============================================================
-         PANTALLA DEL JUEGO
-         ============================================================ -->
-    <div id="game-screen">
-        
-        <div class="game-header">
-            <button class="back-menu-btn" onclick="backToMenu()">⚙️ Volver</button>
-            <div class="hud-group">
-                <div id="timer-display" class="timer-container" style="display: none;">
-                    <span>⏳ <span id="time-left">00:00</span></span>
-                </div>
-                <div class="score-box">Palabras: <span id="score-display">0</span></div>
-            </div>
-        </div>
-
-        <h1>¡Palabras Desordenadas! 🐝</h1>
-        
-        <div class="prompt-box">
-            Arrastra las letras y ponlas en el orden correcto para formar la palabra.
-        </div>
-
-        <div class="game-area">
-            <!-- Zona Destino -->
-            <div class="drop-zone" id="drop-zone"></div>
-            <!-- Zona Letras Revueltas -->
-            <div class="letters-tray" id="letters-tray"></div>
-        </div>
-        
-        <div class="global-controls">
-            <button class="global-btn reset-btn" onclick="clearSlots()">🔄 Limpiar Letras</button>
-        </div>
-    </div>
-
-    <div class="modal-overlay" id="modal">
-        <div class="modal-box">
-            <h2 class="modal-title" id="m-title">Título</h2>
-            <p class="modal-msg" id="m-msg">Mensaje</p>
-            <button class="modal-btn" onclick="closeModal()">¡Entendido!</button>
-        </div>
-    </div>
-
-    <script>
-        // MOTOR DE SONIDO (WEB AUDIO API + BGM)
-        const AudioContext = window.AudioContext || window.webkitAudioContext;
-        let audioCtx; let isMuted = true;
-        
-        const bgAudio = document.getElementById('bgm');
-        const soundToggle = document.getElementById('soundToggle');
-
-        soundToggle.addEventListener('click', () => {
-            if (!audioCtx) audioCtx = new AudioContext();
-            if (audioCtx.state === 'suspended') audioCtx.resume();
-            
-            isMuted = !isMuted;
-            if(isMuted) {
-                bgAudio.pause();
-                soundToggle.innerText = '🔇';
-            } else {
-                bgAudio.volume = 0.25; 
-                bgAudio.play().catch(e => console.log('El navegador requiere interacción manual previa.'));
-                soundToggle.innerText = '🔊';
-            }
-        });
-
-        function playTone(freq, type, duration, vol = 0.1) {
-            if (!audioCtx || isMuted) return;
-            const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain();
-            osc.type = type; osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
-            gain.gain.setValueAtTime(vol, audioCtx.currentTime); gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + duration);
-            osc.connect(gain); gain.connect(audioCtx.destination); osc.start(); osc.stop(audioCtx.currentTime + duration);
-        }
-
-        function sfxClick() { playTone(600, 'sine', 0.08, 0.1); }
-        function sfxDrop() { playTone(400, 'triangle', 0.1, 0.1); }
-        function sfxWrong() { playTone(200, 'sawtooth', 0.2, 0.15); setTimeout(()=>playTone(150, 'sawtooth', 0.25, 0.15), 100); }
-        function sfxVictory() { let notes = [523.25, 659.25, 783.99, 1046.50]; notes.forEach((freq, i) => { setTimeout(() => playTone(freq, 'square', 0.3, 0.1), i * 150); }); }
-
-        // ESTADO DEL JUEGO Y DICCIONARIO
-        let currentTheme = 'animales';
-        let initialTimeLimit = 0; 
-        let timerInterval = null;
-        let timeLeft = 0; 
-        let isGameActive = false;
-        let currentWord = "";
-        let score = 0;
-
-        const dictionaries = {
-            'animales': ['GATO', 'PERRO', 'VACA', 'PATO', 'RANA', 'MONO', 'LEON', 'TIGRE', 'OSO', 'LOBO', 'PEZ'],
-            'cosas': ['MESA', 'SILLA', 'CAMA', 'CASA', 'TAZA', 'VASO', 'RELOJ', 'LAPIZ', 'LIBRO', 'AUTO', 'TREN'],
-            'colores': ['ROJO', 'AZUL', 'VERDE', 'ROSA', 'GRIS', 'NEGRO', 'LILA', 'OCRE', 'CIAN']
-        };
-
-        const tileColors = ['#e74c3c', '#2ecc71', '#9b59b6', '#f1c40f', '#e67e22', '#1abc9c', '#3498db'];
-
-        const dropZone = document.getElementById('drop-zone');
-        const lettersTray = document.getElementById('letters-tray');
-
-        // LOBBY Y CONFIGURACIÓN
-        function selectTheme(theme) {
-            sfxClick(); currentTheme = theme;
-            document.querySelectorAll('.setup-btn.theme').forEach(btn => btn.classList.remove('active'));
-            document.getElementById('setup-theme-' + theme).classList.add('active');
-        }
-
-        function formatTime(seconds) {
-            let m = Math.floor(seconds / 60); let s = seconds % 60;
-            return (m < 10 ? "0" + m : m) + ":" + (s < 10 ? "0" + s : s);
-        }
-
-        function startGame() {
-            if (!audioCtx && !isMuted) {
-                audioCtx = new AudioContext();
-                bgAudio.play().catch(e => console.log('El navegador requiere interacción.'));
-            }
-            sfxClick();
-            
-            let val = parseInt(document.getElementById('setup-time').value);
-            initialTimeLimit = (isNaN(val) || val < 0) ? 0 : val;
-
-            document.getElementById('setup-screen').style.display = 'none';
-            document.getElementById('game-screen').style.display = 'flex';
-            
-            score = 0;
-            document.getElementById('score-display').innerText = score;
-            
-            setupTimer();
-            loadNewWord();
-        }
-
-        function backToMenu() {
-            sfxClick(); clearInterval(timerInterval); isGameActive = false;
-            document.getElementById('game-screen').style.display = 'none';
-            document.getElementById('setup-screen').style.display = 'flex';
-        }
-
-        function setupTimer() {
-            clearInterval(timerInterval); isGameActive = true; 
-            
-            let display = document.getElementById('timer-display');
-            let timeSpan = document.getElementById('time-left');
-
-            display.classList.remove('warning');
-            
-            if (initialTimeLimit > 0) {
-                timeLeft = initialTimeLimit;
-                display.style.display = 'flex';
-                timeSpan.innerText = formatTime(timeLeft);
-                
-                timerInterval = setInterval(() => {
-                    if (!isGameActive) return;
-                    
-                    timeLeft--;
-                    timeSpan.innerText = formatTime(timeLeft);
-                    
-                    if (timeLeft === 10) { display.classList.add('warning'); playTone(300, 'sawtooth', 0.2, 0.15); }
-                    
-                    if (timeLeft <= 0) {
-                        isGameActive = false; clearInterval(timerInterval);
-                        playTone(150, 'sawtooth', 0.4, 0.3);
-                        
-                        showModal("⏰ ¡Tiempo Acabado! ⏰", `Se acabó el tiempo.\nLograste ordenar ${score} palabras correctamente.`, backToMenu);
-                    }
-                }, 1000);
-            } else {
-                display.style.display = 'none';
-            }
-        }
-
-        // MOTOR DEL JUEGO
-        function loadNewWord() {
-            if (!isGameActive) return;
-            dropZone.innerHTML = ''; lettersTray.innerHTML = '';
-            
-            let words = dictionaries[currentTheme];
-            currentWord = words[Math.floor(Math.random() * words.length)];
-            
-            let lettersArray = currentWord.split('');
-            // Crear Slots vacíos
-            for(let i=0; i<lettersArray.length; i++) {
-                let slot = document.createElement('div');
-                slot.className = 'drop-slot';
-                slot.dataset.index = i;
-                dropZone.appendChild(slot);
-            }
-
-            // Crear y Desordenar Fichas
-            let shuffled = [...lettersArray].sort(() => Math.random() - 0.5);
-            shuffled.forEach((letter, index) => {
-                let tile = document.createElement('div');
-                tile.className = 'letter-tile';
-                tile.innerText = letter;
-                
-                let color = tileColors[Math.floor(Math.random() * tileColors.length)];
-                tile.style.backgroundColor = color;
-                
-                makeDraggable(tile);
-                lettersTray.appendChild(tile);
-            });
-        }
-
-        // DRAG & DROP
-        let draggedElement = null;
-        let placeholder = null;
-
-        function makeDraggable(elm) {
-            elm.addEventListener('mousedown', dragStart, { passive: false });
-            elm.addEventListener('touchstart', dragStart, { passive: false });
-
-            function dragStart(e) {
-                if (e.cancelable) e.preventDefault();
-                sfxClick();
-                draggedElement = elm;
-                
-                placeholder = document.createElement('div');
-                placeholder.style.width = elm.offsetWidth + 'px';
-                placeholder.style.height = elm.offsetHeight + 'px';
-                
-                elm.parentNode.insertBefore(placeholder, elm);
-                elm.classList.add('dragging');
-                
-                // Mover al body para que flote sobre todo
-                let rect = elm.getBoundingClientRect();
-                document.body.appendChild(elm);
-                elm.style.position = 'absolute';
-                
-                let isTouch = e.type.includes('touch');
-                let clientX = isTouch ? e.touches[0].clientX : e.clientX;
-                let clientY = isTouch ? e.touches[0].clientY : e.clientY;
-                
-                elm.style.left = (clientX - rect.width / 2) + 'px';
-                elm.style.top = (clientY - rect.height / 2) + 'px';
-
-                document.addEventListener('mousemove', dragMove, { passive: false });
-                document.addEventListener('touchmove', dragMove, { passive: false });
-                document.addEventListener('mouseup', dragEnd);
-                document.addEventListener('touchend', dragEnd);
-            }
-
-            function dragMove(e) {
-                if (!draggedElement) return;
-                if (e.cancelable) e.preventDefault();
-                
-                let isTouch = e.type.includes('touch');
-                let clientX = isTouch ? e.touches[0].clientX : e.clientX;
-                let clientY = isTouch ? e.touches[0].clientY : e.clientY;
-
-                draggedElement.style.left = (clientX - draggedElement.offsetWidth / 2) + 'px';
-                draggedElement.style.top = (clientY - draggedElement.offsetHeight / 2) + 'px';
-            }
-
-            function dragEnd(e) {
-                document.removeEventListener('mousemove', dragMove);
-                document.removeEventListener('touchmove', dragMove);
-                document.removeEventListener('mouseup', dragEnd);
-                document.removeEventListener('touchend', dragEnd);
-
-                if(!draggedElement) return;
-
-                let elmRect = draggedElement.getBoundingClientRect();
-                let dropped = false;
-
-                // Revisar Slots Vacíos
-                const slots = document.querySelectorAll('.drop-slot');
-                for (let slot of slots) {
-                    if (slot.children.length > 0) continue; // Slot ocupado
-
-                    let sRect = slot.getBoundingClientRect();
-                    // Checar intersección simple
-                    if (
-                        elmRect.left < sRect.right && elmRect.right > sRect.left &&
-                        elmRect.top < sRect.bottom && elmRect.bottom > sRect.top
-                    ) {
-                        sfxDrop();
-                        draggedElement.style.position = 'static';
-                        draggedElement.classList.remove('dragging');
-                        slot.appendChild(draggedElement);
-                        if(placeholder && placeholder.parentNode) placeholder.parentNode.removeChild(placeholder);
-                        dropped = true;
-                        break;
-                    }
-                }
-
-                // Revisar Bandeja de Retorno
-                if (!dropped) {
-                    let trayRect = lettersTray.getBoundingClientRect();
-                    if (
-                        elmRect.left < trayRect.right && elmRect.right > trayRect.left &&
-                        elmRect.top < trayRect.bottom && elmRect.bottom > trayRect.top
-                    ) {
-                        sfxDrop();
-                        draggedElement.style.position = 'static';
-                        draggedElement.classList.remove('dragging');
-                        lettersTray.appendChild(draggedElement);
-                        if(placeholder && placeholder.parentNode) placeholder.parentNode.removeChild(placeholder);
-                        dropped = true;
-                    }
-                }
-
-                // Si no se soltó en un lugar válido, vuelve al placeholder original
-                if (!dropped) {
-                    sfxDrop();
-                    draggedElement.style.position = 'static';
-                    draggedElement.classList.remove('dragging');
-                    if(placeholder && placeholder.parentNode) {
-                        placeholder.parentNode.insertBefore(draggedElement, placeholder);
-                        placeholder.parentNode.removeChild(placeholder);
-                    } else {
-                        lettersTray.appendChild(draggedElement);
-                    }
-                }
-
-                draggedElement = null;
-                placeholder = null;
-                
-                checkWord();
-            }
-        }
-
-        function clearSlots() {
-            sfxClick();
-            const slots = document.querySelectorAll('.drop-slot');
-            slots.forEach(slot => {
-                if(slot.children.length > 0) {
-                    let tile = slot.children[0];
-                    lettersTray.appendChild(tile);
-                }
-            });
-        }
-
-        function checkWord() {
-            const slots = document.querySelectorAll('.drop-slot');
-            let formed = "";
-            let allFilled = true;
-
-            slots.forEach(slot => {
-                if(slot.children.length === 0) { allFilled = false; return; }
-                formed += slot.children[0].innerText;
-            });
-
-            if (allFilled) {
-                if (formed === currentWord) {
-                    // Correcto
-                    isGameActive = false; // Pausa el timer interno un momentito
-                    score++;
-                    document.getElementById('score-display').innerText = score;
-                    sfxVictory();
-                    
-                    // Efecto de pulso en las fichas correctas
-                    slots.forEach(s => {
-                        s.children[0].style.transform = 'scale(1.2)';
-                        s.children[0].style.boxShadow = '0 0 20px #2ecc71';
-                    });
-
-                    setTimeout(() => {
-                        isGameActive = true;
-                        loadNewWord();
-                    }, 1500);
-
-                } else {
-                    // Incorrecto
-                    sfxWrong();
-                    slots.forEach(s => {
-                        s.classList.add('shake-error');
-                        setTimeout(() => s.classList.remove('shake-error'), 400);
-                    });
-                }
-            }
-        }
-
-        let modalCallback = null;
-        function showModal(title, msg, callback = null) { 
-            document.getElementById('m-title').innerText = title; 
-            document.getElementById('m-msg').innerText = msg; 
-            document.getElementById('modal').classList.add('active'); 
-            modalCallback = callback;
-        }
-        function closeModal() { 
-            sfxClick(); document.getElementById('modal').classList.remove('active'); 
-            if(modalCallback) { modalCallback(); modalCallback = null; }
-        }
-
-    </script>
+  </div>
+</section>
+<main id="game-screen" class="screen game-screen">
+  <header class="game-header">
+    <div class="brand"><span class="brand-mark">💌</span><span class="brand-copy"><small>EL CORREO MÁGICO</small><strong>Palabras Desordenadas</strong></span></div>
+    <div class="header-right"><div class="stat-bubble" aria-label="Puntuación">⭐ <strong id="score-display">0</strong></div><div id="timer-display" class="stat-bubble timer" style="display:none">⏳ <strong id="time-left">00:00</strong></div><button class="header-btn back-btn" type="button" onclick="backToMenu()" title="Volver al menú">← Volver</button><button id="soundToggle" class="header-btn sound-btn" type="button" aria-label="Activar sonido" title="Activar o desactivar sonidos">🔇</button></div>
+  </header>
+  <div class="game-content">
+    <section class="mission-card"><div class="mission-icon" id="mission-icon">🐶</div><div class="mission-text"><div class="mission-kicker">✉️ NUEVA ENTREGA</div><h2 id="mission-heading">¡Ordena las letras!</h2><p>Arrastra o toca cada letra para completar la palabra.</p></div><span class="mission-pill" id="word-length">4 letras</span></section>
+    <section class="play-stage" id="play-stage" aria-label="Juego para ordenar letras">
+      <div class="stage-title"><span>✦ SOBRE DE RESPUESTA ✦</span></div>
+      <div class="drop-zone" id="drop-zone" aria-label="Casillas para ordenar las letras"></div>
+      <div class="stage-arrow"><i></i><svg width="19" height="20" viewBox="0 0 24 24" fill="none"><path d="M12 3v15m-5-5 5 5 5-5" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg><span>ELIGE LAS LETRAS</span><i></i></div>
+      <div class="letters-tray" id="letters-tray" aria-label="Letras mezcladas"></div>
+      <div class="stage-foot"><span class="feedback" id="feedback" aria-live="polite">¡Tú puedes! ✨</span><div class="progress-dots" id="progress-dots" aria-label="Progreso de la palabra"></div><span id="letters-progress">0 de 4</span></div>
+    </section>
+    <div class="game-actions"><button type="button" class="action-btn secondary" onclick="clearSlots()">↩️ Limpiar letras</button><button type="button" class="action-btn" onclick="shuffleTray()">🔀 Mezclar</button></div>
+    <div class="game-footer">Tip: <b>toca una letra</b> para colocarla o <b>arrástrala</b> a un espacio.</div>
+  </div>
+</main>
+<div id="modal" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="m-title"><div class="modal-box"><span class="modal-icon" id="m-icon">🏆</span><h2 class="modal-title" id="m-title">¡Buen trabajo!</h2><p class="modal-msg" id="m-msg"></p><button type="button" id="m-button" class="modal-btn" onclick="closeModal()">¡Entendido!</button></div></div>
+<div class="confetti-layer" id="confetti-layer" aria-hidden="true"></div>
+<script>
+/* La ilustración es SVG integrado: no requiere archivos externos. */
+const beeIllustration = `<svg class="intro-bee" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 270" aria-hidden="true"><defs><linearGradient id="mailboxblue" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#96bdf5"/><stop offset="1" stop-color="#6789d2"/></linearGradient><linearGradient id="beebody" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#ffe17c"/><stop offset="1" stop-color="#ffc64f"/></linearGradient></defs><ellipse cx="159" cy="255" rx="115" ry="12" fill="#4e7c8466"/><g transform="translate(18 18) rotate(-6 101 182)"><rect x="50" y="113" width="129" height="116" rx="19" fill="url(#mailboxblue)" stroke="#fff" stroke-width="7"/><path d="M50 152h129" stroke="#537ac0" stroke-width="7"/><rect x="88" y="131" width="53" height="12" rx="6" fill="#415f9e"/><rect x="107" y="89" width="13" height="28" rx="4" fill="#718fc5"/><path d="M113 94l43 10-43 8" fill="#f38ba0" stroke="#fff" stroke-width="3"/><rect x="104" y="168" width="30" height="24" rx="6" fill="#fef2c6"/><path d="m107 170 12 11 12-11" fill="none" stroke="#e9ad68" stroke-width="2"/></g><g transform="translate(43 6)"><g class="bee-wing-left"><ellipse cx="120" cy="120" rx="25" ry="40" fill="#fff" fill-opacity=".8" stroke="#a3d3e5" stroke-width="4" transform="rotate(-43 120 120)"/><animateTransform attributeName="transform" attributeType="XML" type="rotate" values="0 145 149;-12 145 149;0 145 149" keyTimes="0;.5;1" dur=".30s" repeatCount="indefinite"/></g><g class="bee-wing-right"><ellipse cx="178" cy="111" rx="25" ry="40" fill="#fff" fill-opacity=".84" stroke="#a3d3e5" stroke-width="4" transform="rotate(39 178 111)"/><animateTransform attributeName="transform" attributeType="XML" type="rotate" values="0 155 146;12 155 146;0 155 146" keyTimes="0;.5;1" dur=".30s" repeatCount="indefinite"/></g><ellipse cx="149" cy="171" rx="64" ry="59" fill="url(#beebody)" stroke="#b97934" stroke-width="4"/><path d="M107 129q-23 45 0 84M180 123q21 46 1 90" stroke="#7d513e" stroke-width="16" fill="none" stroke-linecap="round"/><ellipse cx="148" cy="133" rx="57" ry="55" fill="#ffdf80" stroke="#c98b41" stroke-width="4"/><path d="M125 89 115 66m54 22 11-24" stroke="#594d57" stroke-width="5" stroke-linecap="round"/><circle cx="112" cy="62" r="8" fill="#704f6b"/><circle cx="181" cy="61" r="8" fill="#704f6b"/><ellipse cx="125" cy="135" rx="6" ry="9" fill="#3b3044"/><ellipse cx="171" cy="135" rx="6" ry="9" fill="#3b3044"/><circle cx="123" cy="131" r="2.4" fill="#fff"/><circle cx="169" cy="131" r="2.4" fill="#fff"/><path d="M141 150q9 13 18 0" stroke="#714e54" stroke-width="3.5" stroke-linecap="round" fill="none"/><ellipse cx="111" cy="148" rx="9" ry="6" fill="#f69f92" opacity=".7"/><ellipse cx="186" cy="148" rx="9" ry="6" fill="#f69f92" opacity=".7"/><path d="M121 78q27-22 54 0" stroke="#7f6070" stroke-width="6" stroke-linecap="round" fill="none"/><path d="m122 76 7-13h42l6 13" fill="#e05d7a"/><rect x="116" y="75" width="61" height="8" rx="4" fill="#c94b79"/><rect x="119" y="179" width="65" height="48" rx="9" fill="#e58d72" stroke="#fff3d3" stroke-width="4"/><path d="m124 185 28 21 28-21" stroke="#fff7e7" stroke-width="3" fill="none"/><path d="M102 177q-30 8-26 35m138-40q25 9 30 29" stroke="#c98b41" stroke-width="9" stroke-linecap="round" fill="none"/></g><g fill="#fffadd"><path d="m24 49 5 11 11 4-11 4-5 12-4-12-12-4 12-4z"/><path d="m279 78 6 14 14 6-14 5-6 14-5-14-14-5 14-6z"/></g></svg>`;
+document.getElementById('intro-illustration').innerHTML = beeIllustration;
+if (window.matchMedia?.('(prefers-reduced-motion: reduce)').matches) {
+  document.querySelector('#intro-illustration svg')?.pauseAnimations?.();
+}
+const AudioType = window.AudioContext || window.webkitAudioContext;
+let audioCtx = null, isMuted = true;
+const soundToggle = document.getElementById('soundToggle');
+const bgAudio = document.getElementById('bgm'); bgAudio.volume = .22;
+function audioReady(){if (!AudioType || isMuted) return false;try{if(!audioCtx)audioCtx = new AudioType();if(audioCtx.state === 'suspended')audioCtx.resume();return true}catch(e){return false}}
+function tone(freq,type='sine',dur=.11,vol=.055,delay=0){if(!audioReady())return;const now=audioCtx.currentTime+delay;const o=audioCtx.createOscillator(),g=audioCtx.createGain();o.type=type;o.frequency.setValueAtTime(freq,now);g.gain.setValueAtTime(.0001,now);g.gain.exponentialRampToValueAtTime(vol,now+.016);g.gain.exponentialRampToValueAtTime(.0001,now+dur);o.connect(g);g.connect(audioCtx.destination);o.start(now);o.stop(now+dur+.01)}
+function sfxClick(){tone(670,'sine',.09,.035)}function sfxDrop(){tone(490,'triangle',.08,.055);tone(750,'sine',.10,.035,.05)}function sfxWrong(){tone(260,'triangle',.18,.06);tone(210,'triangle',.19,.05,.10)}function sfxVictory(){[523,659,784,1046].forEach((f,i)=>tone(f,'sine',.23,.055,i*.105))}
+soundToggle.addEventListener('click',()=>{isMuted=!isMuted;soundToggle.textContent=isMuted?'🔇':'🔊';soundToggle.setAttribute('aria-label',isMuted?'Activar sonido':'Silenciar sonido');if(isMuted)bgAudio.pause();else bgAudio.play().catch(()=>{});sfxClick()});
+const dictionaries={animales:['GATO','PERRO','VACA','PATO','RANA','MONO','LEON','TIGRE','OSO','LOBO','PEZ'],cosas:['MESA','SILLA','CAMA','CASA','TAZA','VASO','RELOJ','LAPIZ','LIBRO','AUTO','TREN'],colores:['ROJO','AZUL','VERDE','ROSA','GRIS','NEGRO','LILA','OCRE','CIAN']};
+const tilePalette=[['#ee8497','#c75978'],['#87bae7','#538ec5'],['#b4a0e4','#8069be'],['#81cbb0','#50a08b'],['#edb56d','#c88945'],['#e392bd','#b86a99']];
+const themes={animales:{emoji:'🐶',label:'Animales',heading:'¡Un animal escondido!'},cosas:{emoji:'🧸',label:'Cosas',heading:'¡Descubre el objeto!'},colores:{emoji:'🎨',label:'Colores',heading:'¡Descubre el color!'}};
+let currentTheme='animales',initialTimeLimit=0,timeLeft=0,timerInterval=null,nextWordTimer=null,isGameActive=false,currentWord='',lastWord='',score=0,locked=false,roundToken=0,drag=null,modalCallback=null;
+const dropZone=document.getElementById('drop-zone'),lettersTray=document.getElementById('letters-tray'),feedback=document.getElementById('feedback');
+function selectTheme(theme){if(!dictionaries[theme])return;currentTheme=theme;sfxClick();document.querySelectorAll('.theme-choice').forEach(b=>b.classList.toggle('active',b.id==='setup-theme-'+theme))}
+function formatTime(s){return String(Math.floor(s/60)).padStart(2,'0')+':'+String(s%60).padStart(2,'0')}
+function stopTimers(){clearInterval(timerInterval);clearTimeout(nextWordTimer);timerInterval=null;nextWordTimer=null;roundToken++}
+function startGame(){stopTimers();const input=parseInt(document.getElementById('setup-time').value,10);initialTimeLimit=Math.max(0,Math.min(9999,Number.isFinite(input)?input:0));score=0;lastWord='';locked=false;isGameActive=true;document.getElementById('score-display').textContent='0';document.getElementById('setup-screen').classList.add('hidden');document.getElementById('game-screen').classList.add('active');document.getElementById('modal').classList.remove('active');document.getElementById('mission-icon').textContent=themes[currentTheme].emoji;document.getElementById('mission-heading').textContent=themes[currentTheme].heading;sfxClick();setupTimer();loadNewWord()}
+function backToMenu(){stopTimers();cancelDrag();isGameActive=false;locked=false;document.getElementById('modal').classList.remove('active');modalCallback=null;document.getElementById('game-screen').classList.remove('active');document.getElementById('setup-screen').classList.remove('hidden');sfxClick()}
+function setupTimer(){clearInterval(timerInterval);const el=document.getElementById('timer-display');el.classList.remove('warning');if(initialTimeLimit===0){el.style.display='none';return}timeLeft=initialTimeLimit;el.style.display='flex';document.getElementById('time-left').textContent=formatTime(timeLeft);timerInterval=setInterval(()=>{if(!isGameActive || locked)return;timeLeft=Math.max(0,timeLeft-1);document.getElementById('time-left').textContent=formatTime(timeLeft);if(timeLeft===10){el.classList.add('warning');tone(320,'triangle',.17)}if(timeLeft===0){clearInterval(timerInterval);isGameActive=false;locked=true;cancelDrag();showModal('¡Se acabó el tiempo!','Ordenaste '+score+' '+(score===1?'palabra':'palabras')+' correctamente.\n¡Buen trabajo, cartero!',backToMenu,'⏰')}},1000)}
+function shuffle(array){for(let i=array.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[array[i],array[j]]=[array[j],array[i]]}return array}
+function setFeedback(text,type=''){feedback.textContent=text;feedback.className='feedback'+(type?' '+type:'')}
+function loadNewWord(){if(!isGameActive)return;cancelDrag();locked=false;dropZone.innerHTML='';lettersTray.innerHTML='';let pool=dictionaries[currentTheme].filter(w=>w!==lastWord);currentWord=pool[Math.floor(Math.random()*pool.length)]||dictionaries[currentTheme][0];lastWord=currentWord;const chars=[...currentWord];document.getElementById('word-length').textContent=chars.length+' letras';document.getElementById('letters-progress').textContent='0 de '+chars.length;document.getElementById('progress-dots').innerHTML=chars.map(()=>'<span></span>').join('');for(let i=0;i<chars.length;i++){const slot=document.createElement('div');slot.className='drop-slot';slot.dataset.index=i;slot.setAttribute('aria-label','Espacio '+(i+1));dropZone.appendChild(slot)}let scrambled=shuffle([...chars]);let attempts=0;while(scrambled.join('')===currentWord&&attempts++<10)scrambled=shuffle([...chars]);scrambled.forEach((letter,index)=>{const tile=document.createElement('button');tile.type='button';tile.className='letter-tile';tile.textContent=letter;tile.setAttribute('aria-label','Letra '+letter+'; toca para colocarla');tile.dataset.tile=index;const [col,dark]=tilePalette[Math.floor(Math.random()*tilePalette.length)];tile.style.setProperty('--tile-color',col);tile.style.setProperty('--tile-dark',dark);tile.addEventListener('pointerdown',tilePointerDown);tile.addEventListener('keydown',e=>{if((e.key==='Enter'||e.key===' ')&&isGameActive&&!locked){e.preventDefault();tapTile(tile)}});lettersTray.appendChild(tile)});setFeedback('¡Arma la palabra! ✨');updateProgress();}
+function updateProgress(){const slots=[...dropZone.children];const n=slots.filter(s=>s.querySelector('.letter-tile')).length;document.getElementById('letters-progress').textContent=n+' de '+slots.length;document.querySelectorAll('#progress-dots span').forEach((dot,i)=>dot.classList.toggle('on',i<n));slots.forEach(s=>s.classList.toggle('filled',!!s.querySelector('.letter-tile')))}
+function settleTile(tile,target){if(!isGameActive||locked)return;const from=tile.parentElement;if(target&&target.classList.contains('drop-slot')){const existing=target.querySelector('.letter-tile');if(existing===tile)return;if(existing){if(from&&from.classList.contains('drop-slot'))from.appendChild(existing);else lettersTray.appendChild(existing)}target.appendChild(tile);sfxDrop()}else if(target===lettersTray&&from!==lettersTray){lettersTray.appendChild(tile);sfxDrop()}else return;updateProgress();checkWord()}
+function tapTile(tile){if(!isGameActive||locked)return;if(tile.parentElement===lettersTray){const first=[...dropZone.children].find(el=>!el.querySelector('.letter-tile'));if(first)settleTile(tile,first);else setFeedback('¡Sobre lleno! Mueve una letra primero.','bad')}else{settleTile(tile,lettersTray)}}
+function tilePointerDown(e){if(!isGameActive||locked||e.button!==0 ||drag)return;const tile=e.currentTarget;drag={tile,origin:tile.parentElement,pointerId:e.pointerId,x:e.clientX,y:e.clientY,moved:false,ghost:null};tile.setPointerCapture(e.pointerId);tile.addEventListener('pointermove',tilePointerMove);tile.addEventListener('pointerup',tilePointerUp);tile.addEventListener('pointercancel',tilePointerCancel);sfxClick()}
+function tilePointerMove(e){if(!drag||drag.pointerId!==e.pointerId)return;const d=drag;if(!d.moved&&Math.hypot(e.clientX-d.x,e.clientY-d.y)>7){d.moved=true;d.ghost=d.tile.cloneNode(true);d.ghost.removeAttribute('id');d.ghost.classList.add('ghost');d.tile.classList.add('origin-drag');document.body.appendChild(d.ghost)}if(d.moved){e.preventDefault();d.ghost.style.left=e.clientX+'px';d.ghost.style.top=e.clientY+'px';highlightSlot(e.clientX,e.clientY)}}
+function findDropTarget(x,y){const el=document.elementFromPoint(x,y);if(!el)return null;const slot=el.closest('.drop-slot');if(slot&&dropZone.contains(slot))return slot;if(el.closest('#letters-tray'))return lettersTray;return null}
+function highlightSlot(x,y){const target=findDropTarget(x,y);document.querySelectorAll('.drop-slot.hovered').forEach(s=>s.classList.remove('hovered'));if(target&&target.classList.contains('drop-slot'))target.classList.add('hovered')}
+function cleanupPointer(d){d.tile.removeEventListener('pointermove',tilePointerMove);d.tile.removeEventListener('pointerup',tilePointerUp);d.tile.removeEventListener('pointercancel',tilePointerCancel);d.tile.classList.remove('origin-drag');if(d.ghost)d.ghost.remove();document.querySelectorAll('.drop-slot.hovered').forEach(s=>s.classList.remove('hovered'));drag=null}
+function tilePointerUp(e){if(!drag||drag.pointerId!==e.pointerId)return;const d=drag;const dest=d.moved?findDropTarget(e.clientX,e.clientY):null;const wasMoved=d.moved;cleanupPointer(d);if(!isGameActive||locked)return;if(wasMoved){if(dest)settleTile(d.tile,dest)}else tapTile(d.tile)}
+function tilePointerCancel(e){if(drag&&drag.pointerId===e.pointerId)cleanupPointer(drag)}
+function cancelDrag(){if(drag)cleanupPointer(drag)}
+function clearSlots(){if(!isGameActive||locked)return;cancelDrag();for(const slot of dropZone.children){const tile=slot.querySelector('.letter-tile');if(tile)lettersTray.appendChild(tile)}sfxClick();setFeedback('¡Vuelve a intentarlo! ✨');updateProgress()}
+function shuffleTray(){if(!isGameActive||locked)return;const t=[...lettersTray.children];shuffle(t);t.forEach(tile=>lettersTray.appendChild(tile));sfxClick();setFeedback('¡Letras mezcladas! 🔀')}
+function checkWord(){if(!isGameActive||locked)return;const slots=[...dropZone.children];if(slots.some(s=>!s.querySelector('.letter-tile')))return;const formed=slots.map(s=>s.querySelector('.letter-tile').textContent).join('');if(formed!==currentWord){sfxWrong();const stage=document.getElementById('play-stage');stage.classList.remove('stage-shake');void stage.offsetWidth;stage.classList.add('stage-shake');setFeedback('¡Casi! Revisa el orden y prueba otra vez.','bad');setTimeout(()=>stage.classList.remove('stage-shake'),420);return}locked=true;score++;document.getElementById('score-display').textContent=score;document.getElementById('score-display').parentElement.classList.remove('score-bump');void document.getElementById('score-display').offsetWidth;document.getElementById('score-display').parentElement.classList.add('score-bump');sfxVictory();setFeedback('¡Entrega perfecta! ¡'+currentWord+'! 🎉','good');slots.forEach((s,i)=>{const t=s.querySelector('.letter-tile');t.classList.add('success-tile');t.style.animationDelay=i*.06+'s'});burstConfetti(45);const point=document.createElement('div');point.className='mail-pop';point.textContent='+1 ⭐';const r=dropZone.getBoundingClientRect();point.style.top=(r.top+15)+'px';point.style.left=(r.left+r.width/2-20)+'px';document.body.appendChild(point);setTimeout(()=>point.remove(),1100);clearTimeout(nextWordTimer);const token=roundToken;nextWordTimer=setTimeout(()=>{if(isGameActive&&token===roundToken)loadNewWord()},1300)}
+function burstConfetti(count){if(matchMedia('(prefers-reduced-motion: reduce)').matches)return;const root=document.getElementById('confetti-layer');const colors=['#f28e9f','#a89be0','#7bcfb5','#efc47b','#9bcff3'];for(let i=0;i<count;i++){const el=document.createElement('span');el.className='confetti';const x=(8+Math.random()*84)+'vw';el.style.left=x;el.style.setProperty('--x',x);el.style.setProperty('--drift',((Math.random()-.5)*230)+'px');el.style.setProperty('--dur',(1.8+Math.random()*1.5)+'s');el.style.setProperty('--angle',Math.random()*360+'deg');el.style.setProperty('--c',colors[Math.floor(Math.random()*colors.length)]);el.style.animationDelay=(Math.random()*.28)+'s';root.appendChild(el);setTimeout(()=>el.remove(),3500)}}
+function showModal(title,msg,callback=null,icon='🏆'){document.getElementById('m-title').textContent=title;document.getElementById('m-msg').textContent=msg;document.getElementById('m-icon').textContent=icon;document.getElementById('modal').classList.add('active');modalCallback=callback;document.getElementById('m-button').focus()}
+function closeModal(){sfxClick();document.getElementById('modal').classList.remove('active');const cb=modalCallback;modalCallback=null;if(cb)cb()}
+</script>
 </body>
 </html>

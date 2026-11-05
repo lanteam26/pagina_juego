@@ -1,231 +1,149 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Ascenso al Misti: Expedición Characata 🌋</title>
-    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&family=Nunito:wght@800;900&display=swap" rel="stylesheet">
-    
-    <style>
-        :root { 
-            --sillar-light: #ffffff;
-            --sillar-border: #d0d3d4;
-            --sky-top: #154360;
-            --sky-bottom: #3498db;
-            --aqp-red: #b03a2e;
-            --aqp-gold: #f39c12;
-        }
-
-        body, html { 
-            font-family: 'Fredoka', sans-serif; 
-            display: flex; flex-direction: column; align-items: center; justify-content: flex-start;
-            margin: 0; padding: 0; width: 100vw; height: 100vh; 
-            touch-action: manipulation; 
-            color: #333; background: linear-gradient(135deg, var(--sky-top) 0%, var(--sky-bottom) 100%); 
-            overflow: hidden; box-sizing: border-box;
-            user-select: none;
-        }
-
-        .decorations { position: fixed; inset: 0; z-index: -1; pointer-events: none; overflow: hidden; }
-        .sun { position: absolute; top: 5%; right: 5%; font-size: 80px; filter: drop-shadow(0 0 30px rgba(243, 156, 18, 0.9)); animation: pulseSun 5s infinite alternate; }
-        @keyframes pulseSun { 0% { transform: scale(1); } 100% { transform: scale(1.1); } }
-
-        .sound-toggle { position: absolute; top: 15px; right: 15px; background: rgba(255,255,255,0.9); border: 3px solid var(--sillar-border); border-radius: 50%; width: 45px; height: 45px; font-size: 20px; display: flex; justify-content: center; align-items: center; cursor: pointer; z-index: 1000; box-shadow: 0 4px 10px rgba(0,0,0,0.3); transition: all 0.2s;}
-        .sound-toggle:active { transform: translateY(4px); box-shadow: none; }
-
-        /* LOBBY */
-        #setup-screen {
-            position: absolute; inset: 0; z-index: 500; display: flex; flex-direction: column; justify-content: center; align-items: center;
-            background: rgba(10, 20, 30, 0.8); backdrop-filter: blur(10px);
-        }
-
-        .sillar-card {
-            background: var(--sillar-light); padding: 35px; border-radius: 20px;
-            box-shadow: 0 20px 50px rgba(0,0,0,0.6); 
-            border: 6px solid #95a5a6; text-align: center; max-width: 90%; width: 500px; 
-            display: flex; flex-direction: column; gap: 15px; color: #2c3e50;
-        }
-
-        .sillar-card h1 { font-family: 'Nunito', sans-serif; font-size: clamp(28px, 5vh, 38px); color: var(--aqp-red); margin: 0; text-transform: uppercase; text-shadow: 1px 1px 0px #f9e79f;}
-        
-        .setup-section { background: #f2f4f4; padding: 12px; border: 2px dashed #bdc3c7; display: flex; flex-direction: column; gap: 8px; align-items: center; border-radius: 12px;}
-        .setup-section h3 { margin: 0; color: #34495e; font-size: 16px; text-transform: uppercase; font-weight: 800;}
-        
-        .setup-row { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; width: 100%;}
-        
-        .setup-btn { background: #fff; border: 2px solid #bdc3c7; padding: 8px 14px; font-size: 16px; font-weight: bold; color: #7f8c8d; cursor: pointer; transition: all 0.1s; font-family: 'Fredoka', sans-serif; border-radius: 10px; box-shadow: 0 4px 0 #bdc3c7;}
-        .setup-btn.active.diff { background: var(--aqp-red); border-color: #641e16; color: #fff; box-shadow: 0 4px 0 #641e16; transform: translateY(2px);}
-        .setup-btn:active:not(.active) { transform: translateY(2px); box-shadow: none; }
-
-        .time-input-group { display: flex; align-items: center; gap: 10px; background: #fff; padding: 6px 15px; border: 2px solid #bdc3c7; border-radius: 10px;}
-        .time-input-group label { color: #2c3e50; font-size: 18px; font-weight: bold;}
-        .time-input-group input { width: 60px; background: #ecf0f1; border: 1px solid #bdc3c7; color: #2c3e50; text-align: center; font-family: 'Nunito', sans-serif; font-size: 18px; padding: 4px; outline: none; font-weight: bold; border-radius: 6px;}
-        
-        .start-btn {
-            background: var(--aqp-gold); border: none; box-shadow: 0 8px 0 #b7950b, 0 15px 25px rgba(0,0,0,0.3); padding: 14px 30px; font-size: 26px; color: #111; text-transform: uppercase; font-weight: 900; font-family: 'Nunito', sans-serif; cursor:pointer; margin-top: 5px; transition: all 0.1s; border-radius: 15px;
-        }
-        .start-btn:active { transform: translateY(6px); box-shadow: 0 0 0 #b7950b; }
-
-        /* ============================================================
-           PANTALLA DE JUEGO & HUD
-           ============================================================ */
-        #game-screen {
-            display: none; flex-direction: column; align-items: center; justify-content: flex-start;
-            width: 100vw; height: 100vh; padding: 1.5vh 2vw; box-sizing: border-box; overflow: hidden;
-        }
-
-        .game-header { flex: 0 0 auto; display: flex; justify-content: space-between; align-items: center; width: 100%; max-width: 1100px; margin-bottom: 1.5vh; z-index: 10; }
-        
-        .back-menu-btn { background: rgba(255,255,255,0.9); border: 2px solid var(--sillar-border); padding: 8px 16px; font-size: 15px; font-weight: bold; color: #2c3e50; cursor: pointer; transition: all 0.1s; font-family: 'Fredoka', sans-serif; box-shadow: 0 4px 0 rgba(0,0,0,0.2); border-radius: 10px;}
-        .back-menu-btn:active { transform: translateY(4px); box-shadow: none;}
-
-        .hud-group { display: flex; gap: 12px; align-items: center; }
-        .lives-box, .score-box {
-            background: rgba(255,255,255,0.95); padding: 8px 18px; border-radius: 12px;
-            border: 2px solid var(--sillar-border); font-size: 18px; color: #2c3e50; font-weight: bold;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
-        }
-        .lives-box { border-color: var(--aqp-red); color: var(--aqp-red); }
-
-        /* CONTENEDOR SPLIT */
-        .game-split-container {
-            flex: 1 1 auto; width: 100%; max-width: 1100px; display: flex; gap: 25px; align-items: stretch; justify-content: center; z-index: 5; margin-bottom: 1vh; min-height: 0;
-        }
-
-        /* COLUMNA IZQUIERDA */
-        .left-panel {
-            flex: 1.1; display: flex; flex-direction: column; gap: 18px; justify-content: center; align-items: center; max-width: 480px;
-        }
-
-        .prompt-box { 
-            text-align: center; background: rgba(253, 254, 254, 0.95); padding: 20px; 
-            border-radius: 18px; font-size: clamp(18px, 2.8vh, 24px); font-weight: 800; color: #2c3e50;
-            width: 100%; border: 4px solid var(--sillar-border); 
-            box-shadow: 0 10px 30px rgba(0,0,0,0.25); box-sizing: border-box; 
-            font-family: 'Nunito', sans-serif; backdrop-filter: blur(5px);
-        }
-
-        .options-container {
-            display: flex; flex-direction: column; gap: 14px; width: 100%;
-        }
-
-        .option-btn {
-            background: #fdfefe; border: 3px solid #bdc3c7; border-radius: 16px;
-            padding: 15px 22px; font-size: clamp(16px, 2.3vh, 20px); font-weight: 700; color: #2c3e50;
-            cursor: pointer; box-shadow: 0 6px 0 #bdc3c7; transition: all 0.1s; font-family: 'Fredoka', sans-serif;
-            text-align: center; display: flex; align-items: center; justify-content: center; gap: 12px;
-        }
-        .option-btn:active { transform: translateY(4px); box-shadow: 0 2px 0 #bdc3c7; background: #eaeded; }
-        .option-btn.correct { background: #2ecc71 !important; border-color: #27ae60 !important; color: #fff !important; box-shadow: 0 2px 0 #27ae60 !important; transform: translateY(4px); }
-        .option-btn.wrong { background: #e74c3c !important; border-color: #c0392b !important; color: #fff !important; box-shadow: 0 2px 0 #c0392b !important; transform: translateY(4px); }
-
-        /* COLUMNA DERECHA */
-        .right-panel {
-            flex: 1.3; position: relative; background: rgba(5, 10, 20, 0.4); border-radius: 20px; border: 3px solid rgba(255,255,255,0.35);
-            box-shadow: inset 0 0 50px rgba(0,0,0,0.5), 0 15px 35px rgba(0,0,0,0.3);
-            overflow: hidden; display: flex; justify-content: center; align-items: center; backdrop-filter: blur(4px);
-        }
-        
-        #gameCanvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; }
-
-        @keyframes earthquake { 
-            0%, 100% { transform: translate(0, 0); } 
-            10%, 30%, 50%, 70%, 90% { transform: translate(-12px, 8px); } 
-            20%, 40%, 60%, 80% { transform: translate(12px, -8px); } 
-        }
-        .damage-shake { animation: earthquake 0.4s cubic-bezier(.36,.07,.19,.97) both; }
-
-        /* MODAL */
-        .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.85); display: flex; justify-content: center; align-items: center; z-index: 1000; visibility: hidden; opacity: 0; transition: all 0.3s; backdrop-filter: blur(5px);}
-        .modal-overlay.active { visibility: visible; opacity: 1; }
-        .modal-box { background: var(--sillar-light); padding: 35px; border-radius: 20px; text-align: center; max-width: 85%; width: 450px; transform: scale(0.9); transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); border: 5px solid var(--sillar-border); box-shadow: 0 20px 50px rgba(0,0,0,0.6); color: #2c3e50;}
-        .modal-overlay.active .modal-box { transform: scale(1); }
-        .modal-title { font-size: 38px; margin-top: 0; margin-bottom: 10px; color: var(--aqp-red); text-transform: uppercase; font-family: 'Nunito', sans-serif; font-weight: 900;}
-        .modal-msg { font-size: 20px; margin-bottom: 25px; color: #555; white-space: pre-line; line-height: 1.4; font-weight: 600;}
-        .modal-btn { background: var(--aqp-gold); border: none; box-shadow: 0 6px 0 #b7950b; color: #111; padding: 12px 30px; font-size: 22px; border-radius: 12px; text-transform: uppercase; font-weight: 900; font-family: 'Nunito', sans-serif; cursor:pointer; transition: all 0.1s;}
-        .modal-btn:active { transform: translateY(6px); box-shadow: none;}
-
-        @media (max-width: 800px) {
-            .game-split-container { flex-direction: column-reverse; align-items: center; }
-            .left-panel { max-width: 100%; width: 100%; }
-            .right-panel { width: 100%; height: 280px; flex: none; }
-        }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Ascenso al Misti · Expedición Characata</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Nunito:wght@600;700;800;900&display=swap" rel="stylesheet">
+<style>
+:root{--ink:#293b50;--deep:#183951;--muted:#66798a;--brick:#c85c42;--brick-dark:#a53d32;--gold:#f6ba59;--honey:#ffdc85;--cream:#fff9ed;--white:#fffefa;--stroke:#e9dfd0;--mint:#82c7a1;--teal:#177d83;--shadow:0 16px 45px rgba(45,72,94,.17)}
+*{box-sizing:border-box}
+html,body{margin:0;min-height:100%;width:100%;color:var(--ink);font-family:'Fredoka',system-ui,sans-serif}
+body{background:linear-gradient(180deg,#91cce5 0%,#cae9e3 45%,#f7e1ad 100%);overflow-x:hidden;user-select:none}
+button,input{font:inherit}button{cursor:pointer;-webkit-tap-highlight-color:transparent}button:focus-visible,input:focus-visible{outline:3px solid #238da0;outline-offset:3px}
+button:disabled{cursor:not-allowed;opacity:.58}
+.backdrop{position:fixed;inset:0;overflow:hidden;pointer-events:none;z-index:0;background:radial-gradient(ellipse at 80% 3%,rgba(255,250,219,.84),transparent 33%),linear-gradient(#91cce5,#e0f2e8 54%,#f6ddb0 100%)}
+.backdrop:before{content:'';position:absolute;inset:0;opacity:.13;background-image:radial-gradient(#fff 1.1px,transparent 1.1px);background-size:24px 24px}
+.bg-sun{position:absolute;width:180px;height:180px;right:8%;top:7%;border-radius:50%;background:#fff1b8;box-shadow:0 0 0 25px rgba(255,247,193,.16),0 0 0 55px rgba(255,245,193,.09)}
+.bg-cloud{position:absolute;width:160px;height:42px;border-radius:50px;background:rgba(255,255,255,.61);filter:blur(.25px);animation:cloudDrift 22s ease-in-out infinite alternate}
+.bg-cloud:before,.bg-cloud:after{content:'';position:absolute;border-radius:50%;background:inherit}.bg-cloud:before{height:66px;width:75px;left:29px;bottom:5px}.bg-cloud:after{height:55px;width:71px;left:70px;bottom:2px}.cloud-a{left:8%;top:18%}.cloud-b{right:4%;top:30%;transform:scale(.75);animation-delay:-8s}.cloud-c{left:36%;top:7%;transform:scale(.55);animation-delay:-4s}
+.bg-hill{position:absolute;bottom:-9vh;width:85vw;height:29vh;border-radius:50% 50% 0 0}.hill-left{left:-18%;background:#93c19b;transform:rotate(4deg)}.hill-right{right:-25%;height:24vh;background:#75aa8d;transform:rotate(-7deg)}
+@keyframes cloudDrift{to{translate:32px -8px}}@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}@keyframes pop{from{opacity:0;transform:translateY(18px) scale(.94)}to{opacity:1;transform:translateY(0) scale(1)}}@keyframes tap{50%{transform:scale(.965)}}@keyframes shimmer{from{background-position:160% 0}to{background-position:-80% 0}}@keyframes wiggle{0%,100%{transform:rotate(0)}25%{transform:rotate(-5deg)}75%{transform:rotate(4deg)}}
+/* LOBBY */
+#setup-screen{position:relative;z-index:2;min-height:100dvh;display:flex;align-items:center;justify-content:center;padding:26px}
+.intro-shell{width:min(1090px,100%);display:grid;grid-template-columns:1.06fr .94fr;overflow:hidden;background:var(--cream);border:6px solid rgba(255,255,255,.9);border-radius:34px;box-shadow:0 24px 75px rgba(31,71,91,.24),0 10px 0 rgba(54,103,108,.16);animation:pop .5s cubic-bezier(.16,1,.3,1) both}
+.intro-art{position:relative;min-height:605px;overflow:hidden;background:linear-gradient(160deg,#65b7dc,#b4e3d9 54%,#ffe3a8)}
+.intro-art:before{content:'';position:absolute;inset:0;background:linear-gradient(130deg,rgba(255,255,255,.15),transparent 30%);pointer-events:none;z-index:1}
+.intro-art svg{position:absolute;bottom:0;width:100%;height:95%;object-fit:cover}
+.intro-label{position:absolute;left:29px;top:28px;color:#225571;font-size:12px;letter-spacing:2.3px;font-weight:900;font-family:Nunito,sans-serif;background:#e9f9f4dd;padding:10px 15px;border-radius:100px;z-index:2}
+.intro-headline{position:absolute;left:31px;top:83px;z-index:2;color:#fff;filter:drop-shadow(0 4px 0 rgba(25,74,97,.2))}.intro-headline span{display:block;color:#fffdf5;font-family:Nunito,sans-serif;font-weight:900;font-size:clamp(36px,4.2vw,60px);line-height:.95;letter-spacing:-1.8px}.intro-headline em{display:block;color:#ffe39a;font-family:Nunito,sans-serif;font-style:normal;font-weight:900;font-size:clamp(38px,4.8vw,66px);line-height:1.04}
+.art-note{position:absolute;left:28px;bottom:22px;right:28px;background:rgba(255,253,242,.91);padding:13px 18px;border-radius:16px;color:#356070;z-index:2;font-weight:600;font-size:14px;box-shadow:0 5px 20px rgba(34,86,102,.13)}
+.sillar-card{padding:39px 36px 34px;display:flex;flex-direction:column;justify-content:center;gap:21px;background:radial-gradient(circle at top right,rgba(249,212,153,.18),transparent 35%),#fffcf5}
+.mini-label{font-family:Nunito,sans-serif;color:#b66c47;font-size:11px;letter-spacing:2.6px;font-weight:900;text-transform:uppercase}
+.sillar-card h1{font-family:Nunito,sans-serif;color:var(--deep);margin:5px 0 7px;font-size:clamp(27px,3.4vw,39px);font-weight:900;line-height:1.08;letter-spacing:-1.2px}
+.sillar-card .sub{color:#788796;font-size:15px;line-height:1.55;margin:0}
+.setup-section{display:flex;flex-direction:column;gap:11px}
+.setup-section h3{font-family:Nunito,sans-serif;font-size:11px;text-transform:uppercase;letter-spacing:1.7px;color:#9a766a;margin:0;font-weight:900}
+.setup-row{display:flex;flex-wrap:wrap;gap:9px}
+.setup-btn{border:2px solid #e8e2d5;color:#687784;background:#fff;border-radius:12px;padding:10px 14px;font-size:13px;font-weight:600;transition:transform .18s,box-shadow .18s,background .18s;box-shadow:0 3px 0 #e6e0d4}
+.setup-btn:hover{transform:translateY(-2px);border-color:#e2a585}
+.setup-btn.active{border-color:#b84b39;background:#cb654a;color:white;box-shadow:0 4px 0 #a94435}
+.time-input-group{display:flex;align-items:center;justify-content:space-between;gap:15px;border:2px solid #e9e3d8;background:white;padding:10px 15px;border-radius:14px;color:#677889;font-size:14px}.time-input-group input{width:75px;text-align:center;padding:7px;border:1px solid #d7e3de;border-radius:10px;background:#f5f8f4;color:var(--deep);font-size:18px;font-weight:700}.tiny-hint{font-size:12px;color:#92a2a7;margin-top:-7px}
+.start-btn,.modal-btn{position:relative;border:none;border-radius:15px;background:linear-gradient(135deg,#ffcc69,#f3a73d);padding:16px 22px;font-family:Nunito,sans-serif;font-weight:900;color:#623d27;font-size:18px;box-shadow:0 6px 0 #c98534,0 10px 24px rgba(232,144,58,.21);transition:transform .14s,box-shadow .14s}
+.start-btn:hover,.modal-btn:hover{transform:translateY(-2px);box-shadow:0 8px 0 #c98534,0 13px 24px rgba(232,144,58,.28)}.start-btn:active,.modal-btn:active{transform:translateY(5px);box-shadow:0 1px 0 #c98534}
+.sellar-note{display:flex;align-items:center;gap:7px;color:#889da1;font-size:12px;justify-content:center}
+/* GAME */
+#game-screen{position:relative;z-index:2;display:none;width:100%;height:100dvh;min-height:600px;max-width:1330px;margin:auto;padding:20px 27px 23px;flex-direction:column;gap:15px}
+.game-header{display:flex;align-items:center;justify-content:space-between;gap:18px;flex:0 0 auto}
+.game-brand{display:flex;align-items:center;gap:13px}.brand-icon{width:49px;height:49px;border-radius:15px;background:#fff2d3;display:grid;place-items:center;font-size:29px;border:2px solid rgba(255,255,255,.95);box-shadow:0 4px 0 #e6c88b}
+.game-brand strong{display:block;color:#1c4b64;font-weight:900;font-family:Nunito,sans-serif;font-size:19px;line-height:1.12}.game-brand span{font-size:10px;color:#4b7888;text-transform:uppercase;letter-spacing:1.5px;font-weight:800}
+.back-menu-btn{background:#ffffffd9;color:#2d647a;border:1.5px solid #fff;padding:10px 15px;border-radius:12px;font-weight:700;font-size:13px;box-shadow:0 4px 10px #396c8421;white-space:nowrap}.back-menu-btn:hover{background:white}
+.hud-group{display:flex;gap:10px}.hud-chip{display:flex;align-items:center;gap:9px;background:#fffdf6ec;border:2px solid white;border-radius:15px;padding:8px 13px;box-shadow:0 4px 15px #315a7120}.hud-icon{font-size:22px}.hud-copy{display:flex;flex-direction:column;line-height:1.15}.hud-copy small{color:#8d9ca7;text-transform:uppercase;font:900 10px Nunito,sans-serif;letter-spacing:1px}.hud-copy strong{font-size:18px;color:#264b5c;font-weight:700}.lives-box .hud-copy strong{color:#b9504a}
+.progress-strip{padding:13px 18px;background:#ffffffd7;border:1px solid #fff;border-radius:17px;box-shadow:0 5px 15px rgba(42,86,105,.1)}
+.progress-top{display:flex;align-items:center;justify-content:space-between;gap:10px;color:#4d7080;font-size:12px;font-weight:700}.progress-top strong{color:var(--brick-dark)}.progress-track{height:10px;margin-top:10px;border-radius:30px;background:#e4e7e2;overflow:hidden;box-shadow:inset 0 2px 4px #8aa1a82f}.progress-fill{width:0;height:100%;border-radius:30px;background:linear-gradient(90deg,#e68e59,#f7bf6b,#ffdb83);transition:width .85s cubic-bezier(.2,.85,.2,1);box-shadow:0 0 12px #fabc6b}
+.game-split-container{display:grid;grid-template-columns:minmax(340px,.89fr) minmax(440px,1.11fr);align-items:stretch;gap:20px;flex:1;min-height:0}
+.left-panel{background:rgba(255,252,244,.94);border:2px solid #fff;border-radius:25px;box-shadow:var(--shadow);padding:25px;display:flex;flex-direction:column;min-height:0;justify-content:center;gap:18px}
+.question-kicker{color:#bd795e;font:900 11px Nunito,sans-serif;text-transform:uppercase;letter-spacing:2.1px;display:flex;align-items:center;gap:8px}
+.prompt-box{border-radius:18px;background:linear-gradient(150deg,#fff9ea,#ffeed2);border:1.8px solid #f5daba;padding:25px 22px;box-shadow:0 4px 0 #edddc0;min-height:130px;display:flex;align-items:center;justify-content:center;text-align:center}
+.prompt-box span{font-family:Nunito,sans-serif;font-size:clamp(19px,2.1vw,29px);font-weight:900;color:#344c54;line-height:1.3;letter-spacing:-.5px}
+.options-container{display:flex;flex-direction:column;gap:12px}
+.option-btn{width:100%;border:2px solid #e5e6df;background:#fff;color:#3d5961;border-radius:15px;padding:11px 13px;display:flex;align-items:center;text-align:left;gap:13px;font-size:clamp(14px,1.4vw,17px);line-height:1.18;font-weight:600;box-shadow:0 4px 0 #e0dfd6;transition:transform .15s,border-color .15s,background .15s,box-shadow .15s;min-height:64px}
+.option-btn:hover:not(:disabled){transform:translateY(-2px);border-color:#e1a768;box-shadow:0 6px 0 #e0dfd6;background:#fffaf0}
+.option-btn:active:not(:disabled){transform:translateY(3px);box-shadow:0 1px 0 #e0dfd6}
+.answer-letter{flex-shrink:0;width:38px;height:38px;border-radius:11px;background:#e9f4ef;border:1px solid #d0e7dc;color:#30817a;display:grid;place-items:center;font:900 16px Nunito,sans-serif}
+.option-btn.correct{background:#e0f8e7;border-color:#61c391;box-shadow:0 4px 0 #69b787;color:#16654a}.option-btn.correct .answer-letter{color:#fff;background:#3fb680;border-color:#3fb680}
+.option-btn.wrong{background:#ffe6df;border-color:#e8887a;box-shadow:0 4px 0 #d67a6b;color:#9b4238}.option-btn.wrong .answer-letter{color:#fff;background:#d16b5c;border-color:#d16b5c}
+.feedback-line{min-height:26px;text-align:center;color:#648189;font-size:13px;font-weight:600}.feedback-line.good{color:#218c65}.feedback-line.bad{color:#c2584c}
+.right-panel{position:relative;min-height:0;border-radius:25px;overflow:hidden;background:linear-gradient(#88cde6,#ffeacb);border:4px solid #fff8ec;box-shadow:0 9px 0 #d7c49f,0 18px 34px rgba(47,84,102,.16)}
+#gameCanvas{display:block;width:100%;height:100%}
+.scene-label{pointer-events:none;position:absolute;top:17px;left:17px;background:#ffffffd9;border:1px solid white;border-radius:100px;color:#37697a;padding:8px 12px;font:800 10px Nunito,sans-serif;letter-spacing:1.5px}
+.scene-hint{pointer-events:none;position:absolute;bottom:15px;left:15px;right:15px;display:flex;justify-content:space-between;gap:7px;color:#fffdf5;font-size:11px;font-weight:600;text-shadow:0 2px 8px #543726aa}.scene-hint span{background:#324e58a8;border:1px solid #ffffff54;border-radius:40px;padding:7px 11px;backdrop-filter:blur(4px)}
+.damage-shake{animation:damage .48s both}@keyframes damage{0%,100%{transform:translate(0)}15%,55%{transform:translate(-6px,3px)}35%,75%{transform:translate(5px,-2px)}}
+/* END */
+.modal-overlay{position:fixed;inset:0;z-index:1000;display:flex;align-items:center;justify-content:center;padding:20px;background:rgba(25,50,62,.65);backdrop-filter:blur(9px);visibility:hidden;opacity:0;transition:opacity .3s,visibility .3s}.modal-overlay.active{visibility:visible;opacity:1}
+.modal-box{position:relative;width:min(460px,100%);padding:40px 34px 32px;text-align:center;border-radius:28px;border:5px solid #fffdf4;background:linear-gradient(155deg,#fffdf5,#ffeacb);box-shadow:0 23px 0 #455c5060,0 30px 65px #1c2c3580;transform:translateY(28px) scale(.9);transition:transform .35s cubic-bezier(.2,1.4,.3,1)}.modal-overlay.active .modal-box{transform:translateY(0) scale(1)}
+.modal-medal{font-size:64px;display:block;margin-bottom:3px;animation:float 2.2s ease-in-out infinite}.modal-title{font:900 clamp(25px,5vw,35px) Nunito,sans-serif;line-height:1.1;color:#ba5946;margin:8px 0 12px}.modal-msg{font-size:17px;line-height:1.45;white-space:pre-line;color:#6d7276;margin:0 0 24px}.modal-btn{min-width:185px}
+#confetti-canvas{pointer-events:none;position:fixed;inset:0;width:100%;height:100%;z-index:1100}
+@media(max-width:1030px){.game-split-container{grid-template-columns:minmax(0,.94fr) minmax(0,1.06fr);gap:14px}.left-panel{padding:18px;gap:12px}.prompt-box{padding:16px;min-height:105px}.option-btn{min-height:52px}.intro-art{min-height:570px}.sillar-card{padding:28px}}
+@media(max-width:760px){#game-screen{height:auto;min-height:100dvh;padding:15px 14px 28px;gap:12px}.game-header{flex-wrap:wrap;gap:10px}.game-brand strong{font-size:16px}.game-brand span{font-size:9px}.brand-icon{width:41px;height:41px;font-size:24px}.hud-group{margin-left:auto}.hud-chip{padding:6px 9px;gap:5px}.hud-icon{font-size:17px}.hud-copy strong{font-size:15px}.hud-copy small{font-size:8px}.progress-strip{padding:10px 13px}.game-split-container{display:flex;flex-direction:column;gap:15px;flex:initial;min-height:0}.right-panel{order:0;width:100%;height:clamp(270px,44vh,400px);flex:none}.left-panel{order:1;width:100%;flex:none;padding:17px 16px;gap:14px}.prompt-box{min-height:95px}.prompt-box span{font-size:21px}.option-btn{min-height:56px}.intro-shell{max-width:560px;grid-template-columns:1fr}.intro-art{min-height:310px}.intro-art svg{height:100%}.intro-headline{top:60px}.intro-headline span{font-size:36px}.intro-headline em{font-size:40px}.intro-label{top:15px;left:19px}.art-note{display:none}.sillar-card{gap:16px}.bg-sun{width:120px;height:120px}}
+@media(max-width:440px){#setup-screen{padding:12px}.intro-shell{border-width:4px;border-radius:25px}.intro-art{min-height:252px}.intro-headline{left:20px;top:52px}.intro-headline span{font-size:30px}.intro-headline em{font-size:35px}.sillar-card{padding:23px 19px;gap:15px}.sillar-card h1{font-size:29px}.setup-btn{padding:9px 11px;font-size:12px}.game-header{display:grid;grid-template-columns:1fr auto}.game-brand{grid-column:1;grid-row:1}.back-menu-btn{grid-column:2;grid-row:1}.hud-group{grid-column:1/3;grid-row:2;justify-content:space-between;margin-left:0}.hud-chip{flex:1}.right-panel{height:clamp(238px,31vh,280px)}.scene-hint{bottom:10px}.scene-hint span{font-size:9px}.option-btn{font-size:15px;min-height:48px;padding:8px 11px}.prompt-box{min-height:80px;padding:12px}.left-panel{padding:13px;gap:11px}.game-split-container{gap:11px}.prompt-box span{font-size:19px}}
+@media(max-height:720px) and (min-width:761px){#game-screen{padding:12px 19px;gap:10px}.left-panel{padding:15px;gap:9px}.option-btn{min-height:48px;padding:8px}.prompt-box{min-height:90px;padding:13px}.progress-strip{padding:9px}.game-header{min-height:41px}.right-panel{min-height:0}}
+@media(prefers-reduced-motion:reduce){*,*:before,*:after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}
+</style>
 </head>
 <body>
-
-    <audio id="bgm" loop><source src="../assets/musicaFondo/cancion1.mp3" type="audio/mpeg"></audio>
-    <div class="decorations">
-        <div class="sun">☀️</div>
+<div class="backdrop" aria-hidden="true"><div class="bg-sun"></div><div class="bg-cloud cloud-a"></div><div class="bg-cloud cloud-b"></div><div class="bg-cloud cloud-c"></div><div class="bg-hill hill-left"></div><div class="bg-hill hill-right"></div></div>
+<section id="setup-screen">
+  <div class="intro-shell">
+    <div class="intro-art" aria-hidden="true">
+      <span class="intro-label">✦ UNA AVENTURA EN AREQUIPA ✦</span>
+      <div class="intro-headline"><span>ASCENSO</span><span>AL <em>MISTI</em></span></div>
+      <svg viewBox="0 0 540 620" preserveAspectRatio="xMidYMax slice" xmlns="http://www.w3.org/2000/svg">
+      <defs><linearGradient id="mv" x1=".1" x2=".8" y1=".2" y2="1"><stop stop-color="#9b737e"/><stop offset=".47" stop-color="#9b6980"/><stop offset="1" stop-color="#df8a6d"/></linearGradient><linearGradient id="snow" x1="0" x2=".8" y1="0" y2="1"><stop stop-color="#fffdf0"/><stop offset="1" stop-color="#bfe2df"/></linearGradient></defs>
+      <circle cx="411" cy="100" r="74" fill="#fff0bd" opacity=".92"/><circle cx="411" cy="100" r="95" fill="#fff5cf" opacity=".2"/>
+      <path d="M-40 453L119 283L224 453Z" fill="#82a4ae"/><path d="M332 465L461 283L610 465Z" fill="#8296ae"/>
+      <path d="M-35 535L281 149L586 535Z" fill="url(#mv)"/>
+      <path d="M281 149L135 336L208 305L247 349L282 292L321 334L363 313L281 149" fill="url(#snow)"/>
+      <path d="M281 149L225 220L275 207L316 230Z" fill="#fbf3e2" opacity=".75"/><path d="M281 149L289 290L386 426L559 535Z" fill="#754e6c" opacity=".34"/>
+      <path d="M166 400Q270 366 307 316M187 468Q307 445 266 408Q210 373 342 354" fill="none" stroke="#ffeec1" stroke-width="6" stroke-linecap="round" stroke-dasharray="2 18"/>
+      <path d="M-20 492Q126 458 235 503Q415 446 575 485V660H-20Z" fill="#88b98c"/><path d="M-20 554Q150 515 270 548Q400 502 575 536V650H-20Z" fill="#65a88a"/>
+      <g transform="translate(278 379)"><ellipse cx="0" cy="47" rx="37" ry="11" fill="#315a6580"/><path d="M-14 12L-19 41M12 12L18 41" stroke="#335d6c" stroke-width="10" stroke-linecap="round"/><path d="M-18 -23Q0 -36 17 -23L21 15Q0 30 -20 15Z" fill="#e9a34c" stroke="#714e54" stroke-width="4"/><rect x="-27" y="-20" width="15" height="31" rx="6" fill="#9e6c64"/><path d="M-17 -14L-31 5M16 -12L27 9" stroke="#f7d09b" stroke-width="9" stroke-linecap="round"/><circle cy="-37" r="19" fill="#f3c69a" stroke="#6d5350" stroke-width="3"/><path d="M-22 -45Q-18 -70 0 -68Q19 -68 23 -44Z" fill="#bd5845"/><path d="M-24 -45H25" stroke="#f3bd67" stroke-width="6" stroke-linecap="round"/><circle cx="-6" cy="-37" r="2.5" fill="#514943"/><circle cx="7" cy="-37" r="2.5" fill="#514943"/></g>
+      <path d="M78 545l14-27 14 27M438 547l12-27 12 27" fill="#f4d29b" opacity=".8"/>
+      </svg>
+      <div class="art-note">🌋 Responde, supera el desafío y llega hasta la cima del Misti.</div>
     </div>
-    <button id="soundToggle" class="sound-toggle" aria-label="Activar sonido">🔇</button>
-
-    <!-- LOBBY -->
-    <div id="setup-screen">
-        <div class="sillar-card">
-            <h1>ASCENSO AL MISTI</h1>
-            <p style="margin:0; font-size:15px; color:#666;">Guía al explorador paso a paso hacia la cumbre de Arequipa</p>
-            
-            <div class="setup-section">
-                <h3>Temática de Expedición</h3>
-                <div class="setup-row">
-                    <button id="setup-dict-historia" class="setup-btn diff active" onclick="selectDict('historia')">Historia</button>
-                    <button id="setup-dict-gastro" class="setup-btn diff" onclick="selectDict('gastro')">Gastronomía</button>
-                    <button id="setup-dict-cultura" class="setup-btn diff" onclick="selectDict('cultura')">Geografía</button>
-                    <button id="setup-dict-mix" class="setup-btn diff" onclick="selectDict('mix')">Ruta Mixta</button>
-                </div>
-            </div>
-
-            <div class="setup-section">
-                <h3>Resistencia Física (Vidas)</h3>
-                <div class="setup-row">
-                    <div class="time-input-group">
-                        <label>❤️</label>
-                        <input type="number" id="setup-lives" value="3" min="0" max="99">
-                    </div>
-                </div>
-            </div>
-
-            <button class="start-btn" onclick="startGame()">¡INICIAR EXPEDICIÓN!</button>
-        </div>
+    <div class="sillar-card">
+      <div><div class="mini-label">✦ EXPEDICIÓN CHARACATA</div><h1>¡Prepara tu aventura!</h1><p class="sub">Demuestra cuánto conoces Arequipa y ayuda a nuestro explorador a conquistar la montaña.</p></div>
+      <div class="setup-section"><h3>01 · Elige tu ruta</h3><div class="setup-row">
+        <button class="setup-btn active" id="setup-dict-historia" onclick="selectDict('historia')">🏛️ Historia</button>
+        <button class="setup-btn" id="setup-dict-gastro" onclick="selectDict('gastro')">🍲 Gastronomía</button>
+        <button class="setup-btn" id="setup-dict-cultura" onclick="selectDict('cultura')">🏔️ Geografía</button>
+        <button class="setup-btn" id="setup-dict-mix" onclick="selectDict('mix')">🎒 Mixta</button>
+      </div></div>
+      <div class="setup-section"><h3>02 · Resistencia del explorador</h3><div class="time-input-group"><label for="setup-lives">❤️ Número de vidas</label><input id="setup-lives" type="number" min="0" max="99" value="3" inputmode="numeric"></div><div class="tiny-hint">Escribe 0 para jugar sin límite de vidas.</div></div>
+      <button class="start-btn" onclick="startGame()">⛰️ ¡Comenzar expedición!</button>
+      <div class="sellar-note">✦ Cada respuesta correcta te acerca a la cima.</div>
     </div>
-
-    <!-- JUEGO -->
-    <div id="game-screen">
-        <div class="game-header">
-            <button class="back-menu-btn" onclick="backToMenu()">ABANDONAR</button>
-            <div class="hud-group">
-                <div class="lives-box">❤️ <span id="lives-display">3</span></div>
-                <div class="score-box">⛰️ <span id="score-display">2335</span> msnm</div>
-            </div>
-        </div>
-
-        <!-- CONTENEDOR PRINCIPAL SPLIT -->
-        <div class="game-split-container">
-            <div class="left-panel">
-                <div class="prompt-box">
-                    <span id="question-display">Cargando pregunta...</span>
-                </div>
-                <div class="options-container" id="options-container"></div>
-            </div>
-
-            <div class="right-panel" id="canvas-wrapper">
-                <canvas id="gameCanvas"></canvas>
-            </div>
-        </div>
+  </div>
+</section>
+<main id="game-screen">
+  <header class="game-header">
+    <div class="game-brand"><div class="brand-icon">🌋</div><div><strong>ASCENSO AL MISTI</strong><span>Expedición characata</span></div></div>
+    <button class="back-menu-btn" onclick="backToMenu()">← Menú</button>
+    <div class="hud-group">
+      <div class="hud-chip lives-box"><span class="hud-icon">❤️</span><span class="hud-copy"><small>Resistencia</small><strong id="lives-display">3</strong></span></div>
+      <div class="hud-chip score-box"><span class="hud-icon">⛰️</span><span class="hud-copy"><small>Altitud actual</small><strong><span id="score-display">2335</span> m</strong></span></div>
     </div>
-
-    <!-- MODAL -->
-    <div class="modal-overlay" id="modal">
-        <div class="modal-box">
-            <h2 class="modal-title" id="m-title">Título</h2>
-            <p class="modal-msg" id="m-msg">Mensaje</p>
-            <button class="modal-btn" onclick="closeModal()">ACEPTAR</button>
-        </div>
-    </div>
-
-    <script>
-        const triviaDB = {
+  </header>
+  <div class="progress-strip"><div class="progress-top"><span>🏕️ CAMPAMENTO · 2335 m</span><span>PROGRESO <strong id="progress-percent">0%</strong></span><span>🏁 CUMBRE · 5822 m</span></div><div class="progress-track"><div id="progress-fill" class="progress-fill"></div></div></div>
+  <div class="game-split-container">
+    <section class="left-panel" aria-label="Pregunta y respuestas">
+      <div class="question-kicker">✦ DESAFÍO DE LA EXPEDICIÓN <span id="category-label"></span></div>
+      <div class="prompt-box"><span id="question-display">Cargando pregunta...</span></div>
+      <div class="options-container" id="options-container"></div>
+      <div class="feedback-line" id="feedback-line" aria-live="polite">Elige una respuesta para continuar el ascenso.</div>
+    </section>
+    <section class="right-panel" id="canvas-wrapper" aria-label="Paisaje animado del Misti"><canvas id="gameCanvas"></canvas><div class="scene-label">✦ VOLCÁN MISTI · AREQUIPA</div><div class="scene-hint"><span>🏕️ Punto de partida</span><span>🏁 La cima te espera</span></div></section>
+  </div>
+</main>
+<div class="modal-overlay" id="modal" role="dialog" aria-modal="true" aria-labelledby="m-title">
+  <div class="modal-box"><span class="modal-medal" id="modal-medal">🏆</span><h2 class="modal-title" id="m-title">Resultado</h2><p class="modal-msg" id="m-msg"></p><button id="modal-btn" class="modal-btn" onclick="closeModal()">¡CONTINUAR!</button></div>
+</div>
+<canvas id="confetti-canvas" aria-hidden="true"></canvas>
+<script>
+const triviaDB = {
             'historia': [
                 { q: "¿Fundador español de Arequipa en 1540?", a: "Garcí Manuel de Carbajal", fakes: ["Francisco Pizarro", "Simón Bolívar"] },
                 { q: "Prócer y poeta arequipeño fusilado en 1815", a: "Mariano Melgar", fakes: ["Mario Vargas Llosa", "César Vallejo"] },
@@ -245,302 +163,74 @@
                 { q: "¿Qué cañón profundo se ubica en Arequipa?", a: "Cañón del Colca", fakes: ["Cañón del Pato", "Cañón de Cotahuasi"] }
             ]
         };
-
-        const AudioContext = window.AudioContext || window.webkitAudioContext;
-        let audioCtx; let isMuted = true;
-        const bgAudio = document.getElementById('bgm');
-        const soundToggle = document.getElementById('soundToggle');
-
-        soundToggle.addEventListener('click', () => {
-            if (!audioCtx) audioCtx = new AudioContext();
-            if (audioCtx.state === 'suspended') audioCtx.resume();
-            isMuted = !isMuted;
-            if(isMuted) { bgAudio.pause(); soundToggle.innerText = '🔇'; } 
-            else { bgAudio.volume = 0.25; bgAudio.play().catch(e=>e); soundToggle.innerText = '🔊'; }
-        });
-
-        function playTone(freq, type, duration, vol = 0.1) {
-            if (!audioCtx || isMuted) return;
-            const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain();
-            osc.type = type; osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
-            gain.gain.setValueAtTime(vol, audioCtx.currentTime); gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + duration);
-            osc.connect(gain); gain.connect(audioCtx.destination); osc.start(); osc.stop(audioCtx.currentTime + duration);
-        }
-
-        function sfxClick() { playTone(600, 'square', 0.05, 0.05); }
-        function sfxStep() { playTone(350, 'triangle', 0.08, 0.1); } 
-        function sfxSlip() { playTone(150, 'sawtooth', 0.3, 0.2); } 
-        function sfxSummit() { let notes = [523.25, 659.25, 783.99, 1046.50]; notes.forEach((f, i) => setTimeout(() => playTone(f, 'square', 0.3, 0.1), i * 150)); } 
-
-        let currentDict = 'historia';
-        let isGameActive = false;
-        let altitud = 2335; 
-        const altitudBase = 2335;
-        const altitudMeta = 5822; 
-        let lives = 3; let infiniteLives = false;
-        let animFrameId = null; 
-
-        let currentQuestion = null;
-        let particles = [];
-        let recentQuestions = []; // HISTORIAL PARA EVITAR PREGUNTAS REPETIDAS SEGUIDAS
-
-        let mistiImg = new Image();
-        mistiImg.src = '../assets/misti.png';
-        let imgLoaded = false;
-        mistiImg.onload = () => { imgLoaded = true; };
-
-        let climber = {
-            x: 0, y: 0,
-            targetX: 0, targetY: 0,
-            isWalking: false
-        };
-
-        const canvas = document.getElementById('gameCanvas'); const ctx = canvas.getContext('2d');
-        const canvasWrapper = document.getElementById('canvas-wrapper');
-
-        function resizeCanvas() { 
-            canvas.width = canvasWrapper.offsetWidth; 
-            canvas.height = canvasWrapper.offsetHeight;
-            updateClimberPositionImmediate();
-        }
-        window.addEventListener('resize', resizeCanvas);
-
-        function selectDict(dict) { sfxClick(); currentDict = dict; document.querySelectorAll('#setup-dict-historia, #setup-dict-gastro, #setup-dict-cultura, #setup-dict-mix').forEach(btn => btn.classList.remove('active')); document.getElementById('setup-dict-' + dict).classList.add('active'); }
-
-        function startGame() {
-            if (!audioCtx && !isMuted) { audioCtx = new AudioContext(); bgAudio.play().catch(e=>e); }
-            sfxClick();
-            
-            let valLives = parseInt(document.getElementById('setup-lives').value);
-            let initialLives = (isNaN(valLives) || valLives < 0) ? 3 : valLives;
-            infiniteLives = (initialLives === 0);
-            lives = initialLives;
-            
-            document.getElementById('setup-screen').style.display = 'none'; 
-            document.getElementById('game-screen').style.display = 'flex';
-            
-            resizeCanvas(); resetGame();
-        }
-
-        function backToMenu() { 
-            sfxClick(); isGameActive = false; cancelAnimationFrame(animFrameId);
-            document.getElementById('game-screen').style.display = 'none'; document.getElementById('setup-screen').style.display = 'flex'; 
-            document.body.classList.remove('damage-shake');
-        }
-
-        function getVolcanoCoordinates(ratio) {
-            let imgW = canvas.width * 0.95;
-            let imgH = imgW * (mistiImg.height / mistiImg.width || 0.75);
-            let imgX = (canvas.width - imgW) / 2;
-            let imgY = (canvas.height - imgH) / 2;
-
-            let peakX = imgX + imgW * 0.5;
-            let peakY = imgY + imgH * 0.18;
-            let baseY = imgY + imgH * 0.9;
-            let baseX = imgX + imgW * 0.5;
-
-            let currentX = baseX + (peakX - baseX) * ratio;
-            let currentY = baseY - (baseY - peakY) * ratio;
-            return { x: currentX, y: currentY };
-        }
-
-        function updateClimberPositionImmediate() {
-            let ratio = (altitud - altitudBase) / (altitudMeta - altitudBase);
-            let pos = getVolcanoCoordinates(ratio);
-            climber.x = pos.x; climber.y = pos.y;
-            climber.targetX = pos.x; climber.targetY = pos.y;
-        }
-
-        function moveClimberTo(newAltitud) {
-            let oldRatio = (altitud - altitudBase) / (altitudMeta - altitudBase);
-            altitud = newAltitud;
-            let newRatio = (altitud - altitudBase) / (altitudMeta - altitudBase);
-            newRatio = Math.max(0, Math.min(1, newRatio));
-            
-            let startPos = getVolcanoCoordinates(oldRatio);
-            let endPos = getVolcanoCoordinates(newRatio);
-
-            climber.x = startPos.x; climber.y = startPos.y;
-            climber.targetX = endPos.x; climber.targetY = endPos.y;
-            climber.isWalking = true;
-        }
-
-        function updateMountainHUD() {
-            document.getElementById('score-display').innerText = altitud;
-        }
-
-        function generateBifurcation() {
-            let pool = [];
-            if (currentDict === 'mix') {
-                pool = [...triviaDB.historia, ...triviaDB.gastro, ...triviaDB.cultura];
-            } else {
-                pool = triviaDB[currentDict];
-            }
-            
-            // FILTRAR PREGUNTAS RECIENTES PARA EVITAR DUPLICADOS SEGUIDOS
-            let availablePool = pool.filter(q => !recentQuestions.includes(q.q));
-            if (availablePool.length === 0) {
-                recentQuestions = []; // Reiniciar si se acaban
-                availablePool = pool;
-            }
-
-            currentQuestion = availablePool[Math.floor(Math.random() * availablePool.length)];
-            
-            // Guardar en historial (mantener máximo las últimas 2 preguntas)
-            recentQuestions.push(currentQuestion.q);
-            if (recentQuestions.length > 2) recentQuestions.shift();
-
-            document.getElementById('question-display').innerText = currentQuestion.q;
-
-            let answers = [
-                { text: currentQuestion.a, isCorrect: true },
-                { text: currentQuestion.fakes[0], isCorrect: false },
-                { text: currentQuestion.fakes[1], isCorrect: false }
-            ];
-            answers.sort(() => Math.random() - 0.5); 
-
-            let container = document.getElementById('options-container');
-            container.innerHTML = '';
-
-            answers.forEach(ans => {
-                let btn = document.createElement('button');
-                btn.className = 'option-btn';
-                btn.innerHTML = `🚩 ${ans.text}`;
-                btn.onclick = () => handleAnswer(ans.isCorrect, btn);
-                container.appendChild(btn);
-            });
-        }
-
-        function handleAnswer(isCorrect, btnEl) {
-            if (!isGameActive || climber.isWalking) return;
-
-            document.querySelectorAll('.option-btn').forEach(b => b.style.pointerEvents = 'none');
-
-            if (isCorrect) {
-                sfxStep();
-                btnEl.classList.add('correct');
-                createFloatingText(canvas.width/2, canvas.height/2, "¡Correcto! Sube", '#27ae60');
-                
-                let nextAlt = Math.min(altitudMeta, altitud + 350);
-                moveClimberTo(nextAlt);
-
-                setTimeout(() => {
-                    updateMountainHUD();
-                    if (altitud >= altitudMeta) {
-                        endGame(true);
-                    } else {
-                        isGameActive = true;
-                        generateBifurcation();
-                    }
-                }, 900);
-
-            } else {
-                sfxSlip();
-                btnEl.classList.add('wrong');
-                document.body.classList.remove('damage-shake'); void document.body.offsetWidth; document.body.classList.add('damage-shake');
-                createFloatingText(canvas.width/2, canvas.height/2, "¡Resbalón! Baja", '#c0392b');
-                
-                let prevAlt = Math.max(altitudBase, altitud - 200);
-                moveClimberTo(prevAlt);
-
-                setTimeout(() => {
-                    updateMountainHUD();
-                    loseLife();
-                    if(lives > 0 || infiniteLives) {
-                        isGameActive = true;
-                        generateBifurcation();
-                    }
-                }, 900);
-            }
-        }
-
-        function loseLife() {
-            if (!infiniteLives) {
-                lives--; document.getElementById('lives-display').innerText = lives.toString();
-                if (lives <= 0) setTimeout(() => endGame(false), 800);
-            }
-        }
-
-        class FloatText {
-            constructor(x,y,txt,c) { this.x=x; this.y=y; this.txt=txt; this.c=c; this.life=1; this.vy=-2; }
-            update() { this.y+=this.vy; this.life-=0.02; }
-            draw(ctx) { ctx.globalAlpha=Math.max(0,this.life); ctx.fillStyle=this.c; ctx.font="bold 22px 'Fredoka'"; ctx.textAlign="center"; ctx.shadowBlur=6; ctx.shadowColor="#fff"; ctx.fillText(this.txt,this.x,this.y); ctx.shadowBlur=0; ctx.globalAlpha=1; }
-        }
-        function createFloatingText(x,y,txt,c) { particles.push(new FloatText(x,y,txt,c)); }
-
-        // BUCLE PRINCIPAL
-        function gameLoop(ts) {
-            animFrameId = requestAnimationFrame(gameLoop);
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-            let imgW = canvas.width * 0.95;
-            let imgH = imgW * (mistiImg.height / mistiImg.width || 0.75);
-            let imgX = (canvas.width - imgW) / 2;
-            let imgY = (canvas.height - imgH) / 2;
-
-            if (imgLoaded) {
-                ctx.drawImage(mistiImg, imgX, imgY, imgW, imgH);
-            } else {
-                ctx.fillStyle = "#7f8c8d";
-                ctx.beginPath(); ctx.moveTo(canvas.width/2 - 180, canvas.height); ctx.lineTo(canvas.width/2, canvas.height * 0.2); ctx.lineTo(canvas.width/2 + 200, canvas.height); ctx.fill();
-            }
-
-            if (climber.isWalking) {
-                climber.x = climber.x + (climber.targetX - climber.x) * 0.1;
-                climber.y = climber.y + (climber.targetY - climber.y) * 0.1;
-                if (Math.hypot(climber.targetX - climber.x, climber.targetY - climber.y) < 2) {
-                    climber.isWalking = false;
-                }
-            }
-
-            ctx.save();
-            ctx.translate(climber.x, climber.y);
-            let bounce = climber.isWalking ? Math.sin(ts * 0.03) * 6 : 0;
-            ctx.font = "28px Arial";
-            ctx.textAlign = "center"; ctx.textBaseline = "bottom";
-            ctx.shadowBlur = 10; ctx.shadowColor = "rgba(0,0,0,0.6)";
-            ctx.fillText("🧗‍♂️", 0, bounce);
-            ctx.restore();
-
-            for(let i=particles.length-1; i>=0; i--) { particles[i].update(); particles[i].draw(ctx); if(particles[i].life<=0) particles.splice(i,1); }
-        }
-
-        function endGame(isWin) {
-            isGameActive = false;
-            
-            if (isWin) { 
-                sfxSummit();
-                document.getElementById('m-title').style.color = "var(--aqp-red)"; 
-                showModal("¡CUMBRE DEL MISTI! 🌋", `¡Llegaste con éxito a los 5,822 msnm!\nEl explorador plantó la bandera en la cima de Arequipa.`, backToMenu); 
-            } else { 
-                document.getElementById('m-title').style.color = "#e74c3c"; 
-                showModal("¡EXPEDICIÓN FALLIDA! 🧗‍♂️", `Te quedaste sin resistencia en la falda del volcán.\n¡Vuelve a intentarlo, characato!`, backToMenu); 
-            }
-        }
-
-        let modalCallback = null;
-        function showModal(title, msg, callback = null) { document.getElementById('m-title').innerText = title; document.getElementById('m-msg').innerText = msg; document.getElementById('modal').classList.add('active'); modalCallback = callback; }
-        function closeModal() { sfxClick(); document.getElementById('modal').classList.remove('active'); if(modalCallback) { modalCallback(); modalCallback = null; } }
-
-        function resetGame() { 
-            altitud = altitudBase; 
-            updateMountainHUD();
-            updateClimberPositionImmediate();
-            recentQuestions = [];
-            
-            let valLives = parseInt(document.getElementById('setup-lives').value);
-            let initialLives = (isNaN(valLives) || valLives < 0) ? 3 : valLives;
-            infiniteLives = (initialLives === 0);
-            lives = initialLives;
-            document.getElementById('lives-display').innerText = infiniteLives ? "∞" : lives;
-            
-            particles = [];
-            isGameActive = true; 
-            generateBifurcation();
-            
-            cancelAnimationFrame(animFrameId);
-            animFrameId = requestAnimationFrame(gameLoop); 
-        }
-    </script>
-</body>
-</html>
+const audioCtor=window.AudioContext||window.webkitAudioContext;
+let audioCtx=null,isMuted=true;
+function tone(freq,duration=.13,type='sine',gain=.065,delay=0){if(isMuted||!audioCtor)return;try{audioCtx??=new audioCtor();audioCtx.resume();const o=audioCtx.createOscillator(),g=audioCtx.createGain(),t=audioCtx.currentTime+delay;o.type=type;o.frequency.setValueAtTime(freq,t);g.gain.setValueAtTime(gain,t);g.gain.exponentialRampToValueAtTime(.001,t+duration);o.connect(g);g.connect(audioCtx.destination);o.start(t);o.stop(t+duration+.01)}catch(e){}}
+function sfxClick(){tone(610,.08)}function sfxStep(){tone(600,.16,'sine',.07);tone(880,.18,'sine',.06,.12)}function sfxSlip(){tone(240,.22,'triangle',.1);tone(150,.25,'triangle',.07,.1)}function sfxSummit(){[523,659,784,1046].forEach((f,i)=>tone(f,.28,'sine',.09,i*.13))}
+let currentDict='historia',isGameActive=false,altitud=2335,lives=3,infiniteLives=false,animFrameId=null,currentQuestion=null,recentQuestions=[];
+const altitudBase=2335,altitudMeta=5822;
+const canvas=document.getElementById('gameCanvas'),ctx=canvas.getContext('2d'),wrapper=document.getElementById('canvas-wrapper');
+let W=600,H=560,viewRatio=0,targetRatio=0,walkFrom=0,walkStart=0,walkDuration=870,isWalking=false,particles=[],roundToken=0,roundTimeout=null,confetti=[];
+const motionReduced=window.matchMedia?.('(prefers-reduced-motion: reduce)').matches||false;
+function setSound(){isMuted=!isMuted;document.getElementById('soundToggle')?.setAttribute('aria-pressed',String(!isMuted));sfxClick()}
+function selectDict(dict){currentDict=dict;sfxClick();document.querySelectorAll('.setup-btn').forEach(b=>b.classList.toggle('active',b.id==='setup-dict-'+dict))}
+function startGame(){sfxClick();const raw=parseInt(document.getElementById('setup-lives').value,10);lives=Number.isFinite(raw)?Math.min(99,Math.max(0,raw)):3;infiniteLives=lives===0;document.getElementById('setup-screen').style.display='none';document.getElementById('game-screen').style.display='flex';resizeCanvas();resetGame()}
+function backToMenu(){roundToken++;clearTimeout(roundTimeout);isGameActive=false;isWalking=false;cancelAnimationFrame(animFrameId);animFrameId=null;document.getElementById('modal').classList.remove('active');document.getElementById('game-screen').style.display='none';document.getElementById('setup-screen').style.display='flex';sfxClick()}
+function updateMountainHUD(){document.getElementById('score-display').textContent=Math.round(altitud);const p=Math.max(0,Math.min(100,(altitud-altitudBase)/(altitudMeta-altitudBase)*100));document.getElementById('progress-fill').style.width=p+'%';document.getElementById('progress-percent').textContent=Math.round(p)+'%';document.getElementById('lives-display').textContent=infiniteLives?'∞':lives}
+function resizeCanvas(){const r=wrapper.getBoundingClientRect();W=Math.max(100,r.width);H=Math.max(100,r.height);const dpr=Math.min(2,window.devicePixelRatio||1);canvas.width=Math.round(W*dpr);canvas.height=Math.round(H*dpr);ctx.setTransform(dpr,0,0,dpr,0,0)}
+window.addEventListener('resize',()=>{if(document.getElementById('game-screen').style.display==='flex')resizeCanvas()});
+function resetGame(){roundToken++;clearTimeout(roundTimeout);altitud=altitudBase;viewRatio=targetRatio=walkFrom=0;isWalking=false;recentQuestions=[];particles=[];let val=parseInt(document.getElementById('setup-lives').value,10);lives=Number.isFinite(val)?Math.min(99,Math.max(0,val)):3;infiniteLives=lives===0;isGameActive=true;updateMountainHUD();generateBifurcation();cancelAnimationFrame(animFrameId);animFrameId=requestAnimationFrame(gameLoop)}
+function generateBifurcation(){if(!isGameActive)return;const pool=currentDict==='mix'?[...triviaDB.historia,...triviaDB.gastro,...triviaDB.cultura]:triviaDB[currentDict];let available=pool.filter(q=>!recentQuestions.includes(q.q));if(!available.length){recentQuestions=[];available=pool}currentQuestion=available[Math.floor(Math.random()*available.length)];recentQuestions.push(currentQuestion.q);if(recentQuestions.length>2)recentQuestions.shift();document.getElementById('question-display').textContent=currentQuestion.q;document.getElementById('category-label').textContent='· '+({historia:'HISTORIA',gastro:'GASTRONOMÍA',cultura:'GEOGRAFÍA',mix:'RUTA MIXTA'}[currentDict]);const c=document.getElementById('options-container');c.innerHTML='';const answers=[{text:currentQuestion.a,correct:true},{text:currentQuestion.fakes[0],correct:false},{text:currentQuestion.fakes[1],correct:false}].sort(()=>Math.random()-.5);answers.forEach((a,i)=>{const b=document.createElement('button');b.className='option-btn';b.innerHTML='<span class="answer-letter">'+['A','B','C'][i]+'</span><span></span>';b.lastElementChild.textContent=a.text;b.addEventListener('click',()=>handleAnswer(a.correct,b));c.appendChild(b)});setFeedback('Elige una respuesta para continuar el ascenso.','')}
+function setFeedback(text,state=''){const f=document.getElementById('feedback-line');f.textContent=text;f.className='feedback-line '+state}
+function handleAnswer(correct,button){if(!isGameActive||isWalking)return;isGameActive=false;const token=++roundToken;document.querySelectorAll('.option-btn').forEach(b=>b.disabled=true);const newAlt=correct?Math.min(altitudMeta,altitud+350):Math.max(altitudBase,altitud-200);if(correct){sfxStep();button.classList.add('correct');setFeedback('✨ ¡Excelente! +350 metros de altitud.','good');spawnParticles('#ffe0a0')}else{sfxSlip();button.classList.add('wrong');setFeedback('💨 ¡Resbalón! -200 metros de altitud.','bad');wrapper.classList.remove('damage-shake');void wrapper.offsetWidth;wrapper.classList.add('damage-shake');spawnParticles('#fcb4a1')}
+const oldAlt=altitud;altitud=newAlt;walkFrom=viewRatio;targetRatio=(newAlt-altitudBase)/(altitudMeta-altitudBase);walkStart=performance.now();isWalking=true;
+roundTimeout=setTimeout(()=>{if(token!==roundToken)return;viewRatio=targetRatio;isWalking=false;updateMountainHUD();if(!correct&&!infiniteLives){lives--;updateMountainHUD();if(lives<=0){endGame(false);return}}if(altitud>=altitudMeta){endGame(true);return}isGameActive=true;generateBifurcation()},940);
+}
+function endGame(won){roundToken++;clearTimeout(roundTimeout);isGameActive=false;isWalking=false;viewRatio=targetRatio;if(won){sfxSummit();launchConfetti();showModal('¡CUMBRE CONQUISTADA!','¡Alcanzaste los 5,822 msnm!\nTu expedición characata llegó a la cima del Misti.','🏆')}else{showModal('¡FIN DE LA EXPEDICIÓN!','Te quedaste sin resistencia antes de llegar a la cima.\n¡Puedes intentarlo de nuevo!','🧗') }}
+function showModal(title,msg,medal){document.getElementById('m-title').textContent=title;document.getElementById('m-msg').textContent=msg;document.getElementById('modal-medal').textContent=medal;document.getElementById('modal').classList.add('active')}
+function closeModal(){sfxClick();backToMenu()}
+function mix(a,b,t){return a+(b-a)*t}
+function pathCoords(){return [[.16,.845],[.33,.79],[.45,.715],[.29,.642],[.45,.559],[.38,.475],[.56,.407],[.515,.305]].map(([x,y])=>[x*W,y*H])}
+function pointOnTrail(r){const nodes=pathCoords();const lengths=[],total=nodes.slice(1).reduce((s,p,i)=>{const l=Math.hypot(p[0]-nodes[i][0],p[1]-nodes[i][1]);lengths.push(l);return s+l},0);let left=Math.min(1,Math.max(0,r))*total;for(let i=0;i<lengths.length;i++){if(left<=lengths[i]||i===lengths.length-1){let t=lengths[i]?left/lengths[i]:0;return{x:mix(nodes[i][0],nodes[i+1][0],t),y:mix(nodes[i][1],nodes[i+1][1],t)}}left-=lengths[i]}return{x:nodes[0][0],y:nodes[0][1]}}
+function poly(points,fill){ctx.fillStyle=fill;ctx.beginPath();points.forEach((p,i)=>i?ctx.lineTo(p[0]*W,p[1]*H):ctx.moveTo(p[0]*W,p[1]*H));ctx.closePath();ctx.fill()}
+function cloud(x,y,s,opacity){ctx.save();ctx.globalAlpha=opacity;ctx.fillStyle='#fffdf2';for(const [ox,oy,rx,ry] of [[0,9,41,18],[26,0,34,24],[-24,2,32,19],[57,12,30,13]]){ctx.beginPath();ctx.ellipse(x+ox*s,y+oy*s,rx*s,ry*s,0,0,Math.PI*2);ctx.fill()}ctx.restore()}
+function scene(ts){const t=ts*.001;const sky=ctx.createLinearGradient(0,0,0,H);sky.addColorStop(0,'#75badb');sky.addColorStop(.55,'#c7e2db');sky.addColorStop(1,'#fbe3b5');ctx.fillStyle=sky;ctx.fillRect(0,0,W,H);
+// sun halo
+ctx.fillStyle='#fff1b8';ctx.beginPath();ctx.arc(W*.78,H*.16,Math.min(W,H)*.098,0,Math.PI*2);ctx.fill();ctx.fillStyle='#fff9da55';ctx.beginPath();ctx.arc(W*.78,H*.16,Math.min(W,H)*.14,0,Math.PI*2);ctx.fill();
+cloud(W*(.16+Math.sin(t*.15)*.023),H*.2,Math.max(.5,W/600),.68);cloud(W*(.72-Math.sin(t*.13)*.022),H*.29,Math.max(.43,W/800),.60);
+poly([[0,.69],[.08,.60],[.22,.46],[.38,.70],[.55,.56],[.72,.71],[1,.6],[1,1],[0,1]],'#9bbfc4');poly([[.38,.69],[.78,.40],[1,.68],[1,1]],'#83b1b7');
+// volcano silhouette
+const mountain=ctx.createLinearGradient(W*.3,H*.27,W*.78,H);mountain.addColorStop(0,'#93758b');mountain.addColorStop(.57,'#ad7581');mountain.addColorStop(1,'#bd826e');poly([[.03,.93],[.505,.242],[.97,.93]],mountain);
+poly([[.505,.242],[.505,.93],[.97,.93]],'#86576e5e');
+poly([[.505,.242],[.326,.505],[.41,.458],[.457,.51],[.497,.465],[.55,.517],[.594,.47],[.684,.51]],'#dfedf0');
+poly([[.505,.242],[.405,.397],[.465,.366],[.506,.407],[.548,.356],[.593,.411]],'#fffaf0');
+poly([[.05,.93],[.23,.69],[.315,.74],[.41,.68],[.506,.772],[.65,.68],[.8,.773],[.96,.93]],'#c68b7d44');
+poly([[.04,.93],[.28,.84],[.5,.89],[.73,.82],[.97,.93]],'#a9677044');
+// crater rim and plume
+ctx.strokeStyle='#916071';ctx.lineWidth=7;ctx.beginPath();ctx.moveTo(W*.472,H*.268);ctx.quadraticCurveTo(W*.51,H*.281,W*.537,H*.267);ctx.stroke();
+for(let i=0;i<4;i++){let offset=(t*.09+i*.26)%1;let cx=W*(.505+Math.sin(t*.5+i)*.012)+offset*W*.022,cy=H*(.233-offset*.18);ctx.fillStyle=`rgba(245,241,225,${.22*(1-offset)})`;ctx.beginPath();ctx.arc(cx,cy,Math.max(4,W*.014+offset*W*.018),0,Math.PI*2);ctx.fill()}
+// bottom bushes / ground
+poly([[0,.88],[.11,.844],[.25,.875],[.37,.853],[.57,.88],[.8,.843],[1,.872],[1,1],[0,1]],'#87b48c');poly([[0,.933],[.13,.918],[.27,.94],[.5,.916],[.74,.93],[1,.918],[1,1],[0,1]],'#619c80');
+for(let i=0;i<19;i++){const x=((i*137)%1000)/1000*W,y=H*(.905+(i*37%70)/1000);ctx.fillStyle=i%3?'#fff2b5':'#ffc19d';ctx.beginPath();ctx.arc(x,y,1.7+i%3,0,Math.PI*2);ctx.fill()}
+// trail dashed base
+const nodes=pathCoords();ctx.save();ctx.beginPath();nodes.forEach((p,i)=>i?ctx.lineTo(...p):ctx.moveTo(...p));ctx.strokeStyle='#4f35476b';ctx.lineWidth=Math.max(7,W*.014);ctx.lineCap='round';ctx.lineJoin='round';ctx.stroke();ctx.setLineDash([2,Math.max(11,W*.023)]);ctx.strokeStyle='#ffe2aa';ctx.lineWidth=Math.max(3,W*.007);ctx.stroke();ctx.setLineDash([]);ctx.restore();
+// altitude progress portion path, using sampled interpolation
+ctx.beginPath();for(let i=0;i<=60;i++){const p=pointOnTrail(viewRatio*i/60);i?ctx.lineTo(p.x,p.y):ctx.moveTo(p.x,p.y)}ctx.lineCap='round';ctx.strokeStyle='#ffdb7e';ctx.lineWidth=Math.max(3,W*.007);ctx.shadowBlur=12;ctx.shadowColor='#fff2ac';ctx.stroke();ctx.shadowBlur=0;
+// milestones
+const camp=pointOnTrail(0),summit=pointOnTrail(1);ctx.fillStyle='#ffebae';ctx.beginPath();ctx.arc(camp.x,camp.y,8,0,Math.PI*2);ctx.fill();ctx.font=`${Math.round(Math.max(19,W*.042))}px Arial`;ctx.textAlign='center';ctx.fillText('⛺',camp.x,camp.y-12);
+ctx.fillStyle='#ec8a55';ctx.fillRect(summit.x-2,summit.y-37,4,40);poly([[summit.x/W,summit.y/H-.067],[summit.x/W+.06,summit.y/H-.05],[summit.x/W,summit.y/H-.027]],'#f8b75a');
+// explorer
+const p=pointOnTrail(viewRatio);drawHiker(p.x,p.y,t,isWalking);
+}
+function drawHiker(x,y,t,moving){const size=Math.max(23,Math.min(W,H)*.066);ctx.save();ctx.translate(x,y-10+(moving?Math.sin(t*24)*2.8:Math.sin(t*3)*1));ctx.scale(size/36,size/36);ctx.fillStyle='#233f4666';ctx.beginPath();ctx.ellipse(0,22,16,5,0,0,Math.PI*2);ctx.fill();ctx.lineCap='round';ctx.strokeStyle='#354e60';ctx.lineWidth=7;ctx.beginPath();ctx.moveTo(-7,8);ctx.lineTo(-10+(moving?Math.sin(t*22)*4:0),19);ctx.moveTo(7,8);ctx.lineTo(10-(moving?Math.sin(t*22)*4:0),19);ctx.stroke();ctx.fillStyle='#b65a48';ctx.beginPath();ctx.roundRect(-12,-12,24,26,7);ctx.fill();ctx.fillStyle='#da9852';ctx.fillRect(-5,-10,12,19);ctx.fillStyle='#6b6b77';ctx.beginPath();ctx.roundRect(-18,-8,8,18,3);ctx.fill();ctx.strokeStyle='#e6b68e';ctx.lineWidth=5;ctx.beginPath();ctx.moveTo(-8,-7);ctx.lineTo(-17,5);ctx.moveTo(8,-7);ctx.lineTo(17,4);ctx.stroke();ctx.fillStyle='#f6c8a1';ctx.beginPath();ctx.arc(0,-22,12,0,Math.PI*2);ctx.fill();ctx.fillStyle='#b34d40';ctx.beginPath();ctx.arc(0,-26,13,Math.PI,Math.PI*2);ctx.fill();ctx.fillRect(-14,-26,28,4);ctx.fillStyle='#333c4b';ctx.beginPath();ctx.arc(-4,-21,1.3,0,7);ctx.arc(5,-21,1.3,0,7);ctx.fill();ctx.restore()}
+function spawnParticles(color){const p=pointOnTrail(viewRatio);for(let i=0;i<14;i++)particles.push({x:p.x,y:p.y,vx:(Math.random()-.5)*4,vy:(Math.random()-.7)*4,life:1,color,r:2+Math.random()*4})}
+function drawParticles(){for(let i=particles.length-1;i>=0;i--){const p=particles[i];p.x+=p.vx;p.y+=p.vy;p.vy+=.09;p.life-=.024;ctx.globalAlpha=Math.max(0,p.life);ctx.fillStyle=p.color;ctx.beginPath();ctx.arc(p.x,p.y,p.r,0,7);ctx.fill();if(p.life<=0)particles.splice(i,1)}ctx.globalAlpha=1}
+function gameLoop(ts){animFrameId=requestAnimationFrame(gameLoop);if(isWalking){let t=Math.min(1,(ts-walkStart)/walkDuration);let ease=t*t*(3-2*t);viewRatio=mix(walkFrom,targetRatio,ease);if(t>=1){viewRatio=targetRatio;isWalking=false}}ctx.clearRect(0,0,W,H);scene(ts);drawParticles()}
+function launchConfetti(){if(motionReduced)return;const c=document.getElementById('confetti-canvas'),g=c.getContext('2d'),dpr=Math.min(2,devicePixelRatio||1);c.width=Math.round(innerWidth*dpr);c.height=Math.round(innerHeight*dpr);g.setTransform(dpr,0,0,dpr,0,0);confetti=Array.from({length:115},()=>({x:Math.random()*innerWidth,y:-Math.random()*innerHeight,vx:(Math.random()-.5)*3,vy:2+Math.random()*3,c:['#f7b552','#cb6b52','#7ac29d','#6fa9ca','#f5e2b0'][Math.floor(Math.random()*5)],w:3+Math.random()*6,r:Math.random()*7}));let frame=0;function step(){g.clearRect(0,0,innerWidth,innerHeight);for(let p of confetti){p.x+=p.vx;p.y+=p.vy;p.r+=.07;g.save();g.translate(p.x,p.y);g.rotate(p.r);g.fillStyle=p.c;g.fillRect(-p.w/2,-p.w/2,p.w,p.w*.5);g.restore()}if(frame++<200)requestAnimationFrame(step);else g.clearRect(0,0,innerWidth,innerHeight)}step()}
+// optional sound control: inserted in menu and header
+for(const parent of [document.querySelector('.sillar-card'),document.querySelector('.game-header')]){const b=document.createElement('button');b.id=parent.classList.contains('sillar-card')?'sound-lobby':'sound-game';b.type='button';b.setAttribute('aria-label','Activar o silenciar los sonidos');b.className='sound-toggle';b.textContent='🔇';b.addEventListener('click',()=>{isMuted=!isMuted;if(!isMuted)sfxClick();document.querySelectorAll('.sound-toggle').forEach(el=>el.textContent=isMuted?'🔇':'🔊')});parent.appendChild(b)}
+</script>
+<style>
+.sound-toggle{border:1.5px solid #d9e6e3;background:#fffdf8;border-radius:12px;padding:8px 12px;font-size:17px;box-shadow:0 3px 0 #cfdbd5}.sillar-card>.sound-toggle{align-self:center}.game-header>.sound-toggle{order:6}.game-header .hud-group{margin-left:auto}@media(max-width:760px){.game-header>.sound-toggle{order:5}.hud-group{margin-left:0}}@media(max-width:440px){.game-header{grid-template-columns:minmax(0,1fr) auto auto;gap:7px}.game-header .back-menu-btn{grid-column:3;grid-row:1}.game-header>.sound-toggle{position:static;grid-column:2;grid-row:1;padding:7px 9px;font-size:15px}.game-header .hud-group{grid-column:1/4;grid-row:2}}
+</style>
+</body></html>
