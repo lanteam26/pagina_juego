@@ -929,3 +929,10 @@
     border-bottom-color: #a852d4;
     box-shadow: 0 0 16px #55f5ff55;
 }
+
+.home-portal .footer-partner-logo {
+    display: block;
+    width: min(360px, 100%);
+    height: auto;
+    margin: 0 auto 14px;
+}
