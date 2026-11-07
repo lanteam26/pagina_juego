@@ -214,7 +214,11 @@ const Sound = (() => {
         toggleBtn.setAttribute('aria-label', open ? 'Cerrar menú' : 'Abrir menú');
         Sound.click();
     });
-    $$('.nav-btn', mainNav).forEach(link => link.addEventListener('click', () => closeMenu()));
+    $$('.nav-btn', mainNav).forEach(link => {
+        link.addEventListener('click', () => {
+            if (mainNav.classList.contains('is-open')) closeMenu(true);
+        });
+    });
     document.addEventListener('click', e => {
         if (!mainNav.contains(e.target) && !toggleBtn.contains(e.target)) closeMenu();
     });
@@ -465,68 +469,38 @@ const Sound = (() => {
    #secundaria (Ludio) · #recursos · #sobre-nosotros
    ============================================================ */
 (function initActiveNav() {
-    const mainNav   = $('.main-nav');
-    const indicator = $('.nav-indicator');
+    const header = $('#siteHeader');
+    const links = $$('.main-nav .nav-btn[data-nav]');
+    const items = links
+        .map(link => ({link, section: document.getElementById(link.dataset.nav)}))
+        .filter(item => item.section);
+    if (!header || !items.length) return;
 
-    const sectionIds = ['#hero', '#inicial', '#primaria', '#secundaria', '#recursos', '#sobre-nosotros'];
-    const sections   = sectionIds.map(id => $(id)).filter(Boolean);
-    const navLinks   = $$('.nav-btn');
-
-    if (!mainNav || !indicator || !sections.length || !navLinks.length) return;
-
-    function positionIndicator(activeLink) {
-        // El indicador solo funciona en desktop
-        if (window.matchMedia('(max-width: 1024px)').matches) return;
-
-        const navRect  = mainNav.getBoundingClientRect();
-        const linkRect = activeLink.getBoundingClientRect();
-
-        const offsetLeft = linkRect.left - navRect.left - 5;
-        indicator.style.transform = `translateX(${offsetLeft}px)`;
-        indicator.style.width     = `${linkRect.width}px`;
-    }
-
-    function setActiveSection(targetId) {
-        let matchedLink = null;
-
-        navLinks.forEach(link => {
-            const href = link.getAttribute('href');
-            const isActive = (href === targetId);
-            link.classList.toggle('is-active', isActive);
-            if (isActive) link.setAttribute('aria-current', 'location');
-            else link.removeAttribute('aria-current');
-            if (isActive) matchedLink = link;
-        });
-
-        if (matchedLink) {
-            indicator.classList.add('is-active');
-            positionIndicator(matchedLink);
-        } else {
-            indicator.classList.remove('is-active');
+    let current;
+    let frame;
+    function updateActiveSection() {
+        frame = undefined;
+        const activationLine = header.getBoundingClientRect().bottom + 24;
+        let active = items[0];
+        for (const item of items) {
+            if (item.section.getBoundingClientRect().top <= activationLine) active = item;
         }
+        if (active === current) return;
+        current?.link.classList.remove('is-active');
+        current?.link.removeAttribute('aria-current');
+        active.link.classList.add('is-active');
+        active.link.setAttribute('aria-current', 'location');
+        current = active;
     }
 
-    const sectionObserver = new IntersectionObserver((entries) => {
-        entries.forEach(entry => {
-            if (entry.isIntersecting) {
-                setActiveSection('#' + entry.target.id);
-            }
-        });
-    }, {
-        threshold: 0.35,
-        rootMargin: '-15% 0px -35% 0px'
-    });
+    function scheduleUpdate() {
+        if (frame === undefined) frame = requestAnimationFrame(updateActiveSection);
+    }
 
-    sections.forEach(sec => sectionObserver.observe(sec));
-
-    // Reposicionar al redimensionar
-    window.addEventListener('resize', () => {
-        const activeLink = $('.nav-btn.is-active');
-        if (activeLink) positionIndicator(activeLink);
-    });
-
-    // Estado inicial
-    setActiveSection('#hero');
+    window.addEventListener('scroll', scheduleUpdate, {passive: true});
+    window.addEventListener('resize', scheduleUpdate);
+    window.addEventListener('pageshow', scheduleUpdate);
+    updateActiveSection();
 })();
 
 

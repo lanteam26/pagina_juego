@@ -2669,3 +2669,46 @@ section[id]{scroll-margin-top:110px}
 .card-primaria .hud-level { background:rgba(90,174,255,.15); color:#9fdfff; border:1px solid rgba(159,223,255,.28); }
 .card-secundaria .hud-level { background:rgba(139,105,255,.16); color:#c6b8ff; border:1px solid rgba(198,184,255,.30); }
 @media (max-width: 760px){ .wp-stage{font-size:.52rem}.world-preview{min-width:120px}.hud-level{font-size:.58rem;padding:4px 7px} }
+
+/* El crédito se comparte entre la portada y los tres mundos. */
+.site-footer .footer-collaboration {
+    max-width: 44rem;
+    margin: 0 auto 12px;
+    color: inherit;
+    text-align: center;
+    font-size: .9rem;
+    line-height: 1.55;
+}
+.site-footer .footer-collaboration strong { font-weight: 900; }
+.world-portal .site-footer .footer-inner {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+    margin-inline: auto;
+    text-align: center;
+}
+.world-portal .site-footer :is(.footer-brand,.footer-msg,.footer-nav,.footer-copy) {
+    margin: 0 auto;
+    text-align: center;
+}
+.world-portal .site-footer .footer-msg { max-width: 40rem; }
+.world-portal .site-footer .footer-nav {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: 6px 14px;
+    width: 100%;
+}
+.world-portal .site-footer .footer-nav-link { display: inline-flex; align-items: center; min-height: 40px; }
+.world-portal .site-footer .footer-dot { display: none; }
+.world-portal .site-footer .footer-collaboration {
+    margin: 0 auto;
+    padding-top: 14px;
+    border-top: 1px solid currentColor;
+}
+.footer-inicial .footer-collaboration { color: #fff1c5; }
+.footer-primaria .footer-collaboration { color: #ffe1bf; }
+.footer-secundaria .footer-collaboration { color: #ccf8fa; }
+.home-portal .footer-collaboration { color: #dce5ff; }

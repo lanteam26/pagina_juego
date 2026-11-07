@@ -308,8 +308,13 @@
     .home-portal .menu-toggle[aria-expanded='true'] span:nth-child(2) { opacity: 0; }
     .home-portal .menu-toggle[aria-expanded='true'] span:last-child { transform: translateY(-8px) rotate(-45deg); }
     .home-portal .main-nav { position: absolute!important; inset: calc(100% + 10px) 0 auto auto!important; width: min(440px,100%); max-height: calc(100dvh - 140px); padding: 13px; flex-direction: column; align-items: stretch; gap: 7px; display: none; background: #202d49; border: 1px solid #8ea6cd; border-bottom: 4px solid #5c7599; border-radius: 18px; overflow-y: auto; transform: none!important; opacity: 1!important; box-shadow: 0 7px 0 #09172d66; }
-    .home-portal .main-nav.is-open { display: flex; }
-    .home-portal .main-nav .nav-btn { justify-content: flex-start; width: 100%; padding: 11px 15px; min-height: 47px; }
+    .home-portal .main-nav.is-open {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr);
+        grid-auto-rows: 56px;
+        overscroll-behavior-y: contain;
+        transition: none;
+    }
     .home-portal .world-content { gap: 35px; }
     .home-portal .world-card { padding: 27px; }
 }
@@ -787,21 +792,23 @@
 
 /* YachayAventura: una paleta opaca compartida por navegación y tarjetas. */
 .home-portal .nav-inicio { --tile: #54658f; --tile-edge: #dce5ff; }
-.home-portal :is(.nav-beebot,.wp-inicial,.world-inicial) { --tile: #56518c; --tile-edge: #ffe56b; }
-.home-portal :is(.nav-rayet,.wp-primaria,.world-primaria) { --tile: #794950; --tile-edge: #ffb663; }
-.home-portal :is(.nav-ludio,.wp-secundaria,.world-secundaria) { --tile: #405595; --tile-edge: #8de7ff; }
+.home-portal :is(.nav-beebot,.wp-inicial,.world-inicial) { --tile: #ffdf8a; --tile-edge: #9c600e; --tile-text: #402708; --tile-accent: #603604; --tile-button: #a45c0b; }
+.home-portal :is(.nav-rayet,.wp-primaria,.world-primaria) { --tile: #273745; --tile-edge: #ffab58; --tile-text: #f7f9fc; --tile-button: #ffab58; --button-text: #35210b; }
+.home-portal :is(.nav-ludio,.wp-secundaria,.world-secundaria) { --tile: #17384c; --tile-edge: #79e6ec; --tile-text: #effcff; --tile-button: #79e6ec; --button-text: #123242; }
 .home-portal :is(.nav-recursos,.wp-recursos) { --tile: #356b75; --tile-edge: #9af1cd; }
 .home-portal .nav-ayuda { --tile: #604580; --tile-edge: #e3b4ff; }
+.home-portal .main-nav .nav-btn {
+    box-sizing: border-box; flex: 0 0 116px; width: 116px; height: 56px;
+    min-height: 56px; padding: 10px; justify-content: center;
+}
 .home-portal .main-nav .nav-btn,
 .home-portal .main-nav .nav-btn:hover,
 .home-portal .main-nav .nav-btn.is-active {
-    box-sizing: border-box; flex: 0 0 116px; width: 116px; height: 56px;
-    min-height: 56px; padding: 10px; justify-content: center;
-    background: var(--tile); color: #fff; border: 2px solid var(--tile-edge);
+    background: var(--tile); color: var(--tile-text, #fff); border: 2px solid var(--tile-edge);
     border-bottom-width: 4px; border-radius: 14px; opacity: 1;
     filter: none; text-shadow: none; box-shadow: none; backdrop-filter: none;
 }
-.home-portal .main-nav .nav-btn.is-active { outline: 2px solid var(--tile-edge); outline-offset: 3px; }
+.home-portal .main-nav .nav-btn.is-active { box-shadow: inset 0 0 0 2px var(--tile-edge); }
 .home-portal .main-nav .nav-btn :is(.home-nav-robot,.nav-btn-ico) {
     width: 28px; height: 28px; flex: 0 0 28px; display: grid; place-items: center;
 }
@@ -809,19 +816,19 @@
 .home-portal .world-preview:hover,
 .home-portal .world .world-card {
     background: var(--tile); border: 2px solid var(--tile-edge);
-    border-bottom-width: 5px; color: #fff; opacity: 1; filter: none; backdrop-filter: none;
+    border-bottom-width: 5px; color: var(--tile-text, #fff); opacity: 1; filter: none; backdrop-filter: none;
 }
 .home-portal .world-preview .wp-orb { background: #293554; border: 2px solid var(--tile-edge); }
-.home-portal .world-preview .wp-label { color: var(--tile-edge); text-shadow: none; }
-.home-portal .world-preview .wp-stage { color: #fff; text-shadow: none; }
-.home-portal .world .world-card :is(.card-title,.card-title-main,.card-desc) { color: #fff; }
-.home-portal .world .world-card .card-title-accent { color: var(--tile-edge); text-shadow: none; }
+.home-portal .world-preview .wp-label { color: var(--tile-accent, var(--tile-edge)); text-shadow: none; }
+.home-portal .world-preview .wp-stage { color: var(--tile-text, #fff); text-shadow: none; }
+.home-portal .world .world-card :is(.card-title,.card-title-main,.card-desc,.stat-lbl) { color: var(--tile-text); }
+.home-portal .world .world-card :is(.card-title-accent,.stat-num) { color: var(--tile-accent, var(--tile-edge)); text-shadow: none; }
 .home-portal .world .world-card::before { display: none; }
 .home-portal .world .btn-world,
 .home-portal .world .btn-world:hover {
     box-sizing: border-box; display: inline-flex; align-items: center; justify-content: center;
     width: 100%; max-width: 320px; height: 68px; min-height: 68px; padding: 10px 16px;
-    background: var(--tile); color: #fff; border: 2px solid var(--tile-edge);
+    background: var(--tile-button); color: var(--button-text, #fff); border: 2px solid var(--tile-edge);
     border-bottom-width: 5px; border-radius: 14px; font-size: 1rem;
     opacity: 1; filter: none; text-shadow: none; box-shadow: none;
 }
@@ -871,3 +878,23 @@
     .home-portal .brand-logo { width: 64px; flex-basis: 64px; height: 46px; }
     .home-portal .footer-brand-logo { width: 80px; flex-basis: 80px; height: 56px; }
 }
+
+/* Detalles de cada mundo en sus accesos y tarjetas. */
+.home-portal :is(.nav-beebot,.wp-inicial,.world-inicial) {
+    --honeycomb: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60' height='52' viewBox='0 0 60 52'%3E%3Cpath d='M0 0h10l10 17.3-10 17.4H0m60-34.7H50L40 17.3l10 17.4h10M20 17.3h20M10 34.7 20 52m30-17.3L40 52M20 0h20' fill='none' stroke='%23b97719' stroke-opacity='.24' stroke-width='1.3'/%3E%3C/svg%3E");
+}
+.home-portal .main-nav .nav-btn.nav-beebot,
+.home-portal .world-preview.wp-inicial,
+.home-portal .world-inicial .world-card { background-image: var(--honeycomb); }
+.home-portal .wp-inicial .wp-orb { background: #fff1bf; }
+.home-portal .world-inicial .world-card .hud-level { background: #fff2ce; color: #603604; }
+.home-portal .world-primaria .world-card::before {
+    display: block; height: 5px;
+    background: repeating-linear-gradient(90deg, #ffab58 0 12px, #273745 12px 24px);
+}
+.home-portal .world-secundaria .world-card::before {
+    display: block; height: 3px;
+    background: linear-gradient(90deg, #79e6ec, #3485a3);
+}
+.home-portal .main-nav .nav-btn:hover,
+.home-portal .main-nav .nav-btn:active { transform: none; }
