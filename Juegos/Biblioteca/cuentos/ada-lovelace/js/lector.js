@@ -7,6 +7,7 @@ const paragraphs=t=>t.split(/\n\s*\n/).map(p=>`<p>${esc(p)}</p>`).join('');
 const activities=data.activities||[];
 const definitions=data.cards||{};
 let items=[],pos=0,readingMode='activities',narrationMode='page',started=false,busy=false,epoch=0;
+let voiceRun=0;
 let narrationId='',pendingNarration=0,activity=null,activityVoice='',activityWin=false,context;
 const pageTimers=new Set();
 function later(fn,ms){const id=setTimeout(()=>{pageTimers.delete(id);fn();},ms);pageTimers.add(id);return id;}
@@ -101,7 +102,7 @@ function drawActivity(){
   game.querySelectorAll('[data-pattern]').forEach(b=>b.onclick=()=>{if(!canInteract())return;a.selected=+b.dataset.pattern;tap();drawActivity();});
  }else if(item.kind==='decision'){
   game.innerHTML=`<div class="decision-game"><div class="decision-options">${item.options.map((o,i)=>`<button type="button" class="decision-option ${a.selected===i?'selected':''}" data-choice="${i}" aria-pressed="${a.selected===i}"><span class="decision-letter">${o.letter}</span>${esc(o.label)}</button>`).join('')}</div><p class="decision-result" aria-live="polite">${a.selected===null?'Los dos caminos tienen algo que enseñarnos.':esc(item.options[a.selected].result)}</p></div>`;
-  game.querySelectorAll('[data-choice]').forEach(b=>b.onclick=()=>{if(!canInteract())return;a.selected=+b.dataset.choice;tap();drawActivity();});
+  game.querySelectorAll('[data-choice]').forEach(b=>b.onclick=()=>{if(!canInteract())return;a.selected=+b.dataset.choice;tap();drawActivity();if(narrationMode!=='off')playVoice();});
  }else if(item.kind==='robot'){
   const names={U:'Arriba',D:'Abajo',L:'Izquierda',R:'Derecha'},arrows={U:'↑',D:'↓',L:'←',R:'→'};
   game.innerHTML=`<div class="robot-game"><div class="robot-board" role="group" aria-label="Tablero de cuatro columnas y tres filas">${Array.from({length:12},(_,i)=>{const x=i%4,y=Math.floor(i/4);return `<div class="robot-cell" aria-label="Fila ${y+1}, columna ${x+1}">${a.robot.x===x&&a.robot.y===y?icon('robot'):x===3&&y===0?icon('star'):''}</div>`;}).join('')}</div><div class="robot-tools"><p>Prepara tu camino</p><div class="robot-arrows">${Object.keys(arrows).map(k=>`<button type="button" data-command="${k}" aria-label="${names[k]}">${arrows[k]}</button>`).join('')}</div><div class="robot-program" aria-label="Tu programa">${a.program.length?a.program.map((k,i)=>`<button type="button" data-remove="${i}" aria-label="Quitar instrucción ${i+1}: ${names[k]}">${arrows[k]}</button>`).join(''):'<span>Elige las flechas. Toca una del programa para quitarla.</span>'}</div><small>Hasta 8 pasos · Inicio: abajo a la izquierda.</small></div></div>`;
@@ -149,7 +150,7 @@ function winActivity(){
 }
 function stopVoice(){
  if(pendingNarration){clearTimeout(pendingNarration);pageTimers.delete(pendingNarration);pendingNarration=0;}
- narrationId='';narrator.pause();narrator.currentTime=0;narrator.onended=null;window.speechSynthesis?.cancel();activeSpeech=null;$('#voiceStatus').textContent='';musicVolume();
+ voiceRun++;narrationId='';narrator.onended=null;narrator.onerror=null;narrator.pause();narrator.currentTime=0;narrator.onended=null;window.speechSynthesis?.cancel();activeSpeech=null;$('#voiceStatus').textContent='';musicVolume();
 }
 function stopEffects(){winSound.onended=null;winSound.onerror=null;winSound.pause();winSound.currentTime=0;loseSound.pause();loseSound.currentTime=0;musicVolume();}
 function scheduleVoice(){
@@ -160,8 +161,10 @@ let activeSpeech=null,speechOffset=0;
 function playVoice(startAt=0){
  if(narrationMode==='off'||busy||!started||modeDialog.open||endDialog.open||activityWin)return;
  const item=items[pos],token=epoch;stopVoice();
- const src=item.audio;
- if(item.type==='activity'||!src){
+ const src=item.kind==='decision'&&activity?.selected!==null?item.options[activity.selected]?.audio:item.audio;
+ if(src){playRecordedAudio(item,src,token);return;}
+ if(item.type!=='activity'){$('#voiceStatus').textContent='No hay grabación disponible para esta página.';return;}
+ if(item.type==='activity'){
   const fullText=item.type==='activity'?activityVoice:item.text;
   if(!fullText||!window.speechSynthesis||!window.SpeechSynthesisUtterance){$('#voiceStatus').textContent='La voz no está disponible. Puedes leer el texto.';return;}
   const u=new SpeechSynthesisUtterance(fullText.slice(startAt));activeSpeech=u;speechOffset=startAt;u.lang='es-PE';u.rate=.86;u.volume=window.BibliotecaAudio.voice();
@@ -171,11 +174,43 @@ function playVoice(startAt=0){
   u.onerror=()=>{if(epoch!==token||activeSpeech!==u)return;activeSpeech=null;$('#voiceStatus').textContent='Puedes volver a escuchar.';musicVolume();updateControls();};
   speechSynthesis.speak(u);return;
  }
- narrationId=item.id;narrator.src=src;narrator.volume=window.BibliotecaAudio.voice();
- narrator.onended=()=>{if(epoch!==token||narrationId!==item.id)return;$('#voiceStatus').textContent='Narración terminada';musicVolume();updateControls();if(narrationMode==='auto')move(1);};
- narrator.onerror=()=>{if(epoch!==token)return;$('#voiceStatus').textContent='No se pudo reproducir. Puedes volver a escuchar.';musicVolume();updateControls();};
- narrator.play().then(()=>{if(epoch!==token){narrator.pause();return;}$('#voiceStatus').textContent='Narrando esta página';musicVolume();updateControls();}).catch(()=>{if(epoch===token){$('#voiceStatus').textContent='Pulsa Volver a escuchar para iniciar la voz.';updateControls();}});
 }
+// Una página conserva sus partes en orden; solo la última permite avanzar.
+function playRecordedAudio(item,source,token){
+ const queue=Array.isArray(source)?source:[source],run=++voiceRun;let part=0;
+ if(!queue.length)return;
+ narrationId=item.id;
+ const valid=()=>run===voiceRun&&epoch===token&&narrationId===item.id&&narrationMode!=='off'&&!busy&&!modeDialog.open&&!endDialog.open;
+ function playPart(){
+  if(!valid())return;
+  narrator.onended=null;narrator.onerror=null;narrator.src=queue[part];narrator.volume=window.BibliotecaAudio.voice();
+  const requested=narrator.src;
+  narrator.onended=()=>{
+   if(!valid())return;
+   part++;
+   if(part<queue.length){playPart();return;}
+   narrator.onended=null;narrator.onerror=null;$('#voiceStatus').textContent='Narración terminada';musicVolume();updateControls();
+   if(item.type!=='activity'&&narrationMode==='auto')move(1);
+  };
+  narrator.onerror=()=>{
+   if(!valid())return;
+   narrator.onended=null;narrator.onerror=null;
+   $('#voiceStatus').textContent='No se pudo abrir '+queue[part].split('/').pop()+'. Puedes volver a escuchar.';
+   musicVolume();updateControls();
+  };
+  narrator.play().then(()=>{
+   if(!valid()||narrator.src!==requested)return;
+   $('#voiceStatus').textContent=item.kind==='decision'?'Escuchando la opción elegida':`Narrando · parte ${part+1} de ${queue.length}`;
+   musicVolume();updateControls();
+  }).catch(error=>{
+   if(!valid()||narrator.src!==requested)return;
+   if(error.name!=='AbortError')$('#voiceStatus').textContent='Pulsa Volver a escuchar para iniciar la grabación.';
+   musicVolume();updateControls();
+  });
+ }
+ playPart();
+}
+
 function musicVolume(){window.BibliotecaAudio.duck(!narrator.paused||window.speechSynthesis?.speaking||!winSound.paused||!loseSound.paused);}
 function ensureMusic(){return window.BibliotecaAudio.ensure();}
 function snapshot(side){if(items[pos].type!=='activity')return (side==='right'?right:left).innerHTML;return `<div class="activity-spread activity-snapshot ${side}" data-story="${data.id}" style="${esc(spread.getAttribute('style')||'')}">${spread.innerHTML}</div>`;}
