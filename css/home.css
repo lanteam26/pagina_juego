@@ -794,7 +794,13 @@
 .home-portal .nav-inicio { --tile: #54658f; --tile-edge: #dce5ff; }
 .home-portal :is(.nav-beebot,.wp-inicial,.world-inicial) { --tile: #ffdf8a; --tile-edge: #9c600e; --tile-text: #402708; --tile-accent: #603604; --tile-button: #a45c0b; }
 .home-portal :is(.nav-rayet,.wp-primaria,.world-primaria) { --tile: #273745; --tile-edge: #ffab58; --tile-text: #f7f9fc; --tile-button: #ffab58; --button-text: #35210b; }
-.home-portal :is(.nav-ludio,.wp-secundaria,.world-secundaria) { --tile: #17384c; --tile-edge: #79e6ec; --tile-text: #effcff; --tile-button: #79e6ec; --button-text: #123242; }
+.home-portal :is(.nav-ludio,.wp-secundaria,.world-secundaria) {
+    --tile: linear-gradient(145deg, #13172e 20%, #251744 100%);
+    --tile-edge: #55f5ff;
+    --tile-text: #f4f5ff;
+    --tile-button: #55f5ff;
+    --button-text: #101830;
+}
 .home-portal :is(.nav-recursos,.wp-recursos) { --tile: #356b75; --tile-edge: #9af1cd; }
 .home-portal .nav-ayuda { --tile: #604580; --tile-edge: #e3b4ff; }
 .home-portal .main-nav .nav-btn {
@@ -894,7 +900,32 @@
 }
 .home-portal .world-secundaria .world-card::before {
     display: block; height: 3px;
-    background: linear-gradient(90deg, #79e6ec, #3485a3);
+    background: linear-gradient(90deg, #55f5ff, #bd8cff, #ff68dc);
 }
 .home-portal .main-nav .nav-btn:hover,
 .home-portal .main-nav .nav-btn:active { transform: none; }
+
+/* Ludio: luces de circuito sobre superficies opacas. */
+.home-portal .wp-secundaria .wp-orb {
+    background: radial-gradient(circle, #2a1e50, #12172e 75%);
+    box-shadow: 0 0 18px #55f5ff3d;
+}
+.home-portal .world-preview.wp-secundaria,
+.home-portal .world-secundaria .world-card {
+    border-bottom-color: #ff68dc;
+    box-shadow: 0 0 24px #55f5ff33;
+}
+.home-portal .main-nav .nav-btn.nav-ludio:hover,
+.home-portal .main-nav .nav-btn.nav-ludio.is-active {
+    box-shadow: inset 0 0 0 1px #55f5ff, 0 0 12px #55f5ff55;
+}
+.home-portal .world-secundaria .world-card .hud-level {
+    background: #211638;
+    color: #fbb6ff;
+    border-color: #ff68dc;
+}
+.home-portal .world-secundaria .btn-world,
+.home-portal .world-secundaria .btn-world:hover {
+    border-bottom-color: #a852d4;
+    box-shadow: 0 0 16px #55f5ff55;
+}
