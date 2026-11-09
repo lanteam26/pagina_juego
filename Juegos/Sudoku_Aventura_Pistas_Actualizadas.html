@@ -1,0 +1,703 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#6d63e8">
+  <meta name="description" content="Sudoku Aventura: un sudoku colorido, educativo e interactivo para niños de primaria.">
+  <title>Sudoku Aventura | Aprende jugando</title>
+  <style>
+    :root {
+      --ink:#283458; --muted:#697592; --purple:#6d63e8; --purple-dark:#5349c7;
+      --mint:#48c7af; --sky:#dff5ff; --cream:#fffbf1; --yellow:#ffca65;
+      --line:#dce4f1; --shadow:0 18px 52px rgba(64,72,144,.12);
+      font-family:'Trebuchet MS', 'Arial Rounded MT Bold', Arial, sans-serif;
+      color:var(--ink);
+    }
+    *,*::before,*::after {box-sizing:border-box}
+    body {margin:0; min-height:100vh; background:
+      radial-gradient(circle at 2% 6%,rgba(255,207,113,.34),transparent 28%),
+      radial-gradient(circle at 92% 20%,rgba(162,213,255,.36),transparent 30%),
+      radial-gradient(circle at 74% 94%,rgba(255,180,196,.20),transparent 29%),
+      #f4f7ff; overflow-x:hidden}
+    button {font:inherit; cursor:pointer; touch-action:manipulation}
+    button:focus-visible {outline:3px solid #ed9a35; outline-offset:3px}
+    .wrap {max-width:1210px; padding:28px 24px 44px; margin:auto}
+    .topbar {display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:16px; margin-bottom:25px}
+    .brand {display:flex; align-items:center; gap:12px}
+    .brand-icon {width:52px; height:52px; display:grid; place-items:center; background:#fff; border:2px solid #e8e5ff; box-shadow:0 5px 0 #e7e3ff; border-radius:18px; font-size:30px; transform:rotate(-5deg)}
+    .brand-name {font-weight:900; font-size:clamp(21px,3vw,26px); letter-spacing:-.9px; line-height:1.02}
+    .brand-name span{color:var(--purple)}
+    .brand-subtitle{font-size:12px; color:#697592; font-weight:700; margin-top:5px; letter-spacing:.4px}
+    .top-chips {display:flex; gap:9px; align-items:center; flex-wrap:wrap}
+    .chip {background:white; border:1px solid #e6e9f4; padding:11px 14px; border-radius:999px; font-size:13px; font-weight:800; box-shadow:0 4px 13px rgba(73,88,145,.04)}
+    .chip .gold {color:#c28a16}
+    .layout {display:grid; grid-template-columns:minmax(255px,315px) minmax(0,1fr); gap:25px; align-items:start}
+    .sidebar {display:flex; flex-direction:column; gap:19px}
+    .hero {background:#6e65e9; border-radius:28px; color:#fff; padding:26px 25px 19px; position:relative; overflow:hidden; box-shadow:0 16px 34px rgba(100,92,212,.19)}
+    .hero::before {content:''; position:absolute; width:210px; height:210px; border-radius:50%; border:31px solid rgba(255,255,255,.075); right:-90px; top:-110px}
+    .hero::after {content:'✦'; color:#ffcf6b; position:absolute; right:25px; top:53px; font-size:26px; transform:rotate(10deg)}
+    .hero-eyebrow {display:inline-block; background:rgba(255,255,255,.17); padding:7px 11px; font-size:11px; letter-spacing:1px; border-radius:100px; font-weight:900}
+    .hero h1 {font-size:28px; line-height:1.14; letter-spacing:-1px; margin:17px 0 10px; max-width:230px}
+    .hero p {font-size:14px; line-height:1.55; max-width:240px; margin:0; color:#f1efff}
+    .hero-character{margin-top:10px; text-align:right; font-size:58px; line-height:1; filter:drop-shadow(0 7px 0 rgba(60,52,148,.22))}
+    .white-panel {background:white; border-radius:24px; box-shadow:0 9px 30px rgba(77,91,149,.065); border:1px solid #eaeef9; padding:22px}
+    h2,h3,p {margin-top:0}
+    .section-heading {font-size:16px; font-weight:900; letter-spacing:-.35px; margin:0 0 15px; display:flex; align-items:center; gap:8px}
+    .level-choices {display:grid; gap:10px}
+    .level-btn {width:100%; background:#fff; border:2px solid #e8ecf7; text-align:left; border-radius:17px; padding:11px 12px; display:flex; align-items:center; gap:11px; color:var(--ink); transition:transform .12s, border-color .12s, background .12s}
+    .level-btn:hover{transform:translateY(-2px); border-color:#c9c3ff}
+    .level-btn.active{background:#f2f0ff; border-color:#847afa; box-shadow:0 4px 0 #e1ddff}
+    .level-icon{width:41px; height:41px; flex:none; background:#f1f8ff; border-radius:13px; display:grid; place-items:center; font-size:24px}
+    .level-btn.active .level-icon {background:white}
+    .level-name {font-weight:900; font-size:14px; display:block}
+    .level-small {font-weight:600; font-size:12px; color:var(--muted); margin-top:3px; display:block}
+    .level-check {margin-left:auto; color:var(--purple); font-size:20px; opacity:0}
+    .level-btn.active .level-check{opacity:1}
+    .rules {display:grid; gap:14px}
+    .rule {display:flex; gap:10px; align-items:flex-start}
+    .rule-icon {width:33px; height:33px; flex:none; border-radius:10px; background:#eef9ff; display:grid; place-items:center; font-size:18px}
+    .rule:nth-child(2) .rule-icon{background:#fff2dc}
+    .rule:nth-child(3) .rule-icon{background:#f2ecff}
+    .rule strong{font-size:13px; display:block; margin-bottom:3px}
+    .rule span{font-size:12px; line-height:1.5; color:var(--muted); display:block}
+    .game-panel {background:rgba(255,255,255,.98); border:1px solid #e7eaf5; box-shadow:var(--shadow); border-radius:31px; padding:26px 28px 29px; min-width:0}
+    .game-header {display:flex; justify-content:space-between; align-items:center; gap:15px; flex-wrap:wrap}
+    .game-eyebrow {font-weight:900; color:var(--purple); letter-spacing:1.6px; font-size:11px; text-transform:uppercase; margin-bottom:6px}
+    .game-title {font-size:26px; letter-spacing:-.8px; margin:0}
+    .new-btn {background:#f0efff; color:var(--purple-dark); border:1px solid #e2deff; border-radius:13px; font-weight:900; padding:11px 14px; font-size:13px; transition:background .15s,transform .15s}
+    .new-btn:hover{background:#e6e2ff; transform:translateY(-1px)}
+    .stats {display:grid; grid-template-columns:repeat(3,1fr); gap:10px; margin:23px 0 16px}
+    .stat {background:#f6f8fe; border-radius:16px; padding:12px 10px; text-align:center; min-width:0}
+    .stat:nth-child(2){background:#f1fcf9}
+    .stat:nth-child(3){background:#fff8eb}
+    .stat .stat-icon{font-size:17px; vertical-align:-2px}
+    .stat strong{font-size:20px; display:block; margin:3px 0 3px; font-weight:900; font-variant-numeric:tabular-nums}
+    .stat-label{font-weight:800; font-size:11px; color:var(--muted)}
+    .progress-line {display:flex; align-items:center; justify-content:space-between; gap:10px; font-size:12px; font-weight:800; margin-bottom:8px}
+    .progress-line span:last-child {color:var(--purple)}
+    .progress-track {height:11px; width:100%; background:#eceffa; border-radius:999px; overflow:hidden}
+    .progress-fill {height:100%; width:0; background:linear-gradient(90deg,#67cfb6,#65bde8); border-radius:999px; transition:width .25s}
+    .board-wrap {display:flex; justify-content:center; margin:19px auto 14px}
+    .board {--size:4; width:min(100%,470px); aspect-ratio:1; display:grid; grid-template-columns:repeat(var(--size),minmax(0,1fr)); grid-template-rows:repeat(var(--size),minmax(0,1fr)); background:#fff; overflow:hidden; border:3px solid #4e5b8a; border-radius:15px; box-shadow:0 8px 0 #ebeff9; user-select:none; -webkit-user-select:none; touch-action:manipulation}
+    .cell {appearance:none; min-width:0; min-height:0; display:grid; place-items:center; background:#fff; border:0; border-right:1px solid #d8e0f0; border-bottom:1px solid #d8e0f0; border-radius:0; font-weight:900; font-size:clamp(25px,4vw,36px); color:#5148c2; transition:background .1s; padding:0; position:relative; font-variant-numeric:tabular-nums}
+    .board[data-size='9'] .cell{font-size:clamp(17px,2.7vw,27px)}
+    .board[data-size='6'] .cell{font-size:clamp(22px,3.7vw,34px)}
+    .cell.fixed{background:#f3f6fc; color:#36446c}
+    .cell.selected{background:#cfcaff!important; box-shadow:inset 0 0 0 2px #746af0; z-index:1}
+    .cell.hinted{color:#199e86}
+    .cell.block-right{border-right:3px solid #4e5b8a}
+    .cell.block-bottom{border-bottom:3px solid #4e5b8a}
+    .cell.last-col{border-right:0}
+    .cell.last-row{border-bottom:0}
+    .cell:focus-visible{outline:3px solid #f09d27; outline-offset:-4px; z-index:2}
+    .feedback {min-height:48px; border-radius:15px; padding:12px 14px; display:flex; align-items:center; gap:10px; background:#eef9ff; color:#446985; font-size:13px; line-height:1.4; font-weight:800}
+    .feedback.good {background:#e9fbf4; color:#237d67}
+    .feedback.try {background:#fff5e1; color:#956922}
+    .feedback .feedback-emoji{font-size:20px; flex:none}
+    .pad-label {font-size:12px; text-align:center; color:var(--muted); margin:20px 0 11px; font-weight:800}
+    .number-pad {display:grid; grid-template-columns:repeat(var(--size),minmax(0,1fr)); gap:7px; max-width:470px; margin:0 auto}
+    .number-btn {background:#f4f2ff; border:2px solid #e4dfff; color:#564aca; border-radius:15px; min-width:0; height:53px; font-size:25px; font-weight:900; box-shadow:0 3px 0 #e1dbff; transition:transform .12s,background .12s}
+    .number-btn:hover{background:#e7e3ff; transform:translateY(-2px)}
+    .number-btn:active{transform:translateY(2px); box-shadow:none}
+    .board[data-size='9'] ~ .number-pad .number-btn {font-size:19px}
+    .tools {display:flex; justify-content:center; gap:9px; flex-wrap:wrap; margin:18px auto 0; max-width:470px}
+    .tool-btn {border:1.5px solid #e7ebf4; background:#fff; color:#576480; padding:12px 14px; border-radius:13px; font-weight:900; font-size:12px; display:flex; align-items:center; justify-content:center; gap:7px; flex:1; min-width:100px; transition:background .14s,transform .14s}
+    .tool-btn:hover:not(:disabled){background:#f4f7ff; transform:translateY(-2px)}
+    .tool-btn:disabled{opacity:.45; cursor:not-allowed}
+    .tool-btn.hint {background:#fff3da; color:#9c6c19; border-color:#ffe5b0}
+    .tool-btn.hint:hover:not(:disabled){background:#ffeac1}
+    .footer-note {text-align:center; color:#8995ac; font-size:12px; font-weight:700; margin:24px 0 0}
+    .modal-backdrop {position:fixed; inset:0; z-index:50; background:rgba(28,36,77,.52); display:grid; place-items:center; padding:20px; backdrop-filter:blur(5px)}
+    .modal-backdrop[hidden]{display:none}
+    .victory-card {background:#fff; width:min(100%,440px); padding:35px 28px 29px; border-radius:30px; box-shadow:0 30px 90px rgba(31,36,86,.22); text-align:center; position:relative; overflow:hidden; animation:pop .3s ease-out}
+    .victory-emoji {font-size:66px; line-height:1.2}
+    .victory-card h2 {font-size:31px; letter-spacing:-1px; margin:11px 0 10px}
+    .victory-card p{line-height:1.55; color:var(--muted); font-size:14px}
+    .victory-stars{font-size:42px; letter-spacing:5px; margin:13px 0}
+    .victory-actions{display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:23px}
+    .victory-actions button {border:0; background:#6d63e8; color:#fff; border-radius:13px; padding:14px 9px; font-size:13px; font-weight:900}
+    .victory-actions button.secondary {background:#f0efff; color:#5a52b9}
+    .confetti {pointer-events:none; position:fixed; z-index:60; top:-24px; width:11px; height:18px; border-radius:3px; animation:fall var(--dur) linear forwards; left:var(--x); background:var(--color); transform:rotate(var(--turn))}
+    @keyframes fall {to{top:110vh;transform:translateX(var(--drift)) rotate(660deg);opacity:.9}}
+    @keyframes pop {from{transform:scale(.85);opacity:0}to{transform:scale(1);opacity:1}}
+    @media (min-width:1000px) {.game-panel{padding:30px 43px 35px}.game-title{font-size:28px}}
+    @media (max-width:810px){.layout{grid-template-columns:1fr}.sidebar{display:grid; grid-template-columns:1fr 1fr; align-items:start}.hero{grid-column:1/-1}.hero-character{position:absolute; right:28px; bottom:18px}.hero h1{max-width:unset}.hero p{max-width:75%}.game-panel{grid-row:1}}
+    @media (max-width:580px){.wrap{padding:16px 12px 28px}.topbar{margin-bottom:17px}.brand-icon{width:42px;height:42px;font-size:24px;border-radius:14px}.brand-name{font-size:21px}.top-chips .chip{font-size:11px;padding:8px 10px}.layout{gap:16px}.game-panel{padding:19px 13px 23px;border-radius:23px}.game-title{font-size:22px}.new-btn{padding:9px 10px;font-size:12px}.stats{margin-top:17px}.stat{padding:10px 7px}.stat strong{font-size:18px}.stat-label{font-size:10px}.board-wrap{margin-top:16px}.board{border-radius:10px;border-width:2px}.cell.block-right{border-right-width:2px}.cell.block-bottom{border-bottom-width:2px}.cell{font-size:clamp(22px,7vw,34px)}.number-pad{gap:5px}.number-btn{height:46px;font-size:23px;border-radius:11px}.board[data-size='9'] ~ .number-pad .number-btn{font-size:17px}.tools{gap:6px}.tool-btn{min-width:0;padding:11px 6px;font-size:11px}.sidebar{display:flex;flex-direction:column}.hero{width:100%;padding:22px 22px 20px}.hero h1{font-size:24px;max-width:210px}.hero p{max-width:220px}.hero-character{font-size:50px}.white-panel{width:100%}.footer-note{font-size:11px}}
+    @media (max-width:370px){.brand-subtitle{display:none}.top-chips{width:100%}.game-header{align-items:flex-start}.game-title{font-size:20px}.cell{font-size:22px}.board[data-size='9'] .cell{font-size:16px}.feedback{font-size:12px}}
+    @media (prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important}}
+
+    /* Diseño de una pantalla: todas las áreas se ajustan al espacio disponible. */
+    html,body{height:100%;overflow:hidden}
+    body{min-height:0}
+    .wrap{width:100%;max-width:1500px;height:100dvh;max-height:100dvh;padding:12px 16px 10px;margin:auto;display:flex;flex-direction:column;min-height:0;gap:10px}
+    .topbar{flex:0 0 auto;min-height:42px;margin:0;gap:8px}
+    .brand-icon{width:41px;height:41px;border-radius:13px;font-size:24px}
+    .brand-name{font-size:22px}
+    .brand-subtitle{font-size:10px;margin-top:1px}
+    .chip{padding:8px 12px;font-size:12px}
+    .layout{flex:1;min-height:0;min-width:0;display:grid;grid-template-columns:238px minmax(0,1fr);gap:12px;align-items:stretch}
+    .sidebar{min-height:0;display:flex;flex-direction:column;gap:10px}
+    .hero{flex:0 0 auto;min-height:105px;border-radius:20px;padding:13px 15px;display:flex;gap:4px;align-items:center}
+    .hero-eyebrow{padding:5px 8px;font-size:9px}
+    .hero h1{font-size:19px;line-height:1.14;letter-spacing:-.6px;margin:7px 0 5px;max-width:150px}
+    .hero p{font-size:11px;line-height:1.25;max-width:155px}
+    .hero-character{font-size:39px;margin:0;align-self:flex-end;white-space:nowrap}
+    .hero::after{right:14px;top:15px;font-size:18px}
+    .white-panel{width:100%;padding:14px;border-radius:19px}
+    .selection-panel{flex:0 0 auto}
+    .section-heading{font-size:14px;margin:0 0 10px;gap:5px}
+    .selection-heading{display:flex;justify-content:space-between;align-items:center;gap:5px;margin-bottom:9px}
+    .selection-heading .section-heading{margin:0}
+    .help-button{border:1px solid #e4e1fc;border-radius:10px;background:#f1f0ff;color:#594cc8;padding:6px 7px;font-weight:900;font-size:10px;white-space:nowrap}
+    .level-choices{gap:6px}
+    .level-btn{border-radius:12px;padding:7px 8px;gap:8px;min-height:45px}
+    .level-icon{width:29px;height:29px;border-radius:9px;font-size:19px}
+    .level-name{font-size:12px}
+    .level-small{font-size:10px;margin-top:0}
+    .level-check{font-size:16px}
+    .difficulty-heading{font-size:12px;font-weight:900;margin:12px 0 7px}
+    .difficulty-choices{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:5px}
+    .difficulty-btn{border:1.5px solid #e1e6f1;border-radius:11px;background:#f8f9ff;min-height:37px;padding:6px 3px;font-size:11px;font-weight:900;color:#65708f;transition:background .1s,border-color .1s}
+    .difficulty-btn:hover{border-color:#a9a0f8}
+    .difficulty-btn.active{background:#eae7ff;color:#554ac7;border-color:#8378ec;box-shadow:0 2px 0 #ded9ff}
+    .difficulty-note{font-size:10px;line-height:1.3;color:var(--muted);margin:8px 0 0;min-height:12px}
+    .rules-panel{flex:1 1 0;min-height:0;overflow:hidden}
+    .rules{gap:9px}
+    .rule{gap:8px}
+    .rule-icon{width:28px;height:28px;font-size:15px;border-radius:9px}
+    .rule strong{font-size:11px;margin-bottom:0}
+    .rule span{font-size:10px;line-height:1.3}
+    .footer-note{display:none}
+    .game-panel{height:100%;min-height:0;min-width:0;display:flex;flex-direction:column;border-radius:23px;padding:16px 20px 17px!important}
+    .game-header{flex:0 0 auto;gap:8px;flex-wrap:nowrap}
+    .game-eyebrow{font-size:10px;letter-spacing:1px;margin-bottom:2px}
+    .game-title{font-size:22px!important;white-space:nowrap}
+    .new-btn{padding:9px 11px;font-size:11px;white-space:nowrap}
+    .stats{flex:0 0 auto;margin:10px 0 9px;gap:8px}
+    .stat{padding:7px 8px;border-radius:11px;display:flex;align-items:center;justify-content:center;gap:6px;min-height:37px}
+    .stat .stat-icon{font-size:16px}
+    .stat strong{display:inline;margin:0;font-size:16px;line-height:1;font-variant-numeric:tabular-nums}
+    .stat-label{font-size:10px;white-space:nowrap}
+    .progress-line{flex:0 0 auto;margin-bottom:4px;font-size:10px}
+    .progress-track{flex:0 0 auto;height:6px}
+    .play-area{flex:1;min-height:0;display:grid;grid-template-columns:minmax(0,1fr) 185px;gap:18px;padding-top:10px;align-items:stretch}
+    .board-section{display:flex;flex-direction:column;min-height:0;min-width:0;gap:10px;align-items:center}
+    .board-wrap{width:100%;height:0;min-height:0;flex:1;display:grid;place-items:center;margin:0;overflow:hidden}
+    .board{max-width:100%;aspect-ratio:1;border-radius:13px;box-shadow:0 5px 0 #ebeff9;flex-shrink:0}
+    .cell{font-size:clamp(17px,3vw,36px)}
+    .board[data-size='6'] .cell{font-size:clamp(16px,2.7vw,30px)}
+    .board[data-size='9'] .cell{font-size:clamp(13px,2.2vw,24px)}
+    .feedback{width:100%;flex:0 0 auto;min-height:39px;max-height:49px;padding:7px 10px;border-radius:11px;font-size:11px;line-height:1.25;overflow:hidden}
+    .feedback .feedback-emoji{font-size:17px}
+    .controls-side{min-width:0;min-height:0;display:flex;flex-direction:column;justify-content:center;gap:10px}
+    .pad-label{margin:0;font-size:12px}
+    .number-pad{display:grid;width:100%;max-width:100%;grid-template-columns:repeat(var(--pad-cols,3),minmax(0,1fr));gap:7px;margin:0 auto}
+    .number-btn{height:48px;border-radius:12px;font-size:23px}
+    .tools{width:100%;max-width:100%;display:flex;flex-direction:column;gap:8px;margin:8px auto 0;flex-wrap:nowrap}
+    .tool-btn{width:100%;flex:0 0 auto;min-width:0;padding:11px 7px;font-size:12px}
+    .controls-tip{font-weight:800;font-size:11px;text-align:center;color:#7a86a0;line-height:1.4;margin-top:8px}
+    .rules-dialog{padding:24px 22px;max-height:calc(100dvh - 30px);overflow:auto}
+    .rules-dialog .victory-emoji{font-size:43px}
+    .rules-dialog h2{font-size:24px}
+    .rules-dialog-list{text-align:left;background:#f5f6ff;padding:12px;border-radius:14px}
+    .rules-dialog-list p{font-size:12px;margin:0 0 8px}
+    .rules-dialog-list p:last-child{margin:0}
+    .rules-close{border:0;background:#6d63e8;border-radius:12px;color:white;font-weight:900;padding:12px 18px;margin-top:13px;width:100%}
+    @media (min-width:1250px){
+      .layout{grid-template-columns:252px minmax(0,1fr);gap:16px}
+      .play-area{grid-template-columns:minmax(0,1fr) 210px;gap:25px}
+      .game-panel{padding:18px 25px 18px!important}
+      .number-btn{height:51px}
+    }
+    @media (max-height:680px) and (min-width:801px){
+      .wrap{padding-top:8px;padding-bottom:7px;gap:7px}
+      .sidebar{gap:6px}.hero{min-height:69px;padding:7px 12px}
+      .hero h1{font-size:15px;margin:3px 0}.hero p,.hero-eyebrow{display:none}.hero-character{font-size:31px}
+      .white-panel{padding:10px}.selection-heading{margin-bottom:6px}.level-btn{min-height:37px;padding:4px 6px}.level-icon{width:25px;height:25px;font-size:16px}
+      .difficulty-heading{margin:7px 0 4px}.difficulty-btn{min-height:30px}.difficulty-note{margin-top:5px}
+      .rules{gap:4px}.rules-panel .section-heading{margin-bottom:6px}
+      .game-panel{padding:10px 16px!important}.stats{margin:7px 0 6px}.play-area{padding-top:6px}
+      .number-btn{height:40px}.tools{gap:5px;margin-top:5px}.tool-btn{padding:8px 5px}.controls-tip{display:none}
+      .feedback{min-height:32px}
+    }
+    @media (max-width:800px){
+      .wrap{padding:7px 10px 9px;gap:7px}
+      .topbar{min-height:35px;gap:6px;flex-wrap:nowrap}
+      .brand{gap:7px}.brand-icon{width:32px;height:32px;font-size:19px;border-radius:10px}
+      .brand-name{font-size:18px}.brand-subtitle{display:none}
+      .top-chips{gap:4px;flex-wrap:nowrap}.chip{padding:5px 7px;font-size:10px;white-space:nowrap}
+      .layout{display:flex;flex-direction:column;gap:7px;min-height:0}
+      .sidebar{display:block;flex:none;min-height:0}
+      .sidebar .hero,.sidebar .rules-panel{display:none}
+      .selection-panel{padding:8px 10px;border-radius:14px}
+      .selection-heading{margin-bottom:6px}
+      .section-heading{font-size:12px}.help-button{font-size:10px;padding:4px 7px}
+      .level-choices{grid-template-columns:repeat(3,minmax(0,1fr));gap:5px}
+      .level-btn{min-height:36px;display:flex;justify-content:center;padding:5px 3px;gap:5px;border-radius:9px}
+      .level-icon{width:auto;height:auto;font-size:15px;background:transparent!important}
+      .level-name{display:none}.level-small{font-size:12px;font-weight:900;margin:0;color:var(--ink)}
+      .level-check{display:none}
+      .difficulty-heading{display:none}
+      .difficulty-choices{margin-top:6px;gap:5px}
+      .difficulty-btn{min-height:29px;padding:3px;font-size:11px;border-radius:9px}
+      .difficulty-note{display:none}
+      .game-panel{flex:1;min-height:0;height:auto;grid-row:auto;padding:9px 11px 10px!important;border-radius:17px}
+      .game-header{gap:5px}.game-eyebrow{font-size:9px;letter-spacing:.7px;margin-bottom:1px}
+      .game-title{font-size:17px!important}.new-btn{padding:7px 8px;font-size:10px;border-radius:9px}
+      .stats{margin:7px 0 6px;gap:5px}.stat{min-height:30px;padding:4px 3px;gap:3px;border-radius:8px}
+      .stat .stat-icon{font-size:13px}.stat strong{font-size:13px}.stat-label{font-size:9px}
+      .progress-line{font-size:9px;margin-bottom:3px}.progress-track{height:5px}
+      .play-area{display:flex;flex-direction:column;gap:6px;padding-top:6px;min-height:0}
+      .board-section{flex:1;min-height:0;gap:6px}
+      .board-wrap{flex:1;height:0;min-height:0;min-width:0;overflow:hidden}
+      .board{border-radius:10px;box-shadow:0 3px 0 #ebeff9}
+      .cell{font-size:clamp(17px,6vw,31px)}
+      .board[data-size='6'] .cell{font-size:clamp(14px,5vw,27px)}
+      .board[data-size='9'] .cell{font-size:clamp(12px,3.7vw,22px)}
+      .feedback{width:100%;min-height:29px;max-height:34px;font-size:10px;padding:5px 8px;border-radius:9px}
+      .feedback .feedback-emoji{font-size:14px}
+      .controls-side{flex:0 0 auto;gap:5px;justify-content:flex-start}
+      .pad-label{font-size:10px}
+      .number-pad{grid-template-columns:repeat(var(--size),minmax(0,1fr));gap:5px}
+      .number-btn{height:39px;font-size:20px;border-radius:9px;box-shadow:0 2px 0 #e1dbff}
+      .tools{display:flex;flex-direction:row;gap:5px;margin:3px auto 0}
+      .tool-btn{flex:1;width:auto;min-width:0;padding:8px 3px;font-size:10px;border-radius:9px;white-space:nowrap}
+      .controls-tip{display:none}
+    }
+    @media (max-width:370px){
+      .brand-name{font-size:15px}.chip{font-size:9px;padding:5px}
+      .new-btn{font-size:9px}.game-title{font-size:15px!important}
+      .stat-label{display:none}.number-btn{height:36px}.level-btn{min-height:32px}
+      .difficulty-btn{min-height:26px}.feedback{font-size:9px}
+    }
+    @media (max-height:640px) and (max-width:800px){
+      .wrap{padding-top:4px;padding-bottom:5px;gap:5px}
+      .topbar{min-height:29px}.brand-icon{width:28px;height:28px;font-size:17px}
+      .selection-panel{padding:5px 8px}.selection-heading{margin-bottom:4px}
+      .level-btn{min-height:30px;padding:3px}.difficulty-choices{margin-top:4px}.difficulty-btn{min-height:25px}
+      .game-panel{padding:6px 9px 7px!important}.stats{margin:5px 0}.stat{min-height:26px}
+      .play-area{padding-top:4px;gap:4px}.board-section{gap:4px}.feedback{min-height:25px;max-height:27px}
+      .controls-side{gap:3px}.number-btn{height:31px}.tools{margin-top:1px}.tool-btn{padding:6px 2px}
+    }
+
+    @media (max-height:450px) and (min-width:801px){
+      .wrap{padding:5px 10px;gap:5px}
+      .topbar{min-height:30px}.brand-icon{width:30px;height:30px;font-size:18px}
+      .brand-name{font-size:17px}.brand-subtitle{display:none}.chip{padding:5px 8px;font-size:10px}
+      .layout{grid-template-columns:205px minmax(0,1fr);gap:8px}
+      .sidebar .hero,.sidebar .rules-panel{display:none}
+      .selection-panel{padding:8px;border-radius:13px}
+      .selection-heading{margin-bottom:6px}
+      .level-choices{gap:5px}.level-btn{min-height:36px;padding:3px 6px}
+      .difficulty-heading{margin:8px 0 5px}.difficulty-btn{font-size:10px;min-height:27px;padding:3px 1px}
+      .difficulty-note{font-size:9px;margin-top:4px}
+      .game-panel{padding:7px 12px 8px!important;border-radius:15px}
+      .game-title{font-size:17px!important}.game-eyebrow{font-size:9px}
+      .new-btn{padding:6px 8px}.stats{margin:5px 0;gap:5px}.stat{min-height:27px;padding:4px 5px}
+      .stat strong{font-size:13px}.stat-label{font-size:9px}
+      .progress-line{margin-bottom:2px}.progress-track{height:4px}
+      .play-area{grid-template-columns:minmax(0,1fr) 155px;gap:7px;padding-top:5px}
+      .board-section{gap:5px}.feedback{min-height:25px;max-height:27px;font-size:10px;padding:5px 7px}
+      .controls-side{gap:5px}.number-pad{gap:4px}.number-btn{height:29px;border-radius:8px;font-size:17px;box-shadow:0 1px 0 #e1dbff}
+      .tools{margin-top:3px;gap:4px}.tool-btn{padding:6px 4px;font-size:10px;border-radius:8px}
+      .controls-tip{display:none}.pad-label{font-size:10px}
+    }
+  </style>
+</head>
+<body>
+<div class="wrap">
+  <header class="topbar">
+    <div class="brand">
+      <div class="brand-icon" aria-hidden="true">🧩</div>
+      <div><div class="brand-name">Sudoku <span>Aventura</span></div><div class="brand-subtitle">PEQUEÑOS RETOS, GRANDES MENTES</div></div>
+    </div>
+    <div class="top-chips" aria-label="Tus logros">
+      <div class="chip">🏆 <span id="gamesWon">0</span> tableros</div>
+      <div class="chip"><span class="gold">⭐</span> <span id="totalStars">0</span> estrellas</div>
+    </div>
+  </header>
+
+  <div class="layout">
+    <aside class="sidebar">
+      <section class="hero" aria-label="Bienvenida">
+        <div class="hero-copy"><span class="hero-eyebrow">¡HOLA, EXPLORADOR!</span>
+          <h1>¡Tu mente puede con todo!</h1>
+          <p>¡Cada número es una aventura!</p>
+        </div>
+        <div class="hero-character" aria-hidden="true">🦊✨</div>
+      </section>
+      <section class="white-panel selection-panel">
+        <div class="selection-heading"><h2 class="section-heading">🎯 Elige tu tablero</h2><button type="button" class="help-button" id="howToPlay" aria-label="Ver reglas del juego">❔ Reglas</button></div>
+        <div class="level-choices" role="group" aria-label="Tamaño del sudoku">
+          <button type="button" class="level-btn active" data-level="easy" aria-pressed="true"><span class="level-icon" aria-hidden="true">🌱</span><span class="level-content"><span class="level-name">Semillita</span><span class="level-small">4 × 4</span></span><span class="level-check" aria-hidden="true">✓</span></button>
+          <button type="button" class="level-btn" data-level="medium" aria-pressed="false"><span class="level-icon" aria-hidden="true">🚀</span><span class="level-content"><span class="level-name">Explorador</span><span class="level-small">6 × 6</span></span><span class="level-check" aria-hidden="true">✓</span></button>
+          <button type="button" class="level-btn" data-level="hard" aria-pressed="false"><span class="level-icon" aria-hidden="true">🏆</span><span class="level-content"><span class="level-name">Supergenio</span><span class="level-small">9 × 9</span></span><span class="level-check" aria-hidden="true">✓</span></button>
+        </div>
+        <div class="difficulty-heading">✨ ¿Qué tan difícil?</div>
+        <div class="difficulty-choices" role="group" aria-label="Dificultad del sudoku">
+          <button type="button" class="difficulty-btn active" data-difficulty="easy" aria-pressed="true">😊 Fácil</button>
+          <button type="button" class="difficulty-btn" data-difficulty="normal" aria-pressed="false">🧠 Medio</button>
+          <button type="button" class="difficulty-btn" data-difficulty="hard" aria-pressed="false">🔥 Difícil</button>
+        </div>
+        <p class="difficulty-note" id="difficultyNote">Más números de ayuda para empezar.</p>
+      </section>
+      <section class="white-panel rules-panel">
+        <h2 class="section-heading">💡 Reglas mágicas</h2>
+        <div class="rules">
+          <div class="rule"><div class="rule-icon" aria-hidden="true">↔️</div><div><strong>Filas</strong><span>Sin números repetidos.</span></div></div>
+          <div class="rule"><div class="rule-icon" aria-hidden="true">↕️</div><div><strong>Columnas</strong><span>Sin números repetidos.</span></div></div>
+          <div class="rule"><div class="rule-icon" aria-hidden="true">🔲</div><div><strong>Cuadritos</strong><span>Sin repeticiones. Se revisa al terminar.</span></div></div>
+        </div>
+      </section>
+    </aside>
+
+    <main class="game-panel">
+      <div class="game-header">
+        <div><div class="game-eyebrow" id="levelTag">SEMILLITA · FÁCIL</div><h2 class="game-title">¡Completa el tablero!</h2></div>
+        <button id="newGame" class="new-btn" type="button">↻ Nuevo tablero</button>
+      </div>
+      <div class="stats" aria-label="Estadísticas de la partida">
+        <div class="stat"><span class="stat-icon" aria-hidden="true">⏱️</span><strong id="timer">00:00</strong><span class="stat-label">Tiempo</span></div>
+        <div class="stat"><span class="stat-icon" aria-hidden="true">📝</span><strong id="correctCount">0</strong><span class="stat-label">Casillas</span></div>
+        <div class="stat"><span class="stat-icon" aria-hidden="true">💡</span><strong id="hintsCount">1</strong><span class="stat-label">Pistas</span></div>
+      </div>
+      <div class="progress-line"><span>🌈 Tu progreso</span><span id="progressText">0% completado</span></div>
+      <div class="progress-track" role="progressbar" aria-label="Progreso del sudoku" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" id="progressTrack"><div class="progress-fill" id="progressFill"></div></div>
+      <div class="play-area">
+        <section class="board-section" aria-label="Zona de juego">
+          <div class="board-wrap"><div id="board" class="board" role="grid" aria-label="Tablero de sudoku 4 por 4" data-size="4" style="--size:4"></div></div>
+          <div id="feedback" class="feedback" role="status" aria-live="polite"><span class="feedback-emoji" aria-hidden="true">👆</span><span id="feedbackText">Toca una casilla y elige un número.</span></div>
+        </section>
+        <section class="controls-side" aria-label="Controles del sudoku">
+          <p class="pad-label" id="padLabel">Elige del 1 al 4</p>
+          <div class="number-pad" id="numberPad" role="group" aria-label="Números para completar el sudoku" style="--size:4"></div>
+          <div class="tools">
+            <button type="button" id="erase" class="tool-btn">🧽 Borrar</button>
+            <button type="button" id="undo" class="tool-btn">↶ Deshacer</button>
+            <button type="button" id="hint" class="tool-btn hint">💡 Pista (<span id="hintButtonCount">1</span>)</button>
+          </div>
+          <div class="controls-tip">🌟 Revisa filas, columnas y recuadros. Los errores se comprueban solo al completar.</div>
+        </section>
+      </div>
+    </main>
+  </div>
+  <p class="footer-note">Hecho para aprender jugando 💜 · Puedes jugar con el mouse, el dedo o el teclado.</p>
+</div>
+
+<div id="rulesModal" class="modal-backdrop" hidden>
+  <div class="victory-card rules-dialog" role="dialog" aria-modal="true" aria-labelledby="rulesTitle">
+    <div class="victory-emoji" aria-hidden="true">📚🦊</div>
+    <h2 id="rulesTitle">¿Cómo jugar sudoku?</h2>
+    <p>Completa las casillas vacías con números del 1 al 4, 6 o 9, según tu tablero.</p>
+    <div class="rules-dialog-list">
+      <p>↔️ <strong>En cada fila:</strong> no repitas números.</p>
+      <p>↕️ <strong>En cada columna:</strong> no repitas números.</p>
+      <p>🔲 <strong>En cada recuadro:</strong> usa cada número una sola vez.</p>
+      <p>📝 <strong>Piensa antes de colocar.</strong> El juego no revela si aciertas hasta completar el tablero.</p>
+      <p>💡 <strong>¿Te atascaste?</strong> Usa una pista cuando la necesites.</p>
+    </div>
+    <button type="button" id="closeRules" class="rules-close">¡Entendido! A jugar 🎮</button>
+  </div>
+</div>
+
+<div id="victoryModal" class="modal-backdrop" hidden>
+  <div class="victory-card" role="dialog" aria-modal="true" aria-labelledby="victoryTitle">
+    <div class="victory-emoji" aria-hidden="true">🎉🦊🎉</div>
+    <h2 id="victoryTitle">¡Lo lograste!</h2>
+    <p>¡Completaste el sudoku! Cada número te hizo un poquito más experto.</p>
+    <div id="victoryStars" class="victory-stars" aria-label="Estrellas ganadas">⭐⭐⭐</div>
+    <p id="victoryDetails">¡Excelente trabajo!</p>
+    <div class="victory-actions"><button id="playAgain" type="button">✨ Jugar otro</button><button class="secondary" id="closeVictory" type="button">Ver mi tablero</button></div>
+  </div>
+</div>
+<script>
+(() => {
+  'use strict';
+  const LEVELS = {
+    easy: { size:4, boxRows:2, boxCols:2, name:'Semillita', order:1 },
+    medium:{ size:6, boxRows:2, boxCols:3, name:'Explorador', order:2 },
+    hard:{ size:9, boxRows:3, boxCols:3, name:'Supergenio', order:3 }
+  };
+  const DIFFICULTIES={
+    easy: { name:'Fácil', clues:{4:10,6:25,9:50}, hints:1, description:'Más números de ayuda para empezar. 1 pista disponible.' },
+    normal:{ name:'Medio', clues:{4:8,6:20,9:40}, hints:2, description:'Algunas pistas menos. 2 pistas disponibles.' },
+    hard:{ name:'Difícil', clues:{4:6,6:15,9:30}, hints:3, description:'Pocos números iniciales. 3 pistas disponibles.' }
+  };
+  const $ = id => document.getElementById(id);
+  const range = n => Array.from({length:n},(_,i)=>i);
+  function shuffle(array) {
+    const a=array.slice();
+    for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}
+    return a;
+  }
+  function makeSolution(conf){
+    const n=conf.size, br=conf.boxRows, bc=conf.boxCols;
+    const rperm=shuffle(range(n/br)).flatMap(g=>shuffle(range(br)).map(v=>g*br+v));
+    const cperm=shuffle(range(n/bc)).flatMap(g=>shuffle(range(bc)).map(v=>g*bc+v));
+    const nums=shuffle(range(n).map(x=>x+1));
+    return rperm.flatMap(r=>cperm.map(c=>nums[(r*bc+Math.floor(r/br)+c)%n]));
+  }
+  function solutionCount(puzzle,conf,maxSolutions=2){
+    const n=conf.size,full=(1<<n)-1;
+    const rowMasks=new Int32Array(n),colMasks=new Int32Array(n),boxMasks=new Int32Array(n);
+    const boxIndex=(r,c)=>Math.floor(r/conf.boxRows)*(n/conf.boxCols)+Math.floor(c/conf.boxCols);
+    const blanks=[];
+    for(let k=0;k<n*n;k++){
+      const r=Math.floor(k/n),c=k%n,v=puzzle[k],b=boxIndex(r,c);
+      if(!v){blanks.push(k);continue;}
+      const bit=1<<(v-1);
+      if((rowMasks[r]|colMasks[c]|boxMasks[b])&bit)return 0;
+      rowMasks[r]|=bit; colMasks[c]|=bit;boxMasks[b]|=bit;
+    }
+    let solutions=0;
+    function dfs(){
+      if(solutions>=maxSolutions)return;
+      let target=-1,options=0,min=10;
+      for(const k of blanks){
+        if(puzzle[k])continue;
+        const r=Math.floor(k/n),c=k%n,b=boxIndex(r,c);
+        const bits=full & ~(rowMasks[r]|colMasks[c]|boxMasks[b]);
+        if(!bits)return;
+        let count=0,m=bits;
+        while(m){m&=m-1;count++;}
+        if(count<min){min=count;target=k;options=bits;if(count===1)break;}
+      }
+      if(target<0){solutions++;return;}
+      const r=Math.floor(target/n),c=target%n,b=boxIndex(r,c);
+      for(let opts=options;opts && solutions<maxSolutions;opts&=opts-1){
+        const bit=opts & -opts;
+        rowMasks[r]|=bit;colMasks[c]|=bit;boxMasks[b]|=bit;puzzle[target]=Math.log2(bit)+1;
+        dfs();
+        puzzle[target]=0;rowMasks[r]^=bit;colMasks[c]^=bit;boxMasks[b]^=bit;
+      }
+    }
+    dfs();return solutions;
+  }
+  function makePuzzle(conf){
+    const solution=makeSolution(conf),puzzle=solution.slice();
+    let remaining=conf.size*conf.size;
+    for(const k of shuffle(range(remaining))){
+      if(remaining<=conf.clues)break;
+      const original=puzzle[k];puzzle[k]=0;
+      if(solutionCount(puzzle,conf)!==1)puzzle[k]=original;
+      else remaining--;
+    }
+    return {solution,puzzle};
+  }
+  const defaults={wins:0,stars:0};
+  let records={...defaults};
+  try{const stored=JSON.parse(localStorage.getItem('sudokuAventuraStatsV1')||'null'); if(stored && Number.isInteger(stored.wins)&&Number.isInteger(stored.stars))records=stored;}catch(_){}
+  let level='easy',difficulty='easy',conf=LEVELS.easy,solution=[],puzzle=[],entries=[],hinted=[],selected=-1;
+  let hintsLeft=1,failedChecks=0,history=[],seconds=0,won=false,timerHandle=null;
+  function saveRecords(){try{localStorage.setItem('sudokuAventuraStatsV1',JSON.stringify(records));}catch(_){}}
+  function renderRecords(){$('gamesWon').textContent=records.wins;$('totalStars').textContent=records.stars;}
+  function say(message,kind='neutral',emoji='🦊'){
+    $('feedback').className='feedback'+(kind==='neutral'?'':' '+kind);
+    $('feedback').querySelector('.feedback-emoji').textContent=emoji;
+    $('feedbackText').textContent=message;
+  }
+  function timeText(value){return String(Math.floor(value/60)).padStart(2,'0')+':'+String(value%60).padStart(2,'0');}
+  function renderTimer(){$('timer').textContent=timeText(seconds);}
+  function startTimer(){if(timerHandle!==null)clearInterval(timerHandle);timerHandle=setInterval(()=>{if(!won){seconds++;renderTimer();}},1000);}
+  function filledCount(){return puzzle.reduce((sum,v,k)=>sum+(!v && entries[k]!==0 ? 1:0),0);}
+  function getValue(k){return puzzle[k]||entries[k];}
+  function renderProgress(){
+    const total=puzzle.filter(v=>!v).length;
+    const filled=filledCount();const pct=total?Math.round(filled/total*100):100;
+    $('correctCount').textContent=filled+' / '+total;
+    $('hintsCount').textContent=hintsLeft;
+    $('hintButtonCount').textContent=hintsLeft;
+    $('hint').disabled=hintsLeft<=0||won;
+    $('undo').disabled=history.length===0||won;
+    $('erase').disabled=won;
+    $('progressText').textContent=pct+'% de casillas llenas';
+    $('progressFill').style.width=pct+'%';
+    $('progressTrack').setAttribute('aria-valuenow',String(pct));
+  }
+  function renderBoard(refocus=false){
+    const board=$('board');board.replaceChildren();board.dataset.size=String(conf.size);
+    board.style.setProperty('--size',String(conf.size));
+    board.setAttribute('aria-label','Tablero de sudoku de '+conf.size+' por '+conf.size);
+    const n=conf.size;
+    for(let k=0;k<n*n;k++){
+      const r=Math.floor(k/n),c=k%n,val=getValue(k),fixed=!!puzzle[k];
+      const cell=document.createElement('button');cell.type='button';
+      cell.className='cell';cell.dataset.index=k;
+      if(fixed)cell.classList.add('fixed');
+      if(hinted[k])cell.classList.add('hinted');
+      if(c===n-1)cell.classList.add('last-col');
+      else if((c+1)%conf.boxCols===0)cell.classList.add('block-right');
+      if(r===n-1)cell.classList.add('last-row');
+      else if((r+1)%conf.boxRows===0)cell.classList.add('block-bottom');
+      // Solo se resalta la casilla seleccionada: ni coincidencias ni conflictos.
+      // No indicar números repetidos, filas, columnas ni bloques relacionados.
+      if(selected===k)cell.classList.add('selected');
+      cell.textContent=val||'';
+      cell.setAttribute('role','gridcell');
+      cell.setAttribute('aria-label','Fila '+(r+1)+', columna '+(c+1)+': '+(val||'vacía')+(fixed?', número inicial':hinted[k]?', pista':''));
+      cell.setAttribute('aria-selected',selected===k?'true':'false');
+      cell.tabIndex=selected===k?0:-1;
+      cell.addEventListener('click',()=>choose(k));
+      board.appendChild(cell);
+    }
+    resizeBoard();
+    if(refocus&&selected>=0){const target=board.children[selected];if(target)target.focus({preventScroll:true});}
+  }
+  function resizeBoard(){
+    const wrap=document.querySelector('.board-wrap');
+    const board=$('board');
+    const px=Math.floor(Math.min(wrap.clientWidth,wrap.clientHeight,560));
+    if(px>0){board.style.width=px+'px';board.style.height=px+'px';}
+  }
+  const boardObserver=new ResizeObserver(()=>resizeBoard());
+  boardObserver.observe(document.querySelector('.board-wrap'));
+  window.addEventListener('resize',resizeBoard);
+  function renderPad(){
+    const pad=$('numberPad');pad.replaceChildren();pad.style.setProperty('--size',String(conf.size));
+    $('padLabel').textContent='Elige del 1 al '+conf.size;
+    pad.style.setProperty('--pad-cols',String(conf.size===4?2:3));
+    for(let num=1;num<=conf.size;num++){
+      const button=document.createElement('button');button.type='button';button.className='number-btn';button.textContent=num;
+      button.setAttribute('aria-label','Colocar número '+num);
+      button.addEventListener('click',()=>putNumber(num));
+      button.disabled=won;pad.appendChild(button);
+    }
+  }
+  function choose(k,keyboard=false){
+    if(won)return;
+    selected=k;
+    if(puzzle[k])say('Este número es una ayuda inicial. ¡Prueba una casilla blanca!','neutral','🔒');
+    else if(hinted[k])say('¡Esta casilla ya tiene una pista!','good','💡');
+    else say('¡Muy bien! Ahora elige el número que falta.','neutral','👆');
+    renderBoard(keyboard);
+  }
+  function snapshot(){history.push({entries:entries.slice(),hinted:hinted.slice(),hintsLeft});if(history.length>100)history.shift();}
+  function nextBlank(start){
+    for(let i=1;i<=entries.length;i++){
+      const k=(start+i)%entries.length;
+      if(!puzzle[k]&&!entries[k]&&!hinted[k])return k;
+    }
+    return start;
+  }
+  function putNumber(num){
+    if(won)return;
+    if(selected<0||puzzle[selected]||hinted[selected]){
+      const first=entries.findIndex((v,k)=>!puzzle[k]&&!v&&!hinted[k]);
+      if(first<0){say('No quedan casillas vacías. Selecciona una para cambiar el número.','neutral','🔎');return;}
+      selected=first;
+    }
+    if(entries[selected]===num){say('Ese número ya está aquí. Prueba con otro.','neutral','😊');return;}
+    snapshot();entries[selected]=num;
+    // No comprobamos cada movimiento contra la solución: no hay respuestas gratis.
+    // El avance, los mensajes y la selección son iguales para cualquier número.
+    selected=nextBlank(selected);
+    say('Número colocado. Piensa en las filas, columnas y recuadros.','neutral','🧩');
+    renderBoard();renderProgress();checkWin();
+  }
+  function eraseCell(){
+    if(won||selected<0||puzzle[selected]||hinted[selected]){say('Selecciona un número que hayas colocado para borrarlo.','neutral','🧽');return;}
+    if(!entries[selected]){say('Esta casilla ya está vacía.','neutral','😊');return;}
+    snapshot();entries[selected]=0;renderBoard();renderProgress();say('¡Listo! Puedes intentarlo de nuevo.','neutral','🧽');
+  }
+  function undoMove(){
+    if(won||history.length===0)return;
+    const prev=history.pop();entries=prev.entries;hinted=prev.hinted;hintsLeft=prev.hintsLeft;
+    say('¡Movimiento deshecho! Puedes seguir jugando.','neutral','↶');renderBoard();renderProgress();
+  }
+  function useHint(){
+    if(won)return;
+    if(hintsLeft<=0){say('¡Ya usaste tus pistas! Tú puedes resolver lo demás.','try','💪');return;}
+    let k=selected;
+    if(k<0||puzzle[k]||hinted[k]){
+      k=entries.findIndex((v,i)=>!puzzle[i]&&!hinted[i]&&!v);
+      if(k<0)k=entries.findIndex((v,i)=>!puzzle[i]&&!hinted[i]);
+    }
+    if(k<0){checkWin();return;}
+    snapshot();entries[k]=solution[k];hinted[k]=true;hintsLeft--;selected=k;
+    say('¡Pista revelada! Mira cómo encaja este número.','good','💡');renderBoard();renderProgress();checkWin();
+  }
+  function checkWin(){
+    if(won || !entries.every((v,k)=>puzzle[k] || v!==0))return;
+    // Se comprueba únicamente el tablero completo: nunca indicamos qué casilla falla.
+    if(!puzzle.every((v,k)=>v || entries[k]===solution[k])){
+      failedChecks++;
+      say('¡Tablero lleno! Hay algo que revisar. Busca números repetidos en filas, columnas y recuadros.','try','🔎');
+      return;
+    }
+    won=true;clearInterval(timerHandle);timerHandle=null;
+    const usedHints=DIFFICULTIES[difficulty].hints-hintsLeft;
+    const stars=usedHints===0&&failedChecks===0 ? 3 : usedHints<=1&&failedChecks<=1 ? 2 : 1;
+    records.wins++;records.stars+=stars;saveRecords();renderRecords();renderProgress();renderPad();
+    $('victoryStars').textContent='⭐'.repeat(stars)+'☆'.repeat(3-stars);
+    $('victoryStars').setAttribute('aria-label',stars+' de 3 estrellas');
+    $('victoryDetails').textContent='Tiempo: '+timeText(seconds)+' · '+(failedChecks===0?'¡Resuelto al primer intento!':failedChecks+' revisión'+(failedChecks===1?'':'es')+' antes de lograrlo')+' · '+usedHints+' pista'+(usedHints===1?'':'s')+' usada'+(usedHints===1?'':'s');
+    $('victoryModal').hidden=false;$('playAgain').focus();
+    say('¡Sudoku completado! Eres una estrella.','good','🏆');
+    celebrate();
+  }
+  function celebrate(){
+    const colors=['#ffcc66','#7edccb','#8f82ff','#ff9fc1','#73c3ff'];
+    for(let i=0;i<62;i++){
+      const p=document.createElement('span');p.className='confetti';
+      p.style.setProperty('--x',Math.floor(Math.random()*100)+'%');
+      p.style.setProperty('--drift',Math.floor(Math.random()*180-90)+'px');
+      p.style.setProperty('--turn',Math.floor(Math.random()*180)+'deg');
+      p.style.setProperty('--dur',(2.2+Math.random()*2.8).toFixed(2)+'s');
+      p.style.setProperty('--color',colors[i%colors.length]);
+      p.style.animationDelay=(Math.random()*.6)+'s';document.body.append(p);
+      setTimeout(()=>p.remove(),5500);
+    }
+  }
+  function newGame(nextLevel=level){
+    level=nextLevel;conf=LEVELS[level];
+    document.querySelectorAll('.confetti').forEach(el=>el.remove());
+    const generated=makePuzzle({...conf,clues:DIFFICULTIES[difficulty].clues[conf.size]});solution=generated.solution;puzzle=generated.puzzle;
+    entries=Array(conf.size*conf.size).fill(0);hinted=Array(conf.size*conf.size).fill(false);
+    hintsLeft=DIFFICULTIES[difficulty].hints;failedChecks=0;history=[];seconds=0;won=false;
+    $('victoryModal').hidden=true;renderTimer();
+    selected=puzzle.findIndex(v=>!v);
+    $('levelTag').textContent=conf.name.toUpperCase()+' · '+DIFFICULTIES[difficulty].name.toUpperCase();
+    $('difficultyNote').textContent=DIFFICULTIES[difficulty].description;
+    document.querySelectorAll('.level-btn').forEach(btn=>{
+      const active=btn.dataset.level===level;btn.classList.toggle('active',active);btn.setAttribute('aria-pressed',active?'true':'false');
+    });
+    document.querySelectorAll('.difficulty-btn').forEach(btn=>{
+      const active=btn.dataset.difficulty===difficulty;btn.classList.toggle('active',active);btn.setAttribute('aria-pressed',active?'true':'false');
+    });
+    renderBoard();renderPad();renderProgress();
+    say('Toca una casilla vacía y escoge un número del 1 al '+conf.size+'.','neutral','👆');
+    startTimer();
+  }
+  document.querySelectorAll('.level-btn').forEach(btn=>btn.addEventListener('click',()=>newGame(btn.dataset.level)));
+  document.querySelectorAll('.difficulty-btn').forEach(btn=>btn.addEventListener('click',()=>{difficulty=btn.dataset.difficulty;newGame();}));
+  $('howToPlay').addEventListener('click',()=>{$('rulesModal').hidden=false;$('closeRules').focus();});
+  $('closeRules').addEventListener('click',()=>{$('rulesModal').hidden=true;$('howToPlay').focus();});
+  $('rulesModal').addEventListener('click',e=>{if(e.target===$('rulesModal'))$('rulesModal').hidden=true;});
+  $('newGame').addEventListener('click',()=>newGame());
+  $('erase').addEventListener('click',eraseCell);
+  $('undo').addEventListener('click',undoMove);
+  $('hint').addEventListener('click',useHint);
+  $('playAgain').addEventListener('click',()=>newGame());
+  $('closeVictory').addEventListener('click',()=>{$('victoryModal').hidden=true;});
+  document.addEventListener('keydown',e=>{
+    if(!$('rulesModal').hidden){if(e.key==='Escape'){$('rulesModal').hidden=true;$('howToPlay').focus();}return;}
+    if(!$('victoryModal').hidden){if(e.key==='Escape')$('victoryModal').hidden=true;return;}
+    if(e.altKey||e.ctrlKey||e.metaKey||e.target instanceof HTMLInputElement)return;
+    if(/^[1-9]$/.test(e.key)&&Number(e.key)<=conf.size){e.preventDefault();putNumber(Number(e.key));return;}
+    if(e.key==='Backspace'||e.key==='Delete'||e.key==='0'){e.preventDefault();eraseCell();return;}
+    const steps={ArrowLeft:-1,ArrowRight:1,ArrowUp:-conf.size,ArrowDown:conf.size};
+    if(Object.prototype.hasOwnProperty.call(steps,e.key)){
+      e.preventDefault();let k=selected<0?0:selected;const r=Math.floor(k/conf.size),c=k%conf.size;
+      if(e.key==='ArrowLeft')k=r*conf.size+(c+conf.size-1)%conf.size;
+      else if(e.key==='ArrowRight')k=r*conf.size+(c+1)%conf.size;
+      else if(e.key==='ArrowUp')k=((r+conf.size-1)%conf.size)*conf.size+c;
+      else k=((r+1)%conf.size)*conf.size+c;
+      choose(k,true);
+    }
+  });
+  renderRecords();newGame('easy');
+})();
+</script>
+</body>
+</html>
