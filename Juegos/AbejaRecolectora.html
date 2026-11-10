@@ -1,364 +1,149 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>¡La Abeja Recolectora! 🐝</title>
-    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&display=swap" rel="stylesheet">
-    <style>
-        :root { --p1-main: #f1c40f; --p1-dark: #f39c12; --p1-light: #fef9e7; --grid-bg: #8d6e63; }
-        body { font-family: 'Fredoka', sans-serif; display: flex; flex-direction: column; align-items: center; margin: 0; padding: 10px; min-height: 100vh; touch-action: none; color: #333; background-color: transparent; }
-        
-        .decorations { position: fixed; top: 0; left: 0; right: 0; bottom: 0; z-index: -1; pointer-events: none; overflow: hidden; background: linear-gradient(180deg, #aed6f1 0%, #d4e6f1 100%); }
-        .decorations::before { content: ''; position: absolute; inset: 0; background-image: url("data:image/svg+xml,%3Csvg width='60' height='104' viewBox='0 0 60 104' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M30 52l15-26 15 26v52l-15 26-15-26zM0 0l15 26v52L0 104V0zm60 0v104L45 78V26z' fill='%23ffffff' fill-opacity='0.15' fill-rule='evenodd'/%3E%3C/svg%3E"); z-index: 1; }
-        .sun { position: absolute; top: 3%; right: 5%; font-size: 70px; z-index: 2; filter: drop-shadow(0 0 25px rgba(255, 215, 0, 0.8)); animation: pulse-sun 3s infinite alternate; }
-        @keyframes pulse-sun { 0% { transform: scale(1) rotate(0deg); } 100% { transform: scale(1.1) rotate(10deg); } }
-        .grass { position: absolute; bottom: -5vh; left: -10vw; width: 120vw; height: 25vh; background: #a9dfbf; border-radius: 50% 50% 0 0; z-index: 2; box-shadow: inset 0 15px 0 #82e0aa, 0 -30px 50px rgba(46,204,113,0.3); }
-        
-        h1 { color: #d35400; margin: 0px 0 5px 0; text-align: center; font-size: 26px; text-shadow: 2px 2px 0px #fff; position: relative; }
-        .prompt-box { text-align: center; background: rgba(255, 255, 255, 0.95); padding: 10px 20px; border-radius: 15px; font-size: 15px; font-weight: 600; max-width: 550px; margin-bottom: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); position: relative; border: 3px solid #f39c12; }
-        
-        .grid-wrapper { position: relative; margin-bottom: 15px; padding: 10px; background: #fef9e7; border-radius: 15px; box-shadow: 0 8px 0 #f39c12, 0 15px 25px rgba(0,0,0,0.25); }
-        
-        /* Grid Ampliado a 5x5 */
-        #grid { display: grid; grid-template-columns: repeat(5, 60px); grid-template-rows: repeat(5, 60px); gap: 5px; background-color: var(--grid-bg); border-radius: 10px; padding: 6px; }
-        #drawing-canvas { position: absolute; top: 10px; left: 10px; z-index: 10; cursor: crosshair; border-radius: 10px; }
-        
-        .cell { background-color: #fff9c4; border-radius: 8px; display: flex; justify-content: center; align-items: center; position: relative; user-select: none; box-shadow: inset 0 -4px 0 rgba(0,0,0,0.1); font-size: 30px;}
-        .cell[data-start="true"] { background-color: #e2f1f8; box-shadow: inset 0 -4px 0 rgba(0,0,0,0.05); }
-
-        /* Estilos de las Colmenas donde se colorea el fondo de la celda */
-        .hive-Rojo { background-color: #fadbd8 !important; box-shadow: inset 0 -4px 0 #e74c3c !important;}
-        .hive-Amarillo { background-color: #fcf3cf !important; box-shadow: inset 0 -4px 0 #f1c40f !important;}
-        .hive-Azul { background-color: #d6eaf8 !important; box-shadow: inset 0 -4px 0 #3498db !important;}
-
-        .nectar-item { animation: bounce 1s infinite alternate; display: inline-block; filter: drop-shadow(0 2px 2px rgba(0,0,0,0.2)); }
-        @keyframes bounce { 0% { transform: translateY(0); } 100% { transform: translateY(-5px); } }
-
-        .visited-correct { background-color: #a9dfbf !important; box-shadow: inset 0 0 15px #2ecc71 !important; transform: scale(0.9); transition: all 0.3s;}
-
-        .bee-container { position: absolute; z-index: 15; width: 55px; height: 55px; display: flex; justify-content: center; align-items: center; }
-        .bee-orientation { transition: transform 0.2s ease; display: flex; justify-content: center; align-items: center; position: relative;}
-        .bee-sprite { display: flex; justify-content: center; align-items: center; animation: float 2s ease-in-out infinite; filter: drop-shadow(0 4px 6px rgba(0,0,0,0.3)); }
-        @keyframes float { 0%, 100% { transform: translateY(0px); } 50% { transform: translateY(-5px); } }
-        
-        /* El nectar que lleva la abeja flotando encima de ella */
-        .bee-carrying { position: absolute; top: -15px; right: -15px; font-size: 22px; z-index: 20; background: rgba(255,255,255,0.8); border-radius: 50%; padding: 2px; box-shadow: 0 2px 5px rgba(0,0,0,0.2); animation: popIn 0.3s; }
-
-        .panels-container { display: flex; justify-content: center; width: 100%; max-width: 450px; margin-bottom: 20px; position: relative; }
-        .panel { box-sizing: border-box; background: rgba(255, 255, 255, 0.95); padding: 12px; border-radius: 18px; box-shadow: 0 8px 20px rgba(0,0,0,0.15); width: 95%; display: flex; flex-direction: column; align-items: center; border: 4px solid var(--p1-main); }
-        .panel h3 { margin: 0 0 8px 0; font-size: 16px; color: var(--p1-dark); }
-        .btn-group { display: flex; gap: 6px; justify-content: space-between; width: 100%; margin-bottom: 10px; }
-        button { font-family: 'Fredoka', sans-serif; font-weight: 700; border: none; border-radius: 10px; cursor: pointer; transition: all 0.1s; user-select: none; }
-        button:active { transform: translateY(4px); box-shadow: 0 0px 0 transparent !important; }
-        .cmd-btn { padding: 10px 2px; font-size: 13px; color: white; flex: 1; background-color: var(--p1-main); box-shadow: 0 5px 0 var(--p1-dark); white-space: nowrap; }
-        .undo-btn { background-color: #e74c3c; box-shadow: 0 5px 0 #c0392b; flex: 0.8; }
-        .seq-container { display: flex; flex-wrap: wrap; gap: 5px; min-height: 45px; background: rgba(255,255,255,0.7); padding: 8px; border-radius: 10px; width: 95%; border: 2px dashed rgba(0,0,0,0.1); }
-        .cmd-block { display: inline-flex; align-items: center; justify-content: center; width: 30px; height: 30px; border-radius: 6px; color: white; font-weight: bold; font-size: 16px; box-shadow: 0 3px 0 rgba(0,0,0,0.2); background: var(--p1-main); animation: popIn 0.2s ease-out; }
-        @keyframes popIn { 0% { transform: scale(0); } 100% { transform: scale(1); } }
-
-        .global-controls { display: flex; gap: 15px; margin-bottom: 20px; position: relative; }
-        .global-btn { padding: 12px 20px; font-size: 18px; color: white; border-radius: 15px; }
-        #go-btn { background-color: #ff9800; box-shadow: 0 5px 0 #f57c00; }
-        .reset-btn { background-color: #95a5a6; box-shadow: 0 5px 0 #7f8c8d; }
-
-        .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); display: flex; justify-content: center; align-items: center; z-index: 100; visibility: hidden; opacity: 0; transition: all 0.3s; }
-        .modal-overlay.active { visibility: visible; opacity: 1; }
-        .modal-box { background: white; padding: 25px; border-radius: 20px; text-align: center; max-width: 80%; transform: scale(0.7); transition: 0.3s; box-shadow: 0 10px 30px rgba(0,0,0,0.3); }
-        .modal-overlay.active .modal-box { transform: scale(1); }
-        .modal-title { font-size: 24px; margin-bottom: 10px; color: #ff9800; }
-        .modal-msg { font-size: 16px; margin-bottom: 20px; color: #555; white-space: pre-line;}
-        .modal-btn { background: #4CAF50; box-shadow: 0 5px 0 #388E3C; padding: 10px 20px; font-size: 16px; color: white; }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#f9d27e">
+<title>La Abeja Recolectora · Jardín de Colmenas</title>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Nunito:wght@700;800;900&display=swap" rel="stylesheet">
+<style>
+:root { --ink:#345166; --muted:#6f8492; --honey:#ffcf67; --amber:#f3a93f; --green:#5cad7b; --blue:#65aee3; --red:#e87575; --cream:#fffcf3; --brown:#9d816a; --shadow:0 14px 35px rgba(54,96,112,.14); }
+*{box-sizing:border-box}
+html,body{width:100%;min-height:100%;margin:0}
+body{font-family:'Fredoka',system-ui,sans-serif;color:var(--ink);background:linear-gradient(180deg,#a4d8ed 0%,#daf2df 62%,#ffedbd 100%);overflow-x:hidden;-webkit-tap-highlight-color:transparent}
+button{font:inherit;cursor:pointer;border:0;user-select:none}button:focus-visible{outline:3px solid #2d91bc;outline-offset:3px}button:disabled{opacity:.58;cursor:not-allowed}
+.scene{position:fixed;inset:0;z-index:-1;pointer-events:none;overflow:hidden}
+.scene::before{content:'';position:absolute;inset:0;opacity:.18;background-image:radial-gradient(#fff 1.25px,transparent 1.25px);background-size:27px 27px}
+.sun{position:absolute;top:6%;right:9%;width:110px;aspect-ratio:1;border-radius:50%;background:#fff3ad;box-shadow:0 0 0 18px #fff9c72b,0 0 0 40px #fff9c719;animation:sunPulse 4s ease-in-out infinite alternate}
+.cloud{position:absolute;background:#ffffffb3;width:170px;height:45px;border-radius:60px;filter:drop-shadow(0 5px 8px #ffffff40);animation:cloudFloat 18s ease-in-out infinite alternate}
+.cloud:before,.cloud:after{content:'';position:absolute;background:inherit;border-radius:50%}.cloud:before{width:80px;height:62px;bottom:5px;left:25px}.cloud:after{width:76px;height:54px;bottom:4px;left:80px}
+.cloud.a{left:8%;top:14%}.cloud.b{right:9%;top:26%;scale:.65;animation-delay:-8s}.cloud.c{left:38%;top:7%;scale:.50;animation-delay:-3s}
+.hill{position:absolute;border-radius:50% 50% 0 0;width:95vw;height:22vh;bottom:-8vh}.hill.a{background:#a6d29c;left:-25%;transform:rotate(5deg)}.hill.b{background:#79ba8a;right:-28%;transform:rotate(-6deg)}
+.flower{position:absolute;bottom:12vh;font-size:32px;transform-origin:center bottom;animation:sway 3s ease-in-out infinite alternate}.flower.a{left:6%}.flower.b{left:18%;font-size:26px;animation-delay:.8s}.flower.c{right:8%;font-size:38px;animation-delay:1.1s}.flower.d{right:25%;font-size:26px;animation-delay:1.5s}
+@keyframes sunPulse{to{transform:scale(1.08)}}@keyframes cloudFloat{to{translate:37px -9px}}@keyframes sway{to{transform:rotate(10deg)}from{transform:rotate(-10deg)}}
+.app{width:min(100%,1030px);margin:0 auto;padding:18px 18px 24px;display:flex;flex-direction:column;align-items:center;gap:13px}
+.hero{width:100%;display:flex;align-items:center;justify-content:space-between;gap:18px;background:#fffcf2ee;border:3px solid #fff;border-radius:27px;box-shadow:var(--shadow);padding:13px 24px;position:relative;overflow:hidden}
+.hero::after{content:'';position:absolute;right:-28px;top:-34px;width:200px;height:160px;border-radius:50%;background:#fbd67c33;pointer-events:none}
+.kicker{font:900 11px 'Nunito',sans-serif;color:#c58e55;letter-spacing:1.9px;text-transform:uppercase;margin-bottom:3px}
+h1{font:900 clamp(29px,4.6vw,47px)/1.02 'Nunito',sans-serif;letter-spacing:-1.6px;margin:0;color:#355468}h1 em{font-style:normal;color:#e99b51}
+.hero p{margin:7px 0 0;color:var(--muted);font-size:14px}.hero-mascot{font-size:58px;animation:floatBee 2.6s ease-in-out infinite;position:relative;z-index:1;filter:drop-shadow(0 7px 5px #ad98543d)}
+.mission{width:100%;display:grid;grid-template-columns:1.1fr .9fr;gap:13px}
+.mission-card,.status-card{background:#fffef7e8;border:3px solid white;box-shadow:var(--shadow);border-radius:22px;padding:14px 18px}
+.section-label{font:900 11px 'Nunito',sans-serif;color:#c28a59;letter-spacing:1.6px;text-transform:uppercase;margin-bottom:6px}
+.mission-card strong{font:900 18px 'Nunito',sans-serif;color:#3f586b}.mission-card p{font-size:12px;color:var(--muted);margin:5px 0 10px;line-height:1.32}
+.legend{display:flex;gap:7px;flex-wrap:wrap}.legend-item{border-radius:12px;border:1.5px solid #e9e6d9;background:#fff;padding:7px 9px;font-size:12px;display:flex;align-items:center;gap:6px;color:#556c78;box-shadow:0 3px 0 #e9e7db}.legend-item span{font-size:17px}
+.status-card{display:flex;justify-content:center;flex-direction:column;gap:8px}
+.status-top{display:flex;align-items:center;justify-content:space-between;gap:10px}.delivery-count{font:900 24px 'Nunito',sans-serif;color:#e19b41}.status-note{color:#5e7b84;font-size:13px}.status-note strong{color:#426673}.progress-track{height:10px;background:#e9ebe5;border-radius:30px;box-shadow:inset 0 2px 4px #0000000c;overflow:hidden}.progress-fill{height:100%;width:0%;border-radius:30px;background:linear-gradient(90deg,#f4b35e,#f5d878);transition:width .4s ease}
+.status-bottom{font-size:12px;color:#667d87;display:flex;justify-content:space-between;gap:12px}.carry-pill{font-weight:700;color:#427789}
+.board-section{width:100%;display:flex;justify-content:center}
+.board-frame{position:relative;background:#fff9e9;border:4px solid #fffdf6;box-shadow:0 8px 0 #dcc69b,0 16px 30px #435a6b29;border-radius:27px;padding:14px 13px 12px;margin:13px 0 5px}
+.board-stamp{position:absolute;top:-14px;left:50%;transform:translateX(-50%);background:#fffcf3;border:2px solid #f0e3c4;padding:7px 16px;border-radius:25px;z-index:4;white-space:nowrap;font:900 10px 'Nunito',sans-serif;letter-spacing:1.7px;color:#bb8555}
+.grid-wrapper{position:relative;padding:8px;background:#d0ab75;border:4px solid #e6c99b;border-radius:18px;box-shadow:inset 0 3px 10px #7553372a;overflow:visible}
+#grid{--cell:clamp(50px,8.7vh,66px);display:grid;grid-template-columns:repeat(5,var(--cell));grid-template-rows:repeat(5,var(--cell));gap:6px;padding:5px;background:#a78c70;border-radius:12px}
+.cell{position:relative;border-radius:11px;display:flex;align-items:center;justify-content:center;background:linear-gradient(#fff8d4,#f6e4ab);box-shadow:inset 0 -4px 0 #d5bb7e77;user-select:none;transition:background .22s;overflow:visible}
+.cell:before{content:'';position:absolute;inset:5px;border:1px dashed #fffdf28a;border-radius:7px;pointer-events:none}
+.cell[data-start=true]{background:linear-gradient(#e1f3fc,#c8e5f5)}.cell[data-start=true]:after{content:'⌂';position:absolute;left:6px;top:2px;color:#5c9cb0;font-weight:900;font-size:14px}
+.hive-Rojo{background:linear-gradient(160deg,#fcd6d4,#f6acaa)}.hive-Amarillo{background:linear-gradient(160deg,#fff4c6,#fbd774)}.hive-Azul{background:linear-gradient(160deg,#d0ecff,#9ac7ed)}
+.hive-cell{box-shadow:inset 0 -4px 0 #ffffff65,0 0 0 2px #ffffff85}
+.hive-media{position:absolute;inset:6px 6px 12px;display:flex;justify-content:center;align-items:center;pointer-events:none;z-index:2}
+.hive-media img{display:block;width:94%;height:94%;object-fit:contain;filter:drop-shadow(0 3px 2px #624a4d36)}
+.hive-media .hive-fallback{display:none;font-size:clamp(24px,4.5vh,38px);filter:drop-shadow(0 3px 3px #0000002c)}
+.hive-label{position:absolute;bottom:0px;font:900 8px 'Nunito',sans-serif;letter-spacing:.4px;background:#fffdf2d8;border-radius:8px 8px 0 0;padding:1px 5px;color:#715d4f;z-index:4;pointer-events:none}
+.nectar-item{display:grid;place-items:center;font-size:clamp(23px,4.4vh,34px);animation:nectarBob 1.4s ease-in-out infinite alternate;filter:drop-shadow(0 3px 4px #00000024);position:relative;z-index:1}
+@keyframes nectarBob{to{transform:translateY(-5px) rotate(6deg)}}
+.visited-correct{animation:hiveSuccess .55s ease-in-out!important;box-shadow:inset 0 0 20px #65ca8f,0 0 0 4px #a1efc7!important}
+@keyframes hiveSuccess{0%,100%{transform:scale(1)}50%{transform:scale(1.09)}}
+#drawing-canvas{position:absolute;left:8px;top:8px;z-index:9;border-radius:12px;cursor:crosshair;touch-action:none}
+.bee-container{position:absolute;inset:0;display:grid;place-items:center;z-index:12;pointer-events:none;overflow:visible}
+.bee-orientation{width:80%;height:80%;display:grid;place-items:center;position:relative;transition:transform .23s ease}
+.bee-sprite{display:grid;place-items:center;width:100%;height:100%;animation:floatBee 1.8s ease-in-out infinite;filter:drop-shadow(0 4px 4px #795b3f50)}
+.bee-sprite img{width:100%;height:100%;object-fit:contain}.bee-svg{width:100%;height:100%;overflow:visible}
+.wing-l,.wing-r{transform-box:fill-box;transform-origin:center;animation:wingLeft .22s ease-in-out infinite alternate}.wing-r{animation-name:wingRight}@keyframes wingLeft{to{transform:rotate(15deg)}}@keyframes wingRight{to{transform:rotate(-15deg)}}
+@keyframes floatBee{50%{transform:translateY(-4px)}}
+.bee-carrying{position:absolute;z-index:13;top:-11px;right:-11px;font-size:18px;background:#fffcf4;border:2px solid white;border-radius:50%;box-shadow:0 3px 8px #5c605b29;padding:2px 4px;animation:carryPop .28s both}@keyframes carryPop{from{transform:scale(.3)}to{transform:scale(1)}}
+.panel{width:100%;max-width:860px;background:#fffdf5f2;border:3px solid #fff;border-radius:23px;box-shadow:var(--shadow);padding:13px 16px;display:flex;flex-direction:column;gap:10px}
+.panel-head{display:flex;align-items:baseline;justify-content:space-between;gap:10px}.panel h3{font:900 20px 'Nunito',sans-serif;margin:0;color:#3e5970}.panel-hint{color:#82949a;font-size:12px}
+.btn-group{display:grid;grid-template-columns:repeat(4,1fr);gap:9px}
+.cmd-btn{display:flex;align-items:center;justify-content:center;gap:6px;background:#78bbde;color:white;border-radius:13px;padding:10px 7px;min-height:45px;font-weight:700;font-size:13px;box-shadow:0 5px 0 #4b9bbf;transition:transform .12s,filter .12s}.cmd-btn:hover{filter:brightness(1.05);transform:translateY(-1px)}.cmd-btn:active{transform:translateY(4px);box-shadow:none}
+.cmd-btn .cmd-icon{font-size:20px;line-height:1}.undo-btn{background:#ef8983;box-shadow:0 5px 0 #d46660}
+.seq-box{background:#fff;border:2px dashed #e9dec9;border-radius:13px;padding:9px 11px;min-height:54px}.seq-top{font-size:11px;color:#88989a;display:flex;justify-content:space-between;margin-bottom:7px}
+.seq-container{display:flex;flex-wrap:wrap;gap:5px;align-items:center;min-height:24px}.cmd-block{width:28px;height:28px;display:grid;place-items:center;border-radius:8px;background:#66b5db;color:#fff;box-shadow:0 3px 0 #3f99c2;font-size:15px;animation:cmdPop .19s ease both}@keyframes cmdPop{from{transform:scale(.45);opacity:0}to{transform:scale(1);opacity:1}}
+.seq-empty{font-size:12px;color:#a4a9aa}
+.actions{width:100%;max-width:860px;display:flex;justify-content:center;gap:12px;margin-bottom:12px}
+.global-btn{min-height:47px;padding:11px 20px;border-radius:14px;color:white;font:900 16px 'Nunito',sans-serif;transition:transform .12s,filter .12s}
+#go-btn{background:linear-gradient(#ffbe60,#f3a23e);box-shadow:0 5px 0 #d7832f;flex:1.3}.reset-btn{background:linear-gradient(#98afb0,#7f9b9e);box-shadow:0 5px 0 #648487;flex:1}.clear-btn{background:#fff8e9;border:2px solid #e7d3ac;color:#9d8065;box-shadow:0 4px 0 #dac69f;flex:.8}
+.global-btn:active{transform:translateY(4px);box-shadow:none!important}
+.modal-overlay{position:fixed;inset:0;z-index:100;display:flex;align-items:center;justify-content:center;padding:20px;background:#243e4d91;backdrop-filter:blur(5px);opacity:0;visibility:hidden;transition:opacity .25s,visibility .25s}.modal-overlay.active{opacity:1;visibility:visible}
+.modal-box{width:min(440px,100%);background:linear-gradient(145deg,#fffcf3,#ffefd0);border:5px solid #fffdf4;box-shadow:0 18px 45px #1a39466c;text-align:center;border-radius:28px;padding:27px 24px 24px;transform:translateY(20px) scale(.85);transition:transform .28s cubic-bezier(.21,1.4,.29,1)}.modal-overlay.active .modal-box{transform:translateY(0) scale(1)}
+.modal-icon{font-size:56px;margin-bottom:7px}.modal-title{font:900 29px/1.1 'Nunito',sans-serif;margin:0 0 8px;color:#c17a41}.modal-msg{font-size:16px;line-height:1.42;color:#6c7f88;white-space:pre-line;margin:0 0 21px}.modal-btn{background:#65bd80;color:white;box-shadow:0 5px 0 #439b62;border-radius:13px;padding:12px 27px;font-weight:700;font-size:16px}.modal-btn:active{transform:translateY(4px);box-shadow:none}
+#effects{position:fixed;inset:0;pointer-events:none;z-index:120;overflow:hidden}.spark{position:absolute;font-size:20px;animation:sparkRise .7s ease-out forwards}@keyframes sparkRise{to{transform:translate(var(--dx),-62px) scale(.3);opacity:0}}.confetti{position:absolute;width:7px;height:11px;animation:confettiDrop 2s ease-in forwards}@keyframes confettiDrop{to{transform:translate(var(--dx),105vh) rotate(620deg);opacity:0}}
+@media(max-width:650px){.app{padding:12px 10px 20px;gap:12px}.hero{padding:13px 15px;border-radius:20px}.hero-mascot{font-size:48px}.hero p{font-size:12px}.kicker{font-size:9px}.mission{grid-template-columns:1fr}.mission-card,.status-card{padding:12px 13px;border-radius:18px}.status-card{gap:6px}.mission-card p{margin:3px 0 8px}.board-frame{padding:12px 10px 10px;margin:14px 0 6px}#grid{--cell:min(16.7vw,62px);gap:5px}.cell{border-radius:9px}.hive-media{inset:3px 3px 12px}.hive-label{font-size:7px}.panel{padding:12px;border-radius:18px}.panel h3{font-size:17px}.panel-hint{display:none}.btn-group{gap:6px}.cmd-btn{flex-direction:column;gap:0;min-height:53px;font-size:11px;padding:6px 2px}.cmd-btn .cmd-icon{font-size:22px}.global-btn{font-size:12px;padding:9px 5px}.actions{gap:8px;flex-wrap:wrap}.clear-btn{flex:.8}.sun{width:75px}.cloud{opacity:.65}}
+@media(max-width:360px){#grid{--cell:min(16.25vw,56px);gap:4px;padding:4px}.grid-wrapper{padding:6px}.board-frame{padding:11px 8px 8px}.mission-card .legend-item{padding:5px 7px}.panel{padding:10px}.actions{gap:6px}}
+@media(prefers-reduced-motion:reduce){*,*:before,*:after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}
+</style>
 </head>
 <body>
-    <div class="decorations">
-        <div class="sun">☀️</div><div class="grass"></div>
-    </div>
-
-    <h1>¡Abeja Recolectora! 🐝</h1>
-    <div class="prompt-box">
-        Lleva el néctar a su colmena correspondiente.<br>
-        <span style="color:#e74c3c; font-size:12px;">¡Recuerda que solo puedes llevar un néctar a la vez!</span>
-    </div>
-
-    <div class="grid-wrapper">
-        <div id="grid"></div><canvas id="drawing-canvas"></canvas>
-    </div>
-
-    <div class="panels-container">
-        <div class="panel">
-            <h3>🐝 Programar Rutas</h3>
-            <div class="btn-group">
-                <button class="cmd-btn" onclick="addCommand('L')">↺ Giro Izq</button>
-                <button class="cmd-btn" onclick="addCommand('F')">⬆️ Avanza</button>
-                <button class="cmd-btn" onclick="addCommand('R')">↻ Giro Der</button>
-                <button class="cmd-btn undo-btn" onclick="undoCommand()">🔙 Borrar</button>
-            </div>
-            <div class="seq-container" id="seq"></div>
-        </div>
-    </div>
-    
-    <div class="global-controls">
-        <button class="global-btn" onclick="executeCommands()" id="go-btn">🚀 ¡VOLAR!</button>
-        <button class="global-btn reset-btn" onclick="resetGame()">🔄 Empezar de Cero</button>
-    </div>
-
-    <div class="modal-overlay" id="modal">
-        <div class="modal-box">
-            <h2 class="modal-title" id="m-title">Título</h2><p class="modal-msg" id="m-msg">Mensaje</p>
-            <button class="modal-btn" onclick="closeModal()">¡Entendido!</button>
-        </div>
-    </div>
-
-    <script>
-        const gridSize = 5; 
-        let isExecuting = false;
-        let stopExecution = false;
-
-        let bee = { pos: {x: 0, y: 0}, dir: 0, commands: [] }; 
-        
-        let nectars = {}; 
-        let carryingColor = null;
-        let nectarsCollected = 0;
-        let totalNectars = 3;
-
-        const gridEl = document.getElementById('grid'); 
-        const canvas = document.getElementById('drawing-canvas'); 
-        const ctx = canvas.getContext('2d');
-        let isDrawing = false; let startX, startY;
-
-        function getEmojiForColor(color) {
-            if(color === 'Rojo') return '🌺';
-            if(color === 'Amarillo') return '🌻';
-            if(color === 'Azul') return '🪻';
-            return '';
-        }
-
-        function generateLevel() {
-            nectars = {};
-            carryingColor = null;
-            nectarsCollected = 0;
-            stopExecution = false;
-
-            let coords = [];
-            // Recopilar coordenadas válidas (excluyendo Inicio y Esquinas de Colmenas)
-            for (let y = 0; y < gridSize; y++) {
-                for (let x = 0; x < gridSize; x++) {
-                    if ((x===0 && y===0) || (x===4 && y===0) || (x===0 && y===4) || (x===4 && y===4)) continue;
-                    coords.push({x, y});
-                }
-            }
-            // Spawn Aleatorio
-            coords.sort(() => Math.random() - 0.5);
-            nectars[`${coords[0].x},${coords[0].y}`] = 'Rojo';
-            nectars[`${coords[1].x},${coords[1].y}`] = 'Amarillo';
-            nectars[`${coords[2].x},${coords[2].y}`] = 'Azul';
-        }
-
-        function initGrid() {
-            gridEl.innerHTML = '';
-            for (let y = 0; y < gridSize; y++) {
-                for (let x = 0; x < gridSize; x++) {
-                    const cell = document.createElement('div'); 
-                    cell.className = 'cell'; 
-                    cell.id = `cell-${x}-${y}`;
-                    
-                    if (x === 0 && y === 0) cell.dataset.start = "true";
-                    
-                    // Colmenas en las esquinas restantes
-                    if (x === 4 && y === 0) createHive(cell, 'Rojo');
-                    if (x === 0 && y === 4) createHive(cell, 'Amarillo');
-                    if (x === 4 && y === 4) createHive(cell, 'Azul');
-
-                    // Néctares Aleatorios
-                    let nColor = nectars[`${x},${y}`];
-                    if (nColor) {
-                        cell.dataset.nectarColor = nColor;
-                        cell.innerHTML = `<span class="nectar-item">${getEmojiForColor(nColor)}</span>`;
-                    }
-                    
-                    gridEl.appendChild(cell);
-                }
-            }
-            setTimeout(() => {
-                canvas.width = gridEl.offsetWidth; canvas.height = gridEl.offsetHeight;
-                ctx.lineWidth = 6; ctx.lineCap = 'round'; ctx.lineJoin = 'round'; ctx.setLineDash([10, 15]); ctx.strokeStyle = 'rgba(241, 196, 15, 0.8)'; 
-            }, 50);
-        }
-
-        function createHive(cell, color) {
-            cell.classList.add(`hive-${color}`);
-            cell.dataset.hiveColor = color;
-            // Asset de la colmena integrado (el fondo de la celda da el color)
-            cell.innerHTML = '<img src="../assets/robots/Colmena.png" alt="Colmena" style="width: 85%; height: 85%; object-fit: contain; z-index: 5;">';
-        }
-
-        function getCursorPos(cX, cY) { const r = canvas.getBoundingClientRect(); return { x: cX - r.left, y: cY - r.top }; }
-        function startDraw(e) { if (isExecuting) return; isDrawing = true; let cX = e.touches?e.touches[0].clientX:e.clientX; let cY = e.touches?e.touches[0].clientY:e.clientY; const p = getCursorPos(cX, cY); ctx.beginPath(); ctx.moveTo(p.x, p.y); if(e.cancelable) e.preventDefault(); }
-        function draw(e) { if (!isDrawing || isExecuting) return; let cX = e.touches?e.touches[0].clientX:e.clientX; let cY = e.touches?e.touches[0].clientY:e.clientY; const p = getCursorPos(cX, cY); ctx.lineTo(p.x, p.y); ctx.stroke(); if(e.cancelable) e.preventDefault(); }
-        canvas.addEventListener('mousedown', startDraw); canvas.addEventListener('mousemove', draw); window.addEventListener('mouseup', ()=>isDrawing=false);
-        canvas.addEventListener('touchstart', startDraw, {passive:false}); canvas.addEventListener('touchmove', draw, {passive:false}); window.addEventListener('touchend', ()=>isDrawing=false);
-
-        // ROTACIÓN UNIVERSAL (Sprite mirando hacia ARRIBA por defecto)
-        function getTransform(dir) { 
-            if (dir === 0) return 'rotate(90deg)';   // Derecha
-            if (dir === 1) return 'rotate(180deg)';  // Abajo
-            if (dir === 2) return 'rotate(-90deg)';  // Izquierda
-            if (dir === 3) return 'rotate(0deg)';    // Arriba
-        }
-
-        function drawBee() {
-            document.querySelectorAll('.bee-container').forEach(b => b.remove());
-            const cell = document.getElementById(`cell-${bee.pos.x}-${bee.pos.y}`);
-            
-            const container = document.createElement('div'); 
-            container.className = 'bee-container';
-            
-            const orient = document.createElement('div'); 
-            orient.className = 'bee-orientation'; 
-            orient.style.transform = getTransform(bee.dir);
-            
-            const sprite = document.createElement('div'); 
-            sprite.className = 'bee-sprite'; 
-            sprite.innerHTML = '<img src="../assets/robots/BeebotEmoji.png" alt="BeeBot" style="width: 48px; height: 48px; object-fit: contain; pointer-events: none;">';
-            
-            // Si la abeja lleva un néctar, se lo mostramos flotando
-            if (carryingColor) {
-                const item = document.createElement('div'); 
-                item.className = 'bee-carrying'; 
-                item.innerText = getEmojiForColor(carryingColor);
-                orient.appendChild(item);
-            }
-
-            orient.appendChild(sprite); 
-            container.appendChild(orient); 
-            cell.appendChild(container);
-        }
-
-        function addCommand(cmd) { if(isExecuting) return; bee.commands.push(cmd); updateUI(); }
-        function undoCommand() { if(isExecuting || bee.commands.length===0) return; bee.commands.pop(); updateUI(); }
-        function updateUI() {
-            const sym = { 'F': '⬆️', 'R': '↻', 'L': '↺' }; const seq = document.getElementById('seq'); seq.innerHTML = ''; 
-            bee.commands.forEach(c => { const s = document.createElement('span'); s.className = 'cmd-block'; s.innerText = sym[c]; seq.appendChild(s); });
-        }
-
-        // LÓGICA DE CARGA Y DESCARGA
-        function visitCell(x, y) {
-            let cell = document.getElementById(`cell-${x}-${y}`);
-
-            // 1. Revisa si hay un néctar en el suelo
-            if (cell.dataset.nectarColor) {
-                let nColor = cell.dataset.nectarColor;
-                if (!carryingColor) {
-                    // Lo recoge
-                    carryingColor = nColor;
-                    cell.removeAttribute('data-nectar-color');
-                    cell.innerHTML = ''; // Limpia la celda
-                } else {
-                    // ¡Error! Ya lleva uno
-                    showModal("¡Abeja Llena! 🛑", `Beebot ya tiene un Néctar ${carryingColor}, deposítalo en el panal del color correcto.`);
-                    stopExecution = true;
-                    return;
-                }
-            }
-
-            // 2. Revisa si llegó a una colmena
-            if (cell.dataset.hiveColor) {
-                let hColor = cell.dataset.hiveColor;
-                if (carryingColor) {
-                    if (carryingColor === hColor) {
-                        // ¡Correcto! Lo deposita
-                        carryingColor = null;
-                        nectarsCollected++;
-                        cell.classList.add('visited-correct');
-                        setTimeout(() => cell.classList.remove('visited-correct'), 500);
-                    } else {
-                        // ¡Error! Colmena equivocada
-                        showModal("¡Colmena Equivocada! 😟", `Beebot tiene un Néctar ${carryingColor}. ¡Esa es la colmena de color ${hColor}!`);
-                        stopExecution = true;
-                        return;
-                    }
-                }
-            }
-        }
-
-        function executeCommands() {
-            if (bee.commands.length === 0 || isExecuting) return; 
-            
-            isExecuting = true; 
-            stopExecution = false;
-            document.getElementById('go-btn').style.opacity = "0.5";
-            
-            visitCell(bee.pos.x, bee.pos.y);
-            if (stopExecution) {
-                resetExecutionState();
-                return;
-            }
-
-            let step = 0;
-            const interval = setInterval(() => {
-                if (step >= bee.commands.length || stopExecution) { 
-                    clearInterval(interval); 
-                    if(!stopExecution) checkWin(); 
-                    else resetExecutionState();
-                    return; 
-                }
-                
-                const cmd = bee.commands[step];
-                if (cmd === 'F') {
-                    let nx = bee.pos.x, ny = bee.pos.y;
-                    if (bee.dir===0) nx++; else if (bee.dir===1) ny++; else if (bee.dir===2) nx--; else ny--; 
-                    
-                    if (nx>=0 && nx<gridSize && ny>=0 && ny<gridSize) { 
-                        bee.pos.x = nx; 
-                        bee.pos.y = ny; 
-                        visitCell(nx, ny); 
-                    }
-                } else if (cmd === 'R') bee.dir = (bee.dir+1)%4; 
-                else if (cmd === 'L') bee.dir = (bee.dir+3)%4;
-                
-                drawBee(); 
-                if(!stopExecution) step++;
-            }, 600); 
-        }
-
-        function resetExecutionState() {
-            document.getElementById('go-btn').style.opacity = "1"; 
-            isExecuting = false;
-            bee.commands = [];
-            updateUI();
-            ctx.clearRect(0,0,canvas.width,canvas.height); 
-        }
-
-        function showModal(t, m) { document.getElementById('m-title').innerText = t; document.getElementById('m-msg').innerText = m; document.getElementById('modal').classList.add('active'); }
-        function closeModal() { document.getElementById('modal').classList.remove('active'); }
-        
-        function checkWin() {
-            setTimeout(() => {
-                if (nectarsCollected === totalNectars) {
-                    showModal("¡Misión Cumplida! 🍯", "¡Clasificaste todas las flores en sus colmenas correctamente!");
-                } else if (carryingColor) {
-                    // Si terminó los comandos y se quedó cargando una flor
-                    showModal("¡Viaje a medias! 🐝", `Todavía llevas un Néctar ${carryingColor}. Programa tu camino a la colmena correspondiente.`);
-                } else {
-                    // Si terminó los comandos y no recogió todo
-                    showModal("¡Falta néctar! 🌻", "Aún quedan flores en el jardín. ¡Sigue programando tu ruta!");
-                }
-                resetExecutionState();
-            }, 400);
-        }
-
-        function resetGame() { 
-            bee = { pos:{x:0,y:0}, dir:0, commands:[] }; 
-            generateLevel(); 
-            resetExecutionState();
-            initGrid(); 
-            drawBee(); 
-        }
-        
-        // Iniciar
-        resetGame();
-    </script>
-</body>
-</html>
+<div class="scene" aria-hidden="true"><div class="sun"></div><div class="cloud a"></div><div class="cloud b"></div><div class="cloud c"></div><div class="hill a"></div><div class="hill b"></div><span class="flower a">🌸</span><span class="flower b">🌻</span><span class="flower c">🌼</span><span class="flower d">🌷</span></div>
+<main class="app">
+<header class="hero"><div><div class="kicker">✦ EL JARDÍN DE LA MIEL ✦</div><h1>¡Abeja <em>Recolectora!</em></h1><p>Una aventura de rutas, flores y colmenas.</p></div><div class="hero-mascot" aria-hidden="true">🐝</div></header>
+<section class="mission" aria-label="Objetivo y progreso">
+  <div class="mission-card"><div class="section-label">🌷 TU MISIÓN</div><strong>¡Cada néctar a su colmena!</strong><p>Recoge una flor a la vez y entrega su néctar en la colmena del mismo color.</p><div class="legend"><div class="legend-item"><span>🌺</span> Roja</div><div class="legend-item"><span>🌻</span> Amarilla</div><div class="legend-item"><span>🪻</span> Azul</div></div></div>
+  <div class="status-card"><div class="status-top"><div class="section-label" style="margin:0">🍯 RECOLECCIÓN</div><div class="delivery-count" id="deliveries-display">0 / 3</div></div><div class="progress-track"><div class="progress-fill" id="progress-fill"></div></div><div class="status-bottom"><span id="carry-status">🐝 Sin néctar</span><span>Una flor a la vez</span></div></div>
+</section>
+<section class="board-section" aria-label="Tablero de la abeja">
+ <div class="board-frame"><span class="board-stamp">✦ EL JARDÍN DE LAS COLMENAS ✦</span><div class="grid-wrapper"><div id="grid"></div><canvas id="drawing-canvas" aria-label="Dibuja una ruta sobre el jardín"></canvas></div></div>
+</section>
+<section class="panel" aria-label="Programador de rutas">
+ <div class="panel-head"><h3>🐝 Programa la ruta</h3><span class="panel-hint">Añade movimientos en orden</span></div>
+ <div class="btn-group">
+ <button class="cmd-btn" onclick="addCommand('L')"><span class="cmd-icon">↶</span><span>Girar izquierda</span></button>
+ <button class="cmd-btn" onclick="addCommand('F')"><span class="cmd-icon">↑</span><span>Avanzar</span></button>
+ <button class="cmd-btn" onclick="addCommand('R')"><span class="cmd-icon">↷</span><span>Girar derecha</span></button>
+ <button class="cmd-btn undo-btn" onclick="undoCommand()"><span class="cmd-icon">⌫</span><span>Borrar último</span></button>
+ </div>
+ <div class="seq-box"><div class="seq-top"><span>MI SECUENCIA</span><span id="sequence-count">0 pasos</span></div><div id="seq" class="seq-container"><span class="seq-empty">Tu secuencia aparecerá aquí.</span></div></div>
+</section>
+<div class="actions"><button id="go-btn" class="global-btn" onclick="executeCommands()">🚀 ¡VOLAR!</button><button class="global-btn reset-btn" onclick="resetGame()">↻ Nuevo jardín</button><button class="global-btn clear-btn" onclick="clearDrawing()">✎ Borrar trazo</button></div>
+</main>
+<div class="modal-overlay" id="modal" role="dialog" aria-modal="true" aria-labelledby="m-title"><div class="modal-box"><div class="modal-icon" id="modal-icon">🍯</div><h2 id="m-title" class="modal-title">Resultado</h2><p id="m-msg" class="modal-msg"></p><button class="modal-btn" onclick="closeModal()">¡Entendido!</button></div></div>
+<div id="effects" aria-hidden="true"></div>
+<script>
+'use strict';
+const gridSize=5,correctColors=['Rojo','Amarillo','Azul'];
+let isExecuting=false,stopExecution=false;
+let bee={pos:{x:0,y:0},dir:0,commands:[]};
+let nectars={},carryingColor=null,nectarsCollected=0,totalNectars=3;
+const gridEl=document.getElementById('grid'),canvas=document.getElementById('drawing-canvas'),ctx=canvas.getContext('2d');
+let isDrawing=false,executionInterval=null,completionTimeout=null,roundToken=0;
+function getEmojiForColor(color){return {Rojo:'🌺',Amarillo:'🌻',Azul:'🪻'}[color]||''}
+function shuffle(array){for(let i=array.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[array[i],array[j]]=[array[j],array[i]]}return array}
+function generateLevel(){nectars={};carryingColor=null;nectarsCollected=0;stopExecution=false;const coords=[];for(let y=0;y<gridSize;y++)for(let x=0;x<gridSize;x++)if(!((x===0&&y===0)||(x===4&&y===0)||(x===0&&y===4)||(x===4&&y===4)))coords.push({x,y});shuffle(coords);correctColors.forEach((color,i)=>{nectars[`${coords[i].x},${coords[i].y}`]=color})}
+function createHive(cell,color){cell.classList.add(`hive-${color}`,'hive-cell');cell.dataset.hiveColor=color;const media=document.createElement('div');media.className='hive-media';const fallback=document.createElement('span');fallback.className='hive-fallback';fallback.textContent='🍯';const img=document.createElement('img');img.src='../assets/robots/Colmena.png';img.alt='Colmena original '+color.toLowerCase();img.addEventListener('error',()=>{img.style.display='none';fallback.style.display='block'});media.append(fallback,img);cell.appendChild(media);const label=document.createElement('span');label.className='hive-label';label.textContent=color.toUpperCase();cell.appendChild(label)}
+function initGrid(){gridEl.innerHTML='';for(let y=0;y<gridSize;y++)for(let x=0;x<gridSize;x++){const cell=document.createElement('div');cell.className='cell';cell.id=`cell-${x}-${y}`;if(x===0&&y===0)cell.dataset.start='true';if(x===4&&y===0)createHive(cell,'Rojo');if(x===0&&y===4)createHive(cell,'Amarillo');if(x===4&&y===4)createHive(cell,'Azul');const color=nectars[`${x},${y}`];if(color){cell.dataset.nectarColor=color;const n=document.createElement('span');n.className='nectar-item';n.textContent=getEmojiForColor(color);cell.appendChild(n)}gridEl.appendChild(cell)}requestAnimationFrame(resizeCanvas)}
+function resizeCanvas(){const rect=gridEl.getBoundingClientRect();canvas.width=Math.round(rect.width);canvas.height=Math.round(rect.height);canvas.style.width=rect.width+'px';canvas.style.height=rect.height+'px';ctx.lineWidth=6;ctx.lineCap='round';ctx.lineJoin='round';ctx.setLineDash([9,12]);ctx.strokeStyle='rgba(243,148,53,.86)'}
+window.addEventListener('resize',()=>resizeCanvas());
+function clearDrawing(){ctx.clearRect(0,0,canvas.width,canvas.height)}
+function pointerPosition(e){const r=canvas.getBoundingClientRect();return{x:(e.clientX-r.left)*canvas.width/r.width,y:(e.clientY-r.top)*canvas.height/r.height}}
+canvas.addEventListener('pointerdown',e=>{if(isExecuting||document.getElementById('modal').classList.contains('active'))return;isDrawing=true;canvas.setPointerCapture?.(e.pointerId);const p=pointerPosition(e);ctx.beginPath();ctx.moveTo(p.x,p.y);e.preventDefault()});
+canvas.addEventListener('pointermove',e=>{if(!isDrawing||isExecuting)return;const p=pointerPosition(e);ctx.lineTo(p.x,p.y);ctx.stroke();e.preventDefault()});
+['pointerup','pointercancel','lostpointercapture'].forEach(type=>canvas.addEventListener(type,()=>isDrawing=false));
+function getTransform(dir){return ['rotate(90deg)','rotate(180deg)','rotate(-90deg)','rotate(0deg)'][dir]}
+function beeFallbackSVG(){return `<svg class="bee-svg" viewBox="0 0 64 64" aria-hidden="true"><g class="wing-l"><ellipse cx="18" cy="22" rx="10" ry="14" fill="#e6f7ff" stroke="#9ed9e9" stroke-width="2" transform="rotate(-27 18 22)"/></g><g class="wing-r"><ellipse cx="46" cy="22" rx="10" ry="14" fill="#e6f7ff" stroke="#9ed9e9" stroke-width="2" transform="rotate(27 46 22)"/></g><path d="M19 26C19 15 26 9 32 9s13 6 13 17v13c0 11-6 18-13 18s-13-7-13-18z" fill="#ffd35d" stroke="#cd9a41" stroke-width="2"/><path d="M20 32h24M21 43h22" stroke="#74553f" stroke-width="5"/><path d="M23 13l-4-7M41 13l4-7" stroke="#694e50" stroke-linecap="round" stroke-width="2.5"/><circle cx="19" cy="6" r="3" fill="#865878"/><circle cx="45" cy="6" r="3" fill="#865878"/><circle cx="27" cy="27" r="2.6" fill="#423d48"/><circle cx="37" cy="27" r="2.6" fill="#423d48"/><path d="M27 34q5 5 10 0" fill="none" stroke="#9d6a4c" stroke-width="2.4" stroke-linecap="round"/><ellipse cx="23" cy="34" rx="4" ry="2.8" fill="#ffa3a0"/><ellipse cx="41" cy="34" rx="4" ry="2.8" fill="#ffa3a0"/></svg>`}
+function drawBee(){document.querySelectorAll('.bee-container').forEach(el=>el.remove());const cell=document.getElementById(`cell-${bee.pos.x}-${bee.pos.y}`);if(!cell)return;const container=document.createElement('div');container.className='bee-container';const orient=document.createElement('div');orient.className='bee-orientation';orient.style.transform=getTransform(bee.dir);const sprite=document.createElement('div');sprite.className='bee-sprite';const image=document.createElement('img');image.src='../assets/robots/BeebotEmoji.png';image.alt='Abeja original';image.addEventListener('error',()=>{image.remove();sprite.innerHTML=beeFallbackSVG()});sprite.appendChild(image);orient.appendChild(sprite);if(carryingColor){const carried=document.createElement('span');carried.className='bee-carrying';carried.textContent=getEmojiForColor(carryingColor);orient.appendChild(carried)}container.appendChild(orient);cell.appendChild(container)}
+function updateHUD(){document.getElementById('deliveries-display').textContent=`${nectarsCollected} / ${totalNectars}`;document.getElementById('progress-fill').style.width=`${(nectarsCollected/totalNectars)*100}%`;const status=document.getElementById('carry-status');status.textContent=carryingColor?`🐝 Llevando: ${getEmojiForColor(carryingColor)} ${carryingColor}`:'🐝 Sin néctar'}
+function addCommand(cmd){if(isExecuting||document.getElementById('modal').classList.contains('active'))return;bee.commands.push(cmd);updateUI()}
+function undoCommand(){if(isExecuting||!bee.commands.length)return;bee.commands.pop();updateUI()}
+function updateUI(){const sym={F:'↑',R:'↷',L:'↶'},seq=document.getElementById('seq');seq.innerHTML='';document.getElementById('sequence-count').textContent=bee.commands.length+' '+(bee.commands.length===1?'paso':'pasos');if(!bee.commands.length){const el=document.createElement('span');el.className='seq-empty';el.textContent='Aquí aparecerán tus movimientos.';seq.appendChild(el);return}bee.commands.forEach(cmd=>{const s=document.createElement('span');s.className='cmd-block';s.textContent=sym[cmd];seq.appendChild(s)})}
+function burstAt(el,symbol='✨'){if(!el)return;const r=el.getBoundingClientRect(),root=document.getElementById('effects');for(let i=0;i<7;i++){const s=document.createElement('span');s.className='spark';s.style.left=(r.left+r.width/2+(Math.random()-.5)*35)+'px';s.style.top=(r.top+r.height/2)+'px';s.style.setProperty('--dx',((Math.random()-.5)*95)+'px');s.textContent=symbol;root.appendChild(s);setTimeout(()=>s.remove(),750)}}
+function launchConfetti(){const root=document.getElementById('effects');for(let i=0;i<80;i++){const s=document.createElement('div');s.className='confetti';s.style.left=(Math.random()*100)+'vw';s.style.top=(-25-Math.random()*240)+'px';s.style.background=['#f9bd54','#e87973','#71c7a6','#6aa6e0','#b89acb'][i%5];s.style.animationDelay=(Math.random()*.65)+'s';s.style.setProperty('--dx',((Math.random()-.5)*160)+'px');root.appendChild(s);setTimeout(()=>s.remove(),2750)}}
+function showModal(title,msg,icon='🍯'){document.getElementById('m-title').textContent=title;document.getElementById('m-msg').textContent=msg;document.getElementById('modal-icon').textContent=icon;document.getElementById('modal').classList.add('active')}
+function closeModal(){document.getElementById('modal').classList.remove('active')}
+function visitCell(x,y){const cell=document.getElementById(`cell-${x}-${y}`);if(cell.dataset.nectarColor){const color=cell.dataset.nectarColor;if(!carryingColor){carryingColor=color;cell.removeAttribute('data-nectar-color');cell.querySelector('.nectar-item')?.remove();burstAt(cell,'✨')}else{showModal('¡Abeja llena!','Ya llevas un néctar '+carryingColor+'. Entrega esa flor antes de recoger otra.','🐝');stopExecution=true;return false}}if(cell.dataset.hiveColor){const hive=cell.dataset.hiveColor;if(carryingColor){if(carryingColor===hive){carryingColor=null;nectarsCollected++;cell.classList.add('visited-correct');burstAt(cell,'⭐');setTimeout(()=>cell.isConnected&&cell.classList.remove('visited-correct'),550)}else{showModal('¡Colmena equivocada!','Llevas néctar '+carryingColor+', pero esta colmena es '+hive+'.','😯');stopExecution=true;return false}}}updateHUD();return true}
+function cancelExecution(){roundToken++;if(executionInterval!==null){clearInterval(executionInterval);executionInterval=null}if(completionTimeout!==null){clearTimeout(completionTimeout);completionTimeout=null}isExecuting=false;stopExecution=false;document.getElementById('go-btn').disabled=false;document.getElementById('go-btn').style.opacity='1'}
+function resetExecutionState(){isExecuting=false;executionInterval=null;stopExecution=false;document.getElementById('go-btn').disabled=false;document.getElementById('go-btn').style.opacity='1';bee.commands=[];updateUI();clearDrawing()}
+function executeCommands(){if(isExecuting||document.getElementById('modal').classList.contains('active'))return;if(!bee.commands.length){showModal('¡Falta programar!','Añade movimientos para que la abejita pueda volar.','↗️');return}isExecuting=true;stopExecution=false;const token=++roundToken;document.getElementById('go-btn').disabled=true;document.getElementById('go-btn').style.opacity='.6';if(!visitCell(bee.pos.x,bee.pos.y)){resetExecutionState();return}let step=0;executionInterval=setInterval(()=>{if(token!==roundToken){clearInterval(executionInterval);executionInterval=null;return}if(step>=bee.commands.length||stopExecution){clearInterval(executionInterval);executionInterval=null;if(stopExecution)resetExecutionState();else checkWin(token);return}const cmd=bee.commands[step];if(cmd==='F'){let nx=bee.pos.x,ny=bee.pos.y;if(bee.dir===0)nx++;else if(bee.dir===1)ny++;else if(bee.dir===2)nx--;else ny--;if(nx>=0&&nx<gridSize&&ny>=0&&ny<gridSize){bee.pos.x=nx;bee.pos.y=ny;visitCell(nx,ny)}}else if(cmd==='R')bee.dir=(bee.dir+1)%4;else if(cmd==='L')bee.dir=(bee.dir+3)%4;drawBee();step++;if(stopExecution){clearInterval(executionInterval);executionInterval=null;resetExecutionState()}},470)}
+function checkWin(token){completionTimeout=setTimeout(()=>{if(token!==roundToken)return;if(nectarsCollected===totalNectars){showModal('¡Misión cumplida!','¡Llevaste los tres néctares a sus colmenas correctas!','🏆');launchConfetti()}else if(carryingColor){showModal('¡Viaje a medias!','Todavía llevas el néctar '+carryingColor+'. Programa una ruta hasta su colmena.','🐝')}else{showModal('¡Todavía hay flores!','Quedan néctares sin entregar. ¡Continúa tu ruta!','🌻')}resetExecutionState()},320)}
+function resetGame(){cancelExecution();document.getElementById('modal').classList.remove('active');bee={pos:{x:0,y:0},dir:0,commands:[]};generateLevel();updateUI();initGrid();drawBee();updateHUD()}
+resetGame();
+</script>
+</body></html>

@@ -1,726 +1,278 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Astro-Bot: Minería Autónoma 🤖</title>
-    <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Rajdhani:wght@500;700;800&display=swap" rel="stylesheet">
-    
-    <style>
-        :root { 
-            --bg-color: #020617;
-            --panel-bg: rgba(15, 23, 42, 0.95);
-            --border-main: #3b82f6;
-            --neon-blue: #60a5fa;
-            --neon-cyan: #22d3ee;
-            --neon-green: #34d399;
-            --neon-yellow: #fbbf24;
-            --neon-red: #f87171;
-            --neon-purple: #c084fc;
-        }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Astro-Bot · Misión Cristal</title>
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700;800&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+<style>
+:root{
+ --bg:#050c1b;--panel:#0e1d33;--panel2:#11263e;--text:#edfaff;--muted:#90b2c8;--stroke:#2c5971;
+ --cyan:#60e6f6;--blue:#609dff;--purple:#c79bff;--gold:#ffd47b;--green:#7ce8bc;--red:#ff8297;
+ --space:clamp(6px,.9vw,14px);
+}
+*{box-sizing:border-box}
+html,body{margin:0;width:100%;height:100%;overflow:hidden;background:var(--bg);color:var(--text);font-family:Rajdhani,system-ui,sans-serif}
+button,select{font:inherit}button{cursor:pointer}button:focus-visible,select:focus-visible{outline:2px solid #fff;outline-offset:2px}
+button:disabled,select:disabled{opacity:.55;cursor:not-allowed}
+#universe{position:fixed;inset:0;pointer-events:none;overflow:hidden;z-index:0;background:radial-gradient(ellipse at 80% -10%,#1d4266 0%,transparent 49%),radial-gradient(ellipse at 0% 90%,#252454 0%,transparent 35%),linear-gradient(155deg,#061124,#030914)}
+#universe:before{content:'';position:absolute;inset:0;opacity:.4;background-image:radial-gradient(#c6eaff 1px,transparent 1px),radial-gradient(#a4dafe 1px,transparent 1px);background-size:69px 59px,115px 109px;background-position:4px 8px,31px 55px;animation:stars 45s linear infinite}
+#universe:after{content:'';position:absolute;width:44vw;height:44vw;max-height:580px;max-width:580px;right:-11vw;bottom:-32vw;border-radius:50%;background:radial-gradient(circle at 32% 27%,#3e7393,#244463 45%,#0f2438 76%);box-shadow:0 0 100px #2a709d55,0 0 0 18px #69d5fc0a;opacity:.7}
+@keyframes stars{to{background-position:73px 67px,146px 164px}}
+#app{height:100vh;height:100dvh;width:min(1390px,100%);margin:auto;position:relative;z-index:1;display:flex;flex-direction:column;gap:var(--space);padding:var(--space);overflow:hidden}
+.topbar{height:clamp(43px,5.7vh,62px);flex-shrink:0;display:flex;align-items:center;justify-content:space-between;gap:8px;background:linear-gradient(100deg,#132e46e8,#0b1a2fe8);border:1px solid #386580;border-radius:16px;padding:6px 12px;box-shadow:0 8px 24px #02081270}
+.brand{display:flex;align-items:center;gap:9px;min-width:0}
+.brand-mark{display:grid;place-items:center;width:35px;height:35px;flex-shrink:0;border-radius:11px;background:linear-gradient(135deg,#63dffc,#4b79df);box-shadow:inset 0 1px 0 #ffffff8c,0 4px 12px #00caff38;font-size:22px}
+.brand-title{font-weight:800;font-size:clamp(16px,2vw,25px);letter-spacing:.4px;line-height:1;white-space:nowrap}
+.brand-title em{font-style:normal;color:var(--cyan)}
+.brand-sub{font:10px 'Share Tech Mono',monospace;color:#86b7cd;letter-spacing:1.5px;margin-top:3px;white-space:nowrap}
+.top-actions{display:flex;align-items:center;gap:8px}
+.small-btn,.stat{height:34px;display:inline-flex;gap:7px;align-items:center;justify-content:center;border-radius:10px;padding:0 12px;background:#08172b;border:1px solid #3b617b;color:var(--muted);font-size:12px;font-weight:800;white-space:nowrap}
+.small-btn{color:#d7edfb;transition:.15s}.small-btn:hover{background:#1d3d55;border-color:var(--cyan)}
+.stat{color:var(--gold);border-color:#9f765245}.stat b{font-size:19px;color:#fff}
+.icon-sound{width:34px;padding:0;font-size:18px;color:var(--cyan)}
+#main{flex:1;min-height:0;display:grid;grid-template-columns:minmax(0,1.04fr) minmax(0,.96fr);gap:var(--space)}
+.panel{min-width:0;min-height:0;background:linear-gradient(152deg,#162b42f5,#0a1729f5);border:1px solid #38607c;border-radius:20px;box-shadow:inset 0 1px 0 #93d9ff19,0 12px 25px #0007;overflow:hidden}
+.map-panel{display:flex;flex-direction:column;padding:clamp(8px,1.6vw,18px);gap:7px}
+.panel-head{min-height:34px;display:flex;align-items:center;justify-content:space-between;gap:8px;flex-shrink:0}
+.eyebrow{font:10px 'Share Tech Mono',monospace;color:var(--cyan);letter-spacing:1.3px;white-space:nowrap}
+.panel-title{font-size:clamp(16px,2vw,25px);font-weight:800;letter-spacing:.4px;line-height:1.05}
+.mini-pill{display:inline-flex;gap:5px;align-items:center;padding:5px 9px;background:#071b2e;border:1px solid #3f7891;border-radius:99px;color:#c8edf7;font:10px 'Share Tech Mono',monospace;white-space:nowrap}
+.map-stage{min-height:0;flex:1;display:grid;place-items:center;position:relative;border-radius:16px;background:radial-gradient(circle at 50% 50%,#173c57 0%,#071629 70%);border:1px solid #2b506b;overflow:hidden}
+.map-stage:before{content:'';position:absolute;inset:0;opacity:.4;background-image:linear-gradient(#66c9f311 1px,transparent 1px),linear-gradient(90deg,#66c9f311 1px,transparent 1px);background-size:23px 23px}
+.map-stage:after{content:'';pointer-events:none;position:absolute;inset:0;box-shadow:inset 0 0 35px #0c284c;z-index:2}
+#grid{position:relative;flex-shrink:0;display:grid;grid-template-columns:repeat(8,minmax(0,1fr));grid-template-rows:repeat(8,minmax(0,1fr));gap:2px;padding:5px;border-radius:13px;border:2px solid #457c9b;background:#1a3a50;box-shadow:0 0 0 5px #376f9421,0 16px 28px #0008,0 0 38px #1d92cc27;overflow:visible}
+.cell{position:relative;display:grid;place-items:center;min-width:0;min-height:0;border-radius:4px;overflow:hidden;background:linear-gradient(130deg,#152f45,#0c1c31);border:1px solid #47738c30;font-size:var(--cell-font,27px)}
+.cell:before{content:'';position:absolute;inset:0;background:linear-gradient(145deg,#fff1,transparent 50%);pointer-events:none}
+.cell.mat-rock{background:linear-gradient(145deg,#66778b,#354859);border-color:#94a5b047;box-shadow:inset 0 -3px 0 #172d3c}
+.cell.mat-rock:after{content:'🪨';filter:drop-shadow(0 2px 2px #050b18aa)}
+.cell.mat-ice{background:linear-gradient(145deg,#266c90,#153c64);border-color:#60d3f398;box-shadow:inset 0 0 11px #62dff353}
+.cell.mat-ice:after{content:'🧊';filter:drop-shadow(0 0 5px #50cafe)}
+.cell.mat-crystal{background:radial-gradient(circle,#542b91a6,#202b5e);border-color:#ca9afeaa;box-shadow:inset 0 0 14px #b16ffe55}
+.cell.mat-crystal:after{content:'💎';filter:drop-shadow(0 0 8px #cd86ff);animation:crystalHover 1.7s ease-in-out infinite alternate}
+@keyframes crystalHover{to{transform:translateY(-3px) scale(1.1)}}
+.cell.recent{animation:tileFlash .4s ease-out}
+@keyframes tileFlash{0%{background:#b1fff3;box-shadow:0 0 25px #70ffcc}100%{}}
+.cell.targeting{outline:2px solid #fff;outline-offset:-3px}
+#rover{position:absolute;z-index:10;pointer-events:none;display:grid;place-items:center;will-change:left,top,transform;transition:left .19s ease,top .19s ease,transform .21s ease;filter:drop-shadow(0 0 9px #55e8fc8a)}
+#rover svg{width:92%;height:92%;overflow:visible}
+.rover-thruster{animation:enginePulse .22s ease-in-out infinite alternate;transform-origin:center}
+@keyframes enginePulse{to{transform:scaleY(.65);opacity:.55}}
+#laser{position:absolute;pointer-events:none;z-index:15;opacity:0;transition:opacity .14s;background:linear-gradient(90deg,#ff706a,#fff9c8,#ff706a);box-shadow:0 0 8px #ff676b,0 0 21px #f75d86;border-radius:20px}
+#drill-fx{position:absolute;z-index:16;pointer-events:none;opacity:0;font-size:var(--cell-font,25px)}
+#drill-fx.anim-drill{animation:drillFx .31s ease-out forwards}
+@keyframes drillFx{0%{opacity:1;transform:scale(.6) rotate(0)}100%{opacity:0;transform:scale(1.4) rotate(240deg)}}
+#explosion{position:absolute;z-index:50;inset:0;opacity:0;pointer-events:none;background:#ff536b7d;transition:opacity .24s;border-radius:16px}
+.shake{animation:shake .32s linear}
+@keyframes shake{20%{transform:translateX(-5px)}40%{transform:translateX(5px)}60%{transform:translateX(-4px)}80%{transform:translateX(4px)}}
+.spark{position:absolute;z-index:18;width:5px;height:5px;pointer-events:none;background:var(--spark-color,#8fffdc);border-radius:50%;left:50%;top:50%;box-shadow:0 0 7px currentColor;animation:sparkMove .5s ease-out forwards}
+@keyframes sparkMove{to{opacity:0;transform:translate(var(--dx),var(--dy)) scale(.1)}}
+.map-footer{height:35px;flex-shrink:0;display:flex;justify-content:space-between;align-items:center;gap:7px}
+.sensor{display:flex;gap:5px;align-items:center;min-width:0;color:#a9c7d8;font:11px 'Share Tech Mono',monospace;white-space:nowrap}
+.sensor strong{color:var(--gold);font-weight:400;overflow:hidden;text-overflow:ellipsis}
+.legend{display:flex;gap:8px;align-items:center;justify-content:end;white-space:nowrap;color:#a6c3d8;font:10px 'Share Tech Mono',monospace}
+.legend span{display:inline-flex;gap:2px;align-items:center}
 
-        body, html { 
-            font-family: 'Rajdhani', sans-serif; 
-            display: flex; flex-direction: column; align-items: center; justify-content: flex-start;
-            margin: 0; padding: 0; width: 100vw; height: 100vh; 
-            color: #fff; background-color: var(--bg-color); 
-            overflow: hidden; box-sizing: border-box; user-select: none;
-        }
+.brain-panel{display:flex;flex-direction:column;padding:clamp(7px,1vw,12px);gap:6px}
+.brain-head{min-height:42px;flex-shrink:0;display:flex;align-items:center;justify-content:space-between;gap:8px;padding:1px 5px 5px;border-bottom:1px solid #29556f}
+.brain-sub{font:11px 'Share Tech Mono',monospace;color:#94b2cc}
+.loop-tag{color:var(--purple);font:11px 'Share Tech Mono',monospace;padding:5px 7px;border-radius:8px;border:1px solid #936db55e;background:#5c358b27;white-space:nowrap}
+.rules{flex:1;min-height:0;display:grid;grid-template-rows:repeat(5,minmax(0,1fr));gap:5px}
+.rule{min-height:0;min-width:0;display:grid;grid-template-columns:48px minmax(0,1fr);align-items:center;gap:8px;background:linear-gradient(100deg,#172f47e8,#0b2037);border:1px solid #365e77;border-radius:11px;padding:5px 9px;transition:border-color .14s,background .14s,box-shadow .14s}
+.rule .rule-num{font:10px 'Share Tech Mono',monospace;color:#8dc7e3;letter-spacing:.4px}
+.rule .rule-num strong{display:block;color:var(--cyan);font-size:15px;margin-top:3px}
+.rule.elseif .rule-num strong{color:var(--gold)}
+.rule.else .rule-num strong{color:#bbcbdb}
+.rule.active{border-color:#99ffd7;background:linear-gradient(100deg,#183f47,#163c42);box-shadow:0 0 15px #42ffd033,inset 0 0 10px #58ffaf1c}
+.rule.active .rule-num strong{color:#8affcc}
+.rule.invalid{border-color:#fa677b;background:#592939}
+.rule-logic{min-width:0;display:grid;grid-template-columns:minmax(0,.9fr) minmax(0,1.1fr);gap:7px;align-items:center}
+.rule-logic label{display:flex;flex-direction:column;gap:3px;min-width:0;color:#83a9c0;font:10px 'Share Tech Mono',monospace;letter-spacing:.2px}
+.rule-logic label b{font-weight:400;color:#9bbbd0}
+.rule-logic select{width:100%;min-width:0;min-height:30px;border:1px solid #47738c;border-radius:7px;background:#08192b;color:#f3fbff;padding:5px 22px 5px 7px;font-size:clamp(11px,1.15vw,14px);font-family:Rajdhani,sans-serif;font-weight:800;text-overflow:ellipsis}
+.rule-logic select.cond{border-color:#a47c4575;color:#ffe1aa}
+.rule-logic select.act{border-color:#4cbb987a;color:#a8ffda}
+.rule.else .rule-logic{grid-template-columns:1fr 1fr}
+.always{padding:6px 8px;min-height:30px;display:flex;align-items:center;border:1px dashed #66819d;border-radius:7px;color:#bdccdf;font-size:12px}
+.status-bar{height:36px;flex-shrink:0;display:flex;align-items:center;gap:8px;border:1px solid #375971;border-radius:9px;background:#061629;padding:6px 10px;min-width:0}
+.status-dot{width:8px;height:8px;flex-shrink:0;border-radius:50%;background:#5bdcb7;box-shadow:0 0 8px #5bdcb777}
+.status-text{min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:#a9cadf;font:11px 'Share Tech Mono',monospace}
+.status-bar.error .status-dot{background:var(--red);box-shadow:0 0 8px #ff6e8b}
+.status-bar.success .status-dot{background:var(--gold)}
+.controls{height:48px;flex-shrink:0;display:flex;gap:8px}
+.btn{border:1px solid #4f7b98;border-radius:11px;color:#f1faff;font-weight:800;letter-spacing:.3px;font-size:15px;background:#163249;padding:7px 13px;transition:background .15s,transform .15s}
+.btn:hover{background:#24506a;transform:translateY(-1px)}
+.btn-primary{flex:1.25;background:linear-gradient(135deg,#61e6e9,#62b1ff);color:#06243b;border-color:#a2f8ff;box-shadow:0 4px 0 #257e9a;font-family:'Share Tech Mono',monospace}
+.btn-primary:hover{background:linear-gradient(135deg,#9ff8f4,#77c4ff)}
+.btn-secondary{flex:.8;color:#b4d8eb}
+.btn:active{transform:translateY(2px)}
+.btn-primary.running{color:white;background:linear-gradient(135deg,#dc536a,#9e324a);border-color:#ff8497;box-shadow:0 4px 0 #802d40}
 
-        /* FONDO CYBERPUNK */
-        .decorations { position: fixed; inset: 0; z-index: -1; pointer-events: none; overflow: hidden; background: radial-gradient(circle at center, #0f172a 0%, #020617 100%); }
-        .grid-bg { position: absolute; inset: -50%; background-image: linear-gradient(rgba(34, 211, 238, 0.05) 1px, transparent 1px), linear-gradient(90deg, rgba(34, 211, 238, 0.05) 1px, transparent 1px); background-size: 50px 50px; transform: perspective(800px) rotateX(60deg) translateY(-100px); animation: gridScroll 10s linear infinite; }
-        @keyframes gridScroll { from { transform: perspective(800px) rotateX(60deg) translateY(0); } to { transform: perspective(800px) rotateX(60deg) translateY(50px); } }
-
-        .sound-toggle { position: absolute; top: 15px; right: 15px; background: rgba(15,23,42,0.8); border: 2px solid var(--neon-cyan); border-radius: 8px; width: 45px; height: 45px; font-size: 20px; display: flex; justify-content: center; align-items: center; cursor: pointer; z-index: 1000; box-shadow: 0 0 10px rgba(34,211,238,0.3); transition: all 0.2s; color: var(--neon-cyan);}
-        .sound-toggle:active { transform: scale(0.9); }
-
-        /* PANTALLA DE INSTRUCCIONES */
-        #instructions-screen { position: absolute; inset: 0; z-index: 600; display: flex; flex-direction: column; justify-content: center; align-items: center; background: rgba(2,6,23,0.9); backdrop-filter: blur(5px); }
-        .instructions-card { background: var(--panel-bg); padding: 40px; border-radius: 12px; border: 2px solid var(--neon-cyan); max-width: 90%; width: 680px; display: flex; flex-direction: column; gap: 20px; box-shadow: 0 0 50px rgba(34,211,238,0.2); }
-        .instructions-card h1 { font-family: 'Share Tech Mono', monospace; font-size: 36px; color: var(--neon-cyan); margin: 0; text-align: center; text-shadow: 0 0 15px rgba(34,211,238,0.5);}
-        .instruction-step { display: flex; gap: 15px; align-items: flex-start; font-size: 17px; background: rgba(255,255,255,0.03); padding: 15px; border-radius: 8px; border: 1px solid rgba(34,211,238,0.3);}
-        .instruction-icon { font-size: 28px; flex-shrink: 0; }
-        .instruction-text b { color: var(--neon-yellow); }
-        
-        .start-btn { background: var(--neon-cyan); border: none; padding: 15px 40px; font-size: 22px; color: #000; border-radius: 6px; text-transform: uppercase; font-weight: bold; font-family: 'Share Tech Mono', monospace; cursor:pointer; transition: all 0.2s; align-self: center; box-shadow: 0 5px 0 #0891b2, 0 10px 20px rgba(34,211,238,0.3); letter-spacing: 2px;}
-        .start-btn:active { transform: translateY(5px); box-shadow: 0 0 0 #0891b2; }
-
-        /* HEADER DEL JUEGO */
-        .game-header { display: flex; justify-content: space-between; align-items: center; width: 100%; max-width: 1200px; padding: 15px 2vw; z-index: 10; box-sizing: border-box;}
-        .back-menu-btn { background: rgba(34,211,238,0.1); border: 1px solid var(--neon-cyan); padding: 8px 15px; border-radius: 6px; font-size: 14px; color: var(--neon-cyan); cursor: pointer; transition: all 0.2s; font-family: 'Share Tech Mono', monospace; text-transform: uppercase; font-weight: bold;}
-        .back-menu-btn:hover { background: var(--neon-cyan); color: #000; }
-        .hud-box { background: var(--panel-bg); padding: 8px 20px; border-radius: 6px; border: 1px solid var(--neon-purple); font-size: 20px; color: #fff; box-shadow: 0 0 15px rgba(192,132,252,0.3); font-family: 'Share Tech Mono', monospace;}
-        .hud-box span { color: var(--neon-purple); font-weight: bold; font-size: 24px; text-shadow: 0 0 10px var(--neon-purple);}
-
-        /* LAYOUT PRINCIPAL */
-        .main-layout { display: flex; flex-direction: row; gap: 20px; width: 100%; max-width: 1200px; flex: 1; padding: 0 2vw 2vh 2vw; box-sizing: border-box; overflow: hidden; align-items: stretch;}
-        @media (max-width: 950px) { .main-layout { flex-direction: column; overflow-y: auto; } }
-
-        /* =========================================================
-           ZONA VISUAL: EL MAPA SATURADO (IZQUIERDA)
-           ========================================================= */
-        .map-column { flex: 1; display: flex; flex-direction: column; background: var(--panel-bg); border: 2px solid var(--border-main); border-radius: 12px; padding: 20px; position: relative; box-shadow: inset 0 0 50px rgba(0,0,0,0.8); overflow: hidden; align-items: center;}
-        
-        .map-title { font-family: 'Share Tech Mono', monospace; color: var(--neon-cyan); font-size: 20px; margin-bottom: 15px; text-transform: uppercase; letter-spacing: 2px; text-shadow: 0 0 10px var(--neon-cyan); width: 100%; text-align: center; border-bottom: 1px dashed var(--neon-cyan); padding-bottom: 10px;}
-        
-        .grid-container { display: grid; grid-template-columns: repeat(8, 1fr); grid-template-rows: repeat(8, 1fr); gap: 2px; background: #0f172a; padding: 6px; border-radius: 8px; border: 2px solid #334155; position: relative; box-shadow: 0 10px 30px rgba(0,0,0,0.8); width: 100%; max-width: 50vh; aspect-ratio: 1/1;}
-        
-        .cell { background: #020617; border-radius: 3px; display: flex; justify-content: center; align-items: center; font-size: clamp(18px, 3vw, 28px); position: relative; transition: opacity 0.2s;}
-        
-        .mat-rock { background: #475569; border: 1px solid #64748b;}
-        .mat-rock::after { content: '🪨'; }
-        
-        .mat-ice { background: rgba(34,211,238,0.2); border: 1px solid var(--neon-cyan); box-shadow: inset 0 0 10px rgba(34,211,238,0.3);}
-        .mat-ice::after { content: '🧊'; }
-        
-        .mat-crystal { background: rgba(192,132,252,0.15); box-shadow: inset 0 0 20px rgba(192,132,252,0.4);}
-        .mat-crystal::after { content: '💎'; filter: drop-shadow(0 0 10px var(--neon-purple)); animation: floatGem 2s infinite ease-in-out;}
-
-        /* Rover 2D */
-        .rover { position: absolute; width: calc(100% / 8 - 3px); height: calc(100% / 8 - 3px); z-index: 10; transition: all 0.15s linear; display: flex; justify-content: center; align-items: center; font-size: clamp(22px, 3.5vw, 35px); filter: drop-shadow(0 0 8px var(--neon-cyan)); pointer-events: none;}
-        
-        /* Herramientas (Láser y Taladro) */
-        .laser-beam { position: absolute; z-index: 15; opacity: 0; pointer-events: none; background: var(--neon-red); box-shadow: 0 0 10px var(--neon-red), 0 0 20px var(--neon-red); transition: opacity 0.1s;}
-        .drill-effect { position: absolute; z-index: 15; opacity: 0; pointer-events: none; font-size: 30px; filter: drop-shadow(0 0 5px var(--neon-yellow));}
-        
-        @keyframes floatGem { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-3px); } }
-        @keyframes drillSpin { 100% { transform: rotate(360deg) scale(1.5); opacity: 0;} }
-        .anim-drill { animation: drillSpin 0.3s forwards; }
-        
-        .explosion-overlay { position: absolute; inset: 0; background: var(--neon-red); z-index: 50; mix-blend-mode: color; opacity: 0; pointer-events: none; transition: opacity 0.2s;}
-
-        /* =========================================================
-           COLUMNA DE CÓDIGO: EL CEREBRO DE LA IA (DERECHA)
-           ========================================================= */
-        .code-column { flex: 1.2; display: flex; flex-direction: column; gap: 15px;}
-
-        .code-editor { flex: 1.2; background: #020617; border: 2px solid #1e293b; border-radius: 12px; padding: 20px; display: flex; flex-direction: column; font-family: 'Share Tech Mono', monospace; font-size: clamp(14px, 2.5vh, 18px); color: #94a3b8; box-shadow: inset 0 0 30px rgba(0,0,0,0.8); overflow-y: auto; gap: 8px;}
-        
-        .code-header { color: var(--neon-cyan); font-size: 20px; text-transform: uppercase; font-weight: bold; border-bottom: 2px solid var(--neon-cyan); padding-bottom: 10px; margin-bottom: 5px; text-shadow: 0 0 10px rgba(34,211,238,0.5);}
-        .code-main-loop { color: var(--neon-purple); font-weight: bold; font-size: 18px; margin-bottom: 10px; text-shadow: 0 0 8px rgba(192,132,252,0.5);}
-
-        /* Bloques Condicionales Visuales */
-        .logic-block { background: rgba(255,255,255,0.03); border: 1px solid #334155; border-left: 6px solid; border-radius: 6px; padding: 12px; display: flex; flex-direction: column; gap: 10px; transition: all 0.2s;}
-        
-        .block-if { border-left-color: var(--neon-cyan); }
-        .block-elseif { border-left-color: var(--neon-yellow); }
-        .block-else { border-left-color: #64748b; }
-
-        .block-header { display: flex; align-items: center; gap: 10px; font-weight: bold; color: #fff;}
-        .block-header span.kw { background: rgba(34,211,238,0.2); padding: 2px 6px; border-radius: 4px; color: var(--neon-cyan);}
-        .block-elseif .block-header span.kw { background: rgba(251,191,36,0.2); color: var(--neon-yellow);}
-        .block-else .block-header span.kw { background: rgba(100,116,139,0.3); color: #cbd5e1;}
-
-        .block-action { margin-left: 30px; display: flex; align-items: center; gap: 10px; background: rgba(0,0,0,0.5); padding: 8px 12px; border-radius: 4px; border: 1px dashed #334155;}
-        .block-action::before { content: '↳'; color: #64748b; font-weight: bold; margin-right: 5px;}
-
-        select { background: #0f172a; color: #fff; border: 1px solid var(--border-main); padding: 6px 10px; font-family: 'Share Tech Mono', monospace; font-size: inherit; border-radius: 4px; cursor: pointer; outline: none; font-weight: bold; box-shadow: inset 0 2px 5px rgba(0,0,0,0.5);}
-        select:focus { border-color: var(--neon-cyan); box-shadow: 0 0 10px rgba(34,211,238,0.4);}
-        .sel-cond { color: var(--neon-yellow); }
-        .sel-act { color: var(--neon-green); }
-
-        .executing { border-color: #fff !important; box-shadow: 0 0 20px rgba(255,255,255,0.3) !important; background: rgba(255,255,255,0.1) !important;}
-
-        /* Consola de Depuración */
-        .console-panel { flex: 0.8; background: #000; border: 2px solid #1e293b; border-radius: 8px; padding: 12px; font-family: 'Share Tech Mono', monospace; font-size: 14px; color: #64748b; overflow-y: auto; display: flex; flex-direction: column; box-shadow: inset 0 0 20px #000;}
-        .console-header { color: var(--neon-cyan); border-bottom: 1px solid #1e293b; padding-bottom: 5px; margin-bottom: 5px; font-weight: bold; display: flex; justify-content: space-between;}
-        .log-line { margin: 2px 0; border-left: 2px solid transparent; padding-left: 5px; line-height: 1.3;}
-        .log-info { color: #60a5fa; border-left-color: #60a5fa;}
-        .log-warn { color: var(--neon-yellow); border-left-color: var(--neon-yellow);}
-        .log-err { color: var(--neon-red); border-left-color: var(--neon-red);}
-        .log-succ { color: var(--neon-green); border-left-color: var(--neon-green); font-weight: bold;}
-
-        /* Controles */
-        .controls { display: flex; gap: 15px;}
-        .run-btn { flex: 1; background: var(--neon-cyan); border: none; padding: 15px; font-size: 20px; color: #000; border-radius: 8px; text-transform: uppercase; font-weight: bold; font-family: 'Share Tech Mono', monospace; cursor: pointer; transition: all 0.2s; box-shadow: 0 5px 0 #0891b2, 0 5px 15px rgba(34,211,238,0.3); letter-spacing: 1px;}
-        .run-btn:active { transform: translateY(5px); box-shadow: none; }
-        .run-btn:disabled { background: #334155; color: #94a3b8; box-shadow: none; cursor: not-allowed; transform: none;}
-
-        /* MODAL */
-        .modal-overlay { position: fixed; inset: 0; background: rgba(2,6,23,0.85); display: flex; justify-content: center; align-items: center; z-index: 1000; visibility: hidden; opacity: 0; transition: all 0.3s; backdrop-filter: blur(8px);}
-        .modal-overlay.active { visibility: visible; opacity: 1; }
-        .modal-box { background: var(--panel-bg); padding: 40px; border-radius: 12px; text-align: center; max-width: 85%; width: 450px; transform: scale(0.9); transition: transform 0.3s; border: 2px solid var(--neon-cyan); box-shadow: 0 0 50px rgba(34,211,238,0.2);}
-        .modal-overlay.active .modal-box { transform: scale(1); }
-        .modal-title { font-family: 'Share Tech Mono', monospace; font-size: 30px; margin-top: 0; margin-bottom: 15px; color: var(--neon-cyan); text-shadow: 0 0 15px rgba(34,211,238,0.5);}
-        .modal-msg { font-size: 18px; margin-bottom: 30px; color: #fff; white-space: pre-line; line-height: 1.5; font-family: 'Rajdhani', sans-serif;}
-        .modal-btn { background: transparent; border: 2px solid var(--neon-cyan); color: var(--neon-cyan); padding: 12px 30px; font-size: 18px; border-radius: 6px; text-transform: uppercase; font-weight: bold; cursor:pointer; font-family: 'Share Tech Mono', monospace; transition: all 0.2s;}
-        .modal-btn:hover { background: var(--neon-cyan); color: #000; box-shadow: 0 0 15px var(--neon-cyan);}
-
-    </style>
+#instructions-screen,#modal{position:fixed;inset:0;z-index:100;display:grid;place-items:center;padding:10px;background:#020b19db;backdrop-filter:blur(10px)}
+#instructions-screen{z-index:80}
+#instructions-screen.hidden{display:none}
+.intro-card{width:min(800px,100%);max-height:100%;display:grid;grid-template-columns:.85fr 1.15fr;overflow:hidden;border-radius:24px;border:2px solid #62aed077;background:linear-gradient(140deg,#162c48,#091c31);box-shadow:0 25px 65px #0009,0 0 90px #1c96d427}
+.intro-art{min-height:360px;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;background:radial-gradient(circle at 52% 34%,#285d83,#0a1d39 66%)}
+.intro-art:before{content:'';position:absolute;inset:0;opacity:.4;background-image:radial-gradient(#b7efff 1px,transparent 1px);background-size:23px 25px}
+.intro-art .planet{width:84%;max-width:260px;aspect-ratio:1;display:grid;place-items:center;border-radius:50%;background:radial-gradient(circle at 35% 30%,#4576ac,#1d3d66 60%,#112347);box-shadow:0 0 0 18px #a2b9fa11,0 0 50px #72beff38;animation:planetFloat 5s ease-in-out infinite alternate}
+@keyframes planetFloat{to{transform:translateY(-9px)}}
+.intro-art svg{width:67%;filter:drop-shadow(0 16px 9px #0917279c);animation:planetFloat 2.7s ease-in-out infinite alternate}
+.intro-caption{position:absolute;bottom:20px;left:18px;right:18px;text-align:center;font:11px 'Share Tech Mono',monospace;color:#b8e9ff;letter-spacing:1px}
+.intro-content{display:flex;flex-direction:column;justify-content:center;gap:11px;padding:27px}
+.intro-eyebrow{font:11px 'Share Tech Mono',monospace;color:var(--cyan);letter-spacing:2px}
+.intro-content h1{font-size:clamp(28px,3.4vw,44px);font-weight:800;line-height:.95;margin:0;letter-spacing:.1px}
+.intro-content h1 em{font-style:normal;color:var(--cyan)}
+.intro-content p{margin:0;color:#adcbdb;font-size:15px;line-height:1.35}
+.instruction-step{display:flex;align-items:center;gap:10px;padding:9px 11px;border:1px solid #44647f;border-radius:10px;background:#0c243b9c;font-size:14px;line-height:1.25;color:#cfebf7}
+.instruction-step .step-icon{font-size:23px;flex-shrink:0}
+.instruction-step strong{color:var(--gold)}
+.start-btn{border:none;color:#082c45;background:linear-gradient(120deg,#6bf2e6,#6cb7ff);font:800 17px Rajdhani,sans-serif;letter-spacing:.3px;border-radius:12px;min-height:45px;box-shadow:0 5px 0 #2c83a6;cursor:pointer}
+.start-btn:hover{filter:brightness(1.15)}
+#modal{z-index:120;visibility:hidden;opacity:0;transition:opacity .18s,visibility .18s}
+#modal.active{visibility:visible;opacity:1}
+.modal-card{width:min(430px,100%);border-radius:21px;background:linear-gradient(160deg,#1c3550,#091d31);border:2px solid #6ac9e2;padding:28px;text-align:center;box-shadow:0 18px 55px #0009;transform:translateY(18px) scale(.95);transition:transform .24s}
+#modal.active .modal-card{transform:translateY(0) scale(1)}
+.modal-icon{font-size:49px;margin-bottom:7px;display:block}
+.modal-card h2{font-size:26px;color:#b1f5f7;margin:0 0 10px;line-height:1}
+.modal-card p{font-size:17px;color:#c1d6e3;white-space:pre-line;line-height:1.32;margin:0 0 21px}
+.modal-card .btn{min-width:160px}
+@media(max-width:1000px){.legend{gap:3px;font-size:9px}.map-panel{padding:9px}.brain-panel{padding:8px}.rule{grid-template-columns:39px minmax(0,1fr);gap:5px;padding:4px 5px}.controls{height:43px}.rule-logic{gap:5px}}
+@media(max-width:760px) and (orientation:portrait){
+ #app{gap:5px;padding:6px}
+ .topbar{height:41px;border-radius:11px;padding:3px 7px}
+ .brand-mark{width:29px;height:29px;font-size:18px;border-radius:8px}
+ .brand-title{font-size:16px}.brand-sub{font-size:8px;letter-spacing:.6px}
+ .top-actions{gap:4px}.stat,.small-btn{height:29px;padding:0 7px;font-size:10px}.stat b{font-size:15px}.small-btn.icon-sound{width:28px;font-size:15px}
+ #main{grid-template-columns:1fr;grid-template-rows:minmax(0,46%) minmax(0,54%);gap:5px}
+ .panel{border-radius:11px}.map-panel{padding:5px;gap:2px}
+ .panel-head{min-height:24px;padding:0 5px}.panel-title{font-size:15px}.eyebrow{font-size:8px;letter-spacing:.4px}.mini-pill{font-size:8px;padding:4px}
+ .map-stage{border-radius:8px}.map-footer{height:22px}
+ .sensor{font-size:9px}.legend{font-size:8px;gap:5px}
+ .brain-panel{padding:5px;gap:3px}.brain-head{min-height:28px;padding:0 4px 2px}.brain-sub{font-size:8px}.loop-tag{font-size:8px;padding:4px}
+ .rules{gap:3px}.rule{border-radius:7px;padding:2px 5px;grid-template-columns:33px minmax(0,1fr);gap:4px}
+ .rule .rule-num{font-size:8px}.rule .rule-num strong{font-size:12px;margin-top:0}
+ .rule-logic{gap:4px}.rule-logic label{gap:1px;font-size:8px}.rule-logic select{min-height:24px;padding:2px 12px 2px 4px;font-size:12px;border-radius:5px}.always{min-height:24px;padding:2px 5px;font-size:11px}
+ .status-bar{height:23px;padding:3px 6px;border-radius:6px;gap:5px}.status-text{font-size:9px}.status-dot{width:6px;height:6px}
+ .controls{height:35px;gap:5px}.btn{padding:4px 7px;font-size:12px;border-radius:7px}
+ .intro-card{grid-template-columns:1fr;width:min(430px,100%)}.intro-art{min-height:145px;max-height:170px}.intro-art .planet{width:130px}.intro-content{padding:15px;gap:7px}.intro-content h1{font-size:29px}.intro-content p{font-size:13px}.instruction-step{font-size:12px;padding:6px 8px}.instruction-step .step-icon{font-size:19px}.start-btn{min-height:38px;font-size:15px}.intro-caption{font-size:9px;bottom:8px}
+}
+@media(max-width:360px) and (orientation:portrait){
+ .legend span{font-size:0}.legend span:first-letter{font-size:12px}.brand-sub{display:none}.brand-title{font-size:15px}.small-btn{font-size:9px}
+ #main{grid-template-rows:minmax(0,43%) minmax(0,57%)}
+ .rule-logic select{font-size:11px}.panel-title{font-size:13px}.rule-logic label{font-size:0;gap:0}.rule-logic label b{display:none}
+ .intro-art{min-height:100px;max-height:112px}.intro-art .planet{width:91px}.intro-content{padding:10px 12px;gap:5px}.intro-content h1{font-size:25px}.intro-content p{font-size:12px;line-height:1.25}.instruction-step{font-size:11px;padding:4px 6px;gap:6px}.start-btn{min-height:35px;flex-shrink:0}
+}
+@media(orientation:landscape) and (max-height:520px){
+ #app{gap:4px;padding:4px}
+ .topbar{height:30px;border-radius:8px;padding:1px 6px}.brand-mark{width:24px;height:24px;font-size:15px}.brand-title{font-size:14px}.brand-sub{display:none}.small-btn,.stat{height:23px;padding:0 5px;font-size:9px}.stat b{font-size:13px}.small-btn.icon-sound{width:24px;font-size:13px}
+ #main{grid-template-columns:minmax(0,.8fr) minmax(0,1.2fr);gap:4px}
+ .panel{border-radius:8px}.map-panel{padding:4px;gap:2px}.panel-head{min-height:19px;padding:0 4px}.panel-title{font-size:13px}.eyebrow{font-size:8px}.mini-pill{font-size:8px;padding:2px}
+ .map-stage{border-radius:6px}.map-footer{height:18px}.sensor{font-size:8px}.legend{font-size:8px;gap:4px}.legend span{font-size:0}.legend span:first-letter{font-size:11px}
+ .brain-panel{padding:3px;gap:2px}.brain-head{min-height:21px;padding:0 3px 1px}.brain-sub{display:none}.loop-tag{font-size:8px;padding:2px}.rules{gap:2px}
+ .rule{grid-template-columns:26px minmax(0,1fr);gap:3px;padding:1px 3px;border-radius:5px}.rule .rule-num{font-size:7px}.rule .rule-num strong{font-size:10px;margin:0}
+ .rule-logic{gap:3px}.rule-logic label{font-size:7px;gap:0}.rule-logic select{min-height:19px;font-size:10px;padding:1px 12px 1px 3px;border-radius:4px}.always{min-height:19px;padding:1px 3px;font-size:9px}
+ .status-bar{height:18px;padding:1px 4px;gap:3px}.status-text{font-size:8px}.status-dot{width:5px;height:5px}
+ .controls{height:26px;gap:4px}.btn{font-size:10px;padding:2px 6px;border-radius:5px}
+ .intro-card{width:min(740px,100%);grid-template-columns:.72fr 1.28fr;border-radius:13px}.intro-art{min-height:0}.intro-art .planet{max-width:170px}.intro-content{padding:11px;gap:5px}.intro-content h1{font-size:25px}.intro-content p{font-size:12px}.instruction-step{font-size:10px;padding:4px 7px}.instruction-step .step-icon{font-size:17px}.start-btn{min-height:28px;font-size:13px}.intro-caption{font-size:8px;bottom:9px}.intro-eyebrow{font-size:8px}
+}
+@media(prefers-reduced-motion:reduce){*,*:before,*:after{animation-duration:.01ms!important;transition-duration:.01ms!important}}
+</style>
 </head>
 <body>
+<div id="universe" aria-hidden="true"></div>
+<div id="app">
+ <header class="topbar">
+  <div class="brand"><div class="brand-mark">🤖</div><div><div class="brand-title">ASTRO-BOT <em>MINERÍA</em></div><div class="brand-sub">MISIÓN CRISTAL · SISTEMA AUTÓNOMO</div></div></div>
+  <div class="top-actions">
+   <div class="stat">💎 <b id="score-display">0/3</b></div>
+   <button class="small-btn" id="new-terrain" type="button" title="Generar otro terreno">↻ NUEVO MAPA</button>
+   <button class="small-btn icon-sound" id="soundToggle" aria-label="Activar o silenciar sonido" aria-pressed="false">🔇</button>
+  </div>
+ </header>
+ <main id="main">
+  <section class="panel map-panel" aria-label="Mapa de minería">
+   <div class="panel-head"><div><div class="eyebrow">01 / SECTOR DE EXTRACCIÓN</div><div class="panel-title">Terreno mineral</div></div><div class="mini-pill">▦ 8 × 8</div></div>
+   <div class="map-stage" id="map-stage"><div class="grid-container" id="grid"><div class="rover" id="rover" aria-label="Rover explorador"><svg viewBox="0 0 64 64" aria-hidden="true"><ellipse cx="32" cy="34" rx="24" ry="23" fill="#071f3a" stroke="#6edcf5" stroke-width="4"/><path d="M32 5 L48 23 L43 48 L21 48 L16 23 Z" fill="#55cce8" stroke="#b7f5ff" stroke-width="2"/><path d="M32 13 L40 27 L37 42 L27 42 L24 27 Z" fill="#173952"/><path d="M32 14L37 27H27Z" fill="#f8f6c9"/><circle cx="32" cy="35" r="6" fill="#9defff" stroke="#d1ffff" stroke-width="2"/><rect x="8" y="28" width="8" height="16" rx="3" fill="#d9e3f7"/><rect x="48" y="28" width="8" height="16" rx="3" fill="#d9e3f7"/><path class="rover-thruster" d="M27 51 L32 62 L37 51Z" fill="#ffc774"/></svg></div><div id="laser"></div><div id="drill-fx">⚙️</div></div><div id="explosion"></div></div>
+   <div class="map-footer"><div class="sensor">◉ SENSOR: <strong id="sensor-display">ESCANEANDO</strong></div><div class="legend"><span>🪨 Roca</span><span>🧊 Hielo</span><span>💎 Cristal</span></div></div>
+  </section>
+  <section class="panel brain-panel" aria-label="Editor de reglas de inteligencia artificial">
+   <div class="brain-head"><div><div class="eyebrow">02 / PROGRAMACIÓN</div><div class="panel-title">Cerebro del rover</div><div class="brain-sub">Las reglas se leen de arriba hacia abajo</div></div><div class="loop-tag">↻ MIENTRAS 💎 &lt; 3</div></div>
+   <div class="rules" id="rules-container">
+    <div class="rule" id="rule-1"><div class="rule-num">REGLA<strong>01</strong></div><div class="rule-logic"><label>SI DETECTA<select class="cond" id="cond-1"><option value="CRISTAL">💎 Cristal</option><option value="ROCA">🪨 Roca</option><option value="HIELO">🧊 Hielo</option><option value="MURO">🧱 Borde</option><option value="VACIO">🌌 Vacío</option></select></label><label>ENTONCES<select class="act" id="act-1"></select></label></div></div>
+    <div class="rule elseif" id="rule-2"><div class="rule-num">SINO SI<strong>02</strong></div><div class="rule-logic"><label>SI DETECTA<select class="cond" id="cond-2"><option value="ROCA">🪨 Roca</option><option value="HIELO">🧊 Hielo</option><option value="CRISTAL">💎 Cristal</option><option value="MURO">🧱 Borde</option><option value="VACIO">🌌 Vacío</option></select></label><label>ENTONCES<select class="act" id="act-2"></select></label></div></div>
+    <div class="rule elseif" id="rule-3"><div class="rule-num">SINO SI<strong>03</strong></div><div class="rule-logic"><label>SI DETECTA<select class="cond" id="cond-3"><option value="HIELO">🧊 Hielo</option><option value="ROCA">🪨 Roca</option><option value="MURO">🧱 Borde</option><option value="CRISTAL">💎 Cristal</option><option value="VACIO">🌌 Vacío</option></select></label><label>ENTONCES<select class="act" id="act-3"></select></label></div></div>
+    <div class="rule elseif" id="rule-4"><div class="rule-num">SINO SI<strong>04</strong></div><div class="rule-logic"><label>SI DETECTA<select class="cond" id="cond-4"><option value="MURO">🧱 Borde</option><option value="VACIO">🌌 Vacío</option><option value="ROCA">🪨 Roca</option><option value="HIELO">🧊 Hielo</option><option value="CRISTAL">💎 Cristal</option></select></label><label>ENTONCES<select class="act" id="act-4"></select></label></div></div>
+    <div class="rule else" id="rule-5"><div class="rule-num">SI NO<strong>05</strong></div><div class="rule-logic"><div class="always">EN OTRO CASO</div><label>ENTONCES<select class="act" id="act-5"></select></label></div></div>
+   </div>
+   <div class="status-bar" id="status-bar" aria-live="polite"><span class="status-dot"></span><span class="status-text" id="status-text">Sistema listo. Ajusta las reglas y comienza.</span></div>
+   <div class="controls"><button class="btn btn-secondary" id="retry-btn" type="button">↺ REINTENTAR</button><button class="btn btn-primary" id="run-btn" type="button">▶ COMPILAR Y EXPLORAR</button></div>
+  </section>
+ </main>
+</div>
+<div id="instructions-screen">
+ <div class="intro-card">
+  <div class="intro-art"><div class="planet"><svg viewBox="0 0 64 64" aria-hidden="true"><ellipse cx="32" cy="34" rx="24" ry="23" fill="#071f3a" stroke="#6edcf5" stroke-width="4"/><path d="M32 5 L48 23 L43 48 L21 48 L16 23 Z" fill="#55cce8" stroke="#b7f5ff" stroke-width="2"/><path d="M32 13 L40 27 L37 42 L27 42 L24 27 Z" fill="#173952"/><path d="M32 14L37 27H27Z" fill="#f8f6c9"/><circle cx="32" cy="35" r="6" fill="#9defff" stroke="#d1ffff" stroke-width="2"/><rect x="8" y="28" width="8" height="16" rx="3" fill="#d9e3f7"/><rect x="48" y="28" width="8" height="16" rx="3" fill="#d9e3f7"/><path d="M27 51 L32 62 L37 51Z" fill="#ffc774"/></svg></div><div class="intro-caption">PLANETA NEXUS · ESCÁNER ONLINE</div></div>
+  <div class="intro-content"><div class="intro-eyebrow">✦ MISIÓN 01 · EXTRACCIÓN AUTÓNOMA</div><h1>ASTRO-BOT<br><em>MINERÍA AUTÓNOMA</em></h1><p>Programa el cerebro del rover para que encuentre los tres cristales en un terreno repleto de obstáculos.</p>
+   <div class="instruction-step"><span class="step-icon">🪨</span><span><strong>Roca = taladro.</strong> El láser rebota y destruye el rover.</span></div>
+   <div class="instruction-step"><span class="step-icon">🧊</span><span><strong>Hielo = láser.</strong> El taladro resbala y provoca un accidente.</span></div>
+   <div class="instruction-step"><span class="step-icon">🧠</span><span><strong>Reglas con prioridad.</strong> Se ejecuta la primera condición que coincida. Recoge 💎 y evita chocar con el borde.</span></div>
+   <button type="button" class="start-btn" id="start-btn">🚀 INICIAR EXPEDICIÓN</button>
+  </div>
+ </div>
+</div>
+<div id="modal" role="dialog" aria-modal="true" aria-labelledby="m-title"><div class="modal-card"><span class="modal-icon" id="m-icon">🛰️</span><h2 id="m-title">Resultado</h2><p id="m-msg"></p><button class="btn btn-primary" id="m-btn" type="button">CONTINUAR</button></div></div>
+<audio id="bgm" loop><source src="../assets/musicaFondo/cancion1.mp3" type="audio/mpeg"></audio>
+<script>
+'use strict';
+const GRID_SIZE=8, CRYSTALS_TOTAL=3, MAX_STEPS=500;
+const materialNames={CRISTAL:'💎 Cristal',ROCA:'🪨 Roca',HIELO:'🧊 Hielo',MURO:'🧱 Borde',VACIO:'🌌 Vacío'};
+const actionLabels={COLLECT:'📥 Recoger y avanzar',DRILL:'⚙ Taladrar',LASER:'⚡ Disparar láser',TURN_RAND:'🔀 Girar al azar',TURN_R:'↪ Girar derecha',MOVE:'↑ Avanzar'};
+const actionOptions=['COLLECT','DRILL','LASER','TURN_RAND','TURN_R','MOVE'];
+const grid=document.getElementById('grid'),stage=document.getElementById('map-stage'),rover=document.getElementById('rover');
+const statusLine=document.getElementById('status-text'),statusBar=document.getElementById('status-bar');
+const runButton=document.getElementById('run-btn'),scoreDisplay=document.getElementById('score-display');
+const modal=document.getElementById('modal');
+let map=[], initialMap=[],bot={x:4,y:4,dir:0},crystalsCollected=0,runActive=false,runToken=0,executionSteps=0,modalCallback=null,isMuted=true,audioCtx=null;
+const audioCtor=window.AudioContext||window.webkitAudioContext;
+const bgm=document.getElementById('bgm');
 
-    <audio id="bgm" loop><source src="../assets/musicaFondo/cancion1.mp3" type="audio/mpeg"></audio>
-    <div class="decorations"><div class="grid-bg"></div><div class="scanlines"></div></div>
-    <button id="soundToggle" class="sound-toggle" aria-label="Activar sonido">🔇</button>
-
-    <!-- INSTRUCCIONES -->
-    <div id="instructions-screen">
-        <div class="instructions-card">
-            <h1>MINERÍA AUTÓNOMA</h1>
-            <div class="instruction-step">
-                <span class="instruction-icon">🚀</span>
-                <span class="instruction-text"><b>TERRENO HOSTIL:</b> El mapa está completamente saturado de obstáculos. Tu Rover debe abrirse paso a la fuerza para recolectar los 3 Cristales (💎).</span>
-            </div>
-            <div class="instruction-step">
-                <span class="instruction-icon">🛠️</span>
-                <span class="instruction-text"><b>HERRAMIENTAS CLAVE:</b>
-                <br>• Si hay <b>Roca (🪨)</b>, debes usar el <b>Taladro</b>. (El láser rebotará y te destruirá).
-                <br>• Si hay <b>Hielo (🧊)</b>, debes usar el <b>Láser</b>. (El taladro resbalará y te destruirá).</span>
-            </div>
-            <div class="instruction-step">
-                <span class="instruction-icon">🧠</span>
-                <span class="instruction-text"><b>EL CEREBRO (IA):</b> El robot leerá tus 5 reglas de <b>Arriba hacia Abajo</b> en cada paso. Programa sus prioridades lógicas para que nunca se quede atascado.</span>
-            </div>
-            <button class="start-btn" onclick="startGame()">ENCENDER SISTEMAS</button>
-        </div>
-    </div>
-
-    <!-- JUEGO -->
-    <div class="game-header">
-        <button class="back-menu-btn" onclick="generateLevel()">[ REESCANEAR TERRENO ]</button>
-        <div class="hud-box">CRISTALES: <span id="score-display">0/3</span></div>
-    </div>
-
-    <div class="main-layout">
-        
-        <!-- COLUMNA VISUAL (MAPA DENSO SATURADO 8x8) -->
-        <div class="map-column">
-            <div class="map-title">TERRENO SATURADO</div>
-            
-            <div class="grid-container" id="grid">
-                <div class="rover" id="rover">🚜</div>
-                <div class="laser-beam" id="laser"></div>
-                <div class="drill-effect" id="drill-fx">⚙️</div>
-                <!-- Celdas generadas por JS -->
-            </div>
-            <div class="explosion-overlay" id="explosion"></div>
-        </div>
-
-        <!-- COLUMNA DE CÓDIGO (CEREBRO) -->
-        <div class="code-column">
-            <div class="code-editor">
-                <div class="code-header">>_ CÓDIGO DE AUTONOMÍA DEL ROVER</div>
-                <div class="code-main-loop">MIENTRAS ( Cristales &lt; 3 ) HACER:</div>
-                
-                <!-- REGLA 1: IF -->
-                <div class="logic-block block-if" id="rule-1">
-                    <div class="block-header"><span class="kw">SI</span> detecta al frente:
-                        <select class="sel-cond" id="cond-1">
-                            <option value="CRISTAL" selected>💎 Cristal</option>
-                            <option value="ROCA">🪨 Roca Sólida</option>
-                            <option value="HIELO">🧊 Bloque de Hielo</option>
-                            <option value="MURO">🧱 Borde del Mapa</option>
-                            <option value="VACIO">🌌 Espacio Vacío</option>
-                        </select>
-                    </div>
-                    <div class="block-action">
-                        ENTONCES ➞ 
-                        <select class="sel-act" id="act-1">
-                            <option value="COLLECT" selected>📥 Recolectar (Y avanzar)</option>
-                            <option value="DRILL">💥 Usar Taladro</option>
-                            <option value="LASER">🔥 Disparar Láser</option>
-                            <option value="TURN_RAND">🔄 Girar al Azar</option>
-                            <option value="TURN_R">↪️ Girar Derecha</option>
-                            <option value="MOVE">⬆️ Avanzar</option>
-                        </select>
-                    </div>
-                </div>
-
-                <!-- REGLA 2: ELSE IF -->
-                <div class="logic-block block-elseif" id="rule-2">
-                    <div class="block-header"><span class="kw">SINO, SI</span> detecta al frente:
-                        <select class="sel-cond" id="cond-2">
-                            <option value="ROCA" selected>🪨 Roca Sólida</option>
-                            <option value="HIELO">🧊 Bloque de Hielo</option>
-                            <option value="CRISTAL">💎 Cristal</option>
-                            <option value="MURO">🧱 Borde del Mapa</option>
-                            <option value="VACIO">🌌 Espacio Vacío</option>
-                        </select>
-                    </div>
-                    <div class="block-action">
-                        ENTONCES ➞ 
-                        <select class="sel-act" id="act-2">
-                            <option value="DRILL" selected>💥 Usar Taladro</option>
-                            <option value="LASER">🔥 Disparar Láser</option>
-                            <option value="COLLECT">📥 Recolectar (Y avanzar)</option>
-                            <option value="TURN_RAND">🔄 Girar al Azar</option>
-                            <option value="TURN_R">↪️ Girar Derecha</option>
-                            <option value="MOVE">⬆️ Avanzar</option>
-                        </select>
-                    </div>
-                </div>
-
-                <!-- REGLA 3: ELSE IF -->
-                <div class="logic-block block-elseif" id="rule-3">
-                    <div class="block-header"><span class="kw">SINO, SI</span> detecta al frente:
-                        <select class="sel-cond" id="cond-3">
-                            <option value="HIELO" selected>🧊 Bloque de Hielo</option>
-                            <option value="ROCA">🪨 Roca Sólida</option>
-                            <option value="MURO">🧱 Borde del Mapa</option>
-                            <option value="CRISTAL">💎 Cristal</option>
-                            <option value="VACIO">🌌 Espacio Vacío</option>
-                        </select>
-                    </div>
-                    <div class="block-action">
-                        ENTONCES ➞ 
-                        <select class="sel-act" id="act-3">
-                            <option value="LASER" selected>🔥 Disparar Láser</option>
-                            <option value="DRILL">💥 Usar Taladro</option>
-                            <option value="TURN_RAND">🔄 Girar al Azar</option>
-                            <option value="COLLECT">📥 Recolectar (Y avanzar)</option>
-                            <option value="MOVE">⬆️ Avanzar</option>
-                        </select>
-                    </div>
-                </div>
-
-                <!-- REGLA 4: ELSE IF -->
-                <div class="logic-block block-elseif" id="rule-4">
-                    <div class="block-header"><span class="kw">SINO, SI</span> detecta al frente:
-                        <select class="sel-cond" id="cond-4">
-                            <option value="MURO" selected>🧱 Borde del Mapa</option>
-                            <option value="VACIO">🌌 Espacio Vacío</option>
-                            <option value="ROCA">🪨 Roca Sólida</option>
-                            <option value="HIELO">🧊 Bloque de Hielo</option>
-                            <option value="CRISTAL">💎 Cristal</option>
-                        </select>
-                    </div>
-                    <div class="block-action">
-                        ENTONCES ➞ 
-                        <select class="sel-act" id="act-4">
-                            <option value="TURN_RAND" selected>🔄 Girar al Azar</option>
-                            <option value="TURN_R">↪️ Girar Derecha</option>
-                            <option value="MOVE">⬆️ Avanzar</option>
-                            <option value="DRILL">💥 Usar Taladro</option>
-                            <option value="LASER">🔥 Disparar Láser</option>
-                        </select>
-                    </div>
-                </div>
-
-                <!-- REGLA 5: ELSE -->
-                <div class="logic-block block-else" id="rule-5">
-                    <div class="block-header"><span class="kw">EN CUALQUIER OTRO CASO</span> (Si está vacío):</div>
-                    <div class="block-action">
-                        ENTONCES ➞ 
-                        <select class="sel-act" id="act-5">
-                            <option value="MOVE" selected>⬆️ Avanzar</option>
-                            <option value="TURN_RAND">🔄 Girar al Azar</option>
-                            <option value="TURN_R">↪️ Girar Derecha</option>
-                            <option value="DRILL">💥 Usar Taladro</option>
-                            <option value="LASER">🔥 Disparar Láser</option>
-                        </select>
-                    </div>
-                </div>
-
-            </div>
-
-            <div class="console-panel" id="console">
-                <div class="console-header"><span>>_ TERMINAL DE EJECUCIÓN</span> <span id="cons-clear" style="cursor:pointer;" onclick="clearConsole()">[LIMPIAR]</span></div>
-                <div id="console-output">
-                    <div class="log-line">Sistemas listos. Configura las reglas y compila la IA.</div>
-                </div>
-            </div>
-
-            <button class="run-btn" id="run-btn" onclick="executeCode()">▶ COMPILAR E INICIAR IA</button>
-
-        </div>
-    </div>
-
-    <!-- MODAL -->
-    <div class="modal-overlay" id="modal">
-        <div class="modal-box">
-            <h2 class="modal-title" id="m-title">Título</h2>
-            <p class="modal-msg" id="m-msg">Mensaje</p>
-            <button class="start-btn" id="m-btn" onclick="closeModal()">CONTINUAR</button>
-        </div>
-    </div>
-
-    <script>
-        const AudioContext = window.AudioContext || window.webkitAudioContext;
-        let audioCtx; let isMuted = true;
-        const bgAudio = document.getElementById('bgm');
-        const soundToggle = document.getElementById('soundToggle');
-
-        soundToggle.addEventListener('click', () => {
-            if (!audioCtx) audioCtx = new AudioContext();
-            if (audioCtx.state === 'suspended') audioCtx.resume();
-            isMuted = !isMuted;
-            if(isMuted) { bgAudio.pause(); soundToggle.innerText = '🔇'; } 
-            else { bgAudio.volume = 0.25; bgAudio.play().catch(e=>e); soundToggle.innerText = '🔊'; }
-        });
-
-        function playTone(freq, type, duration, vol = 0.1) {
-            if (!audioCtx || isMuted) return;
-            const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain();
-            osc.type = type; osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
-            gain.gain.setValueAtTime(vol, audioCtx.currentTime); gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + duration);
-            osc.connect(gain); gain.connect(audioCtx.destination); osc.start(); osc.stop(audioCtx.currentTime + duration);
-        }
-        function playNoise(duration, vol) {
-            if (!audioCtx || isMuted) return;
-            const bufferSize = audioCtx.sampleRate * duration; const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate); const data = buffer.getChannelData(0);
-            for (let i = 0; i < bufferSize; i++) data[i] = Math.random() * 2 - 1;
-            const noise = audioCtx.createBufferSource(); noise.buffer = buffer;
-            const gain = audioCtx.createGain(); gain.gain.setValueAtTime(vol, audioCtx.currentTime); gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + duration);
-            const filter = audioCtx.createBiquadFilter(); filter.type = 'lowpass'; filter.frequency.value = 800;
-            noise.connect(filter); filter.connect(gain); gain.connect(audioCtx.destination); noise.start();
-        }
-
-        function sfxClick() { playTone(600, 'square', 0.05, 0.05); }
-        function sfxMove() { playTone(200, 'sine', 0.1, 0.05); }
-        function sfxTurn() { playTone(400, 'triangle', 0.1, 0.05); }
-        function sfxDrill() { playNoise(0.3, 0.1); playTone(100, 'triangle', 0.3, 0.1); }
-        function sfxLaser() { playTone(1200, 'sawtooth', 0.1, 0.1); setTimeout(()=>playTone(800, 'sawtooth', 0.1, 0.1), 50); }
-        function sfxExplosion() { playNoise(0.8, 0.3); playTone(80, 'sawtooth', 0.8, 0.3); }
-        function sfxExtract() { playTone(900, 'sine', 0.1, 0.1); setTimeout(()=>playTone(1200, 'sine', 0.2, 0.1), 100); }
-        function sfxError() { playTone(200, 'square', 0.3, 0.2); }
-        function sfxWin() { [523.25, 659.25, 783.99, 1046.50].forEach((f, i) => setTimeout(() => playTone(f, 'square', 0.15, 0.1), i * 150)); }
-
-        document.querySelectorAll('select').forEach(sel => sel.addEventListener('change', sfxClick));
-
-        // ESTADO DEL JUEGO
-        const GRID_SIZE = 8;
-        let map = []; // 0: Vacio (solo por donde ya pasó), 2: Roca, 3: Cristal, 4: Hielo
-        let bot = { x: 3, y: 3, dir: 0 }; 
-        let isRunning = false;
-        let crystalsCollected = 0;
-        let executionSteps = 0;
-
-        function logConsole(msg, type = 'log-line') {
-            let out = document.getElementById('console-output');
-            let p = document.createElement('div');
-            p.className = `log-line ${type}`;
-            p.innerText = msg;
-            out.appendChild(p);
-            out.parentElement.scrollTop = out.parentElement.scrollHeight;
-        }
-        function clearConsole() { document.getElementById('console-output').innerHTML = ''; }
-
-        function startGame() {
-            if (!audioCtx && !isMuted) { audioCtx = new AudioContext(); bgAudio.play().catch(e=>e); }
-            sfxClick();
-            document.getElementById('instructions-screen').style.display = 'none';
-            generateLevel();
-        }
-
-        // GENERADOR DE MAPAS TOTALMENTE SATURADO
-        function generateLevel() {
-            if (isRunning) return;
-            map = Array(GRID_SIZE).fill().map(() => Array(GRID_SIZE).fill(0));
-            bot = { x: Math.floor(GRID_SIZE/2), y: Math.floor(GRID_SIZE/2), dir: 0 };
-            crystalsCollected = 0;
-            document.getElementById('score-display').innerText = `0/3`;
-            
-            // Colocar 3 cristales aleatoriamente (no en la posición del bot)
-            let crystalCount = 0;
-            while(crystalCount < 3) {
-                let rx = Math.floor(Math.random() * GRID_SIZE);
-                let ry = Math.floor(Math.random() * GRID_SIZE);
-                if ((rx !== bot.x || ry !== bot.y) && map[ry][rx] === 0) {
-                    map[ry][rx] = 3; 
-                    crystalCount++;
-                }
-            }
-
-            // LLENAR ABSOLUTAMENTE TODAS LAS CASILLAS RESTANTES
-            for(let y=0; y<GRID_SIZE; y++) {
-                for(let x=0; x<GRID_SIZE; x++) {
-                    // Solo evitamos sobreescribir los cristales (3) y donde empieza el bot
-                    if (map[y][x] === 0 && (x !== bot.x || y !== bot.y)) {
-                        // 50% Roca, 50% Hielo - Ningún espacio libre
-                        map[y][x] = Math.random() > 0.5 ? 2 : 4; 
-                    }
-                }
-            }
-
-            renderMap();
-            updateRoverVisuals(true);
-            logConsole("> Nuevo sector minero escaneado. Terreno densamente saturado.", "log-info");
-        }
-
-        function renderMap() {
-            let grid = document.getElementById('grid');
-            Array.from(grid.children).forEach(c => { if(c.id !== 'rover' && c.id !== 'laser' && c.id !== 'drill-fx') c.remove(); });
-
-            for(let y=0; y<GRID_SIZE; y++) {
-                for(let x=0; x<GRID_SIZE; x++) {
-                    let cell = document.createElement('div');
-                    cell.className = 'cell';
-                    if(map[y][x] === 2) cell.classList.add('mat-rock');
-                    else if(map[y][x] === 3) cell.classList.add('mat-crystal');
-                    else if(map[y][x] === 4) cell.classList.add('mat-ice');
-                    cell.id = `cell-${x}-${y}`;
-                    grid.appendChild(cell);
-                }
-            }
-        }
-
-        function updateRoverVisuals(instant = false) {
-            let rover = document.getElementById('rover');
-            let cell = document.getElementById(`cell-${bot.x}-${bot.y}`);
-            if(cell) {
-                let rect = cell.getBoundingClientRect();
-                let gridRect = document.getElementById('grid').getBoundingClientRect();
-                
-                let left = rect.left - gridRect.left; 
-                let top = rect.top - gridRect.top;
-
-                rover.style.transition = instant ? 'none' : 'all 0.15s linear';
-                rover.style.left = `${left}px`;
-                rover.style.top = `${top}px`;
-                rover.style.width = `${rect.width}px`;
-                rover.style.height = `${rect.height}px`;
-                
-                let rot = bot.dir * 90;
-                rover.style.transform = `rotate(${rot}deg)`;
-            }
-        }
-
-        function sleep(ms) { return new Promise(resolve => setTimeout(resolve, ms)); }
-
-        // --- SISTEMA CEREBRAL (IA) ---
-        
-        function getSensorFront() {
-            let nx = bot.x; let ny = bot.y;
-            if (bot.dir === 0) ny--; else if (bot.dir === 1) nx++; else if (bot.dir === 2) ny++; else if (bot.dir === 3) nx--;
-            
-            if (nx < 0 || nx >= GRID_SIZE || ny < 0 || ny >= GRID_SIZE) return 'MURO'; 
-            
-            let val = map[ny][nx];
-            if (val === 2) return 'ROCA';
-            if (val === 3) return 'CRISTAL';
-            if (val === 4) return 'HIELO';
-            return 'VACIO';
-        }
-
-        async function executeCode() {
-            if (isRunning) return;
-            sfxClick();
-            clearConsole();
-            isRunning = true;
-            document.getElementById('run-btn').disabled = true;
-            executionSteps = 0;
-
-            generateLevel(); 
-            await sleep(500);
-
-            logConsole("> Iniciando Bucle Principal de IA...", "log-info");
-            
-            while (crystalsCollected < 3 && isRunning) {
-                if (executionSteps > 300) {
-                    triggerExplosion("BUCLE INFINITO DETECTADO.\n\nEl robot ejecutó 300 pasos sin recolectar todo. Asegúrate de incluir la regla de 'Girar al Azar' en los Muros para que el robot explore todo el mapa.");
-                    return;
-                }
-
-                let front = getSensorFront();
-
-                let c1 = document.getElementById('cond-1').value;
-                let c2 = document.getElementById('cond-2').value;
-                let c3 = document.getElementById('cond-3').value;
-                let c4 = document.getElementById('cond-4').value;
-                
-                let act = null;
-                let ruleFired = 0;
-
-                // Evaluación Top-Down
-                if (front === c1) { act = document.getElementById('act-1').value; ruleFired = 1; }
-                else if (front === c2) { act = document.getElementById('act-2').value; ruleFired = 2; }
-                else if (front === c3) { act = document.getElementById('act-3').value; ruleFired = 3; }
-                else if (front === c4) { act = document.getElementById('act-4').value; ruleFired = 4; }
-                else { act = document.getElementById('act-5').value; ruleFired = 5; } 
-
-                document.querySelectorAll('.logic-block').forEach(b => b.classList.remove('executing'));
-                document.getElementById(`rule-${ruleFired}`).classList.add('executing');
-
-                if (executionSteps % 10 === 0) {
-                    logConsole(`> Bucle ${executionSteps}: Sensor detecta [${front}]. Ejecutando Regla ${ruleFired} -> ${act}`);
-                }
-                
-                let res = await executeAction(act);
-                if (res === 'FATAL') return; 
-                
-                executionSteps++;
-                await sleep(80); 
-            }
-
-            if(crystalsCollected === 3) {
-                sfxWin();
-                document.querySelectorAll('.logic-block').forEach(b => b.classList.remove('executing'));
-                document.getElementById('m-title').style.color = "var(--neon-cyan)";
-                showModal("¡MISIÓN COMPLETADA! 🏆", "Tu Inteligencia Artificial funciona a la perfección.\nHas limpiado el terreno saturado de forma totalmente autónoma.\n\nPreparando siguiente sector...", () => {
-                    isRunning = false;
-                    document.getElementById('run-btn').disabled = false;
-                    generateLevel();
-                });
-            }
-        }
-
-        async function executeAction(act) {
-            if (act === 'MOVE') {
-                let nx = bot.x; let ny = bot.y;
-                if (bot.dir === 0) ny--; else if (bot.dir === 1) nx++; else if (bot.dir === 2) ny++; else if (bot.dir === 3) nx--;
-                
-                if (nx < 0 || nx >= GRID_SIZE || ny < 0 || ny >= GRID_SIZE) {
-                    triggerExplosion("EL ROVER SE ESTRELLÓ CONTRA EL BORDE DEL MAPA.\n\nOlvidaste programarle qué hacer si ve un 'Muro'. Deberías decirle que gire.");
-                    return 'FATAL';
-                }
-                if (map[ny][nx] !== 0 && map[ny][nx] !== 3) {
-                    triggerExplosion("EL ROVER CHOCÓ CONTRA UN OBSTÁCULO.\n\nAvanzaste sobre un bloque sólido. Asegúrate de destruirlo antes de avanzar.");
-                    return 'FATAL';
-                }
-                
-                sfxMove();
-                bot.x = nx; bot.y = ny;
-                updateRoverVisuals();
-                return 'OK';
-            } 
-            else if (act === 'TURN_L') { sfxTurn(); bot.dir = (bot.dir + 3) % 4; updateRoverVisuals(); return 'OK'; }
-            else if (act === 'TURN_R') { sfxTurn(); bot.dir = (bot.dir + 1) % 4; updateRoverVisuals(); return 'OK'; }
-            else if (act === 'TURN_RAND') { 
-                sfxTurn(); 
-                bot.dir = (bot.dir + [1, 2, 3][Math.floor(Math.random()*3)]) % 4; 
-                updateRoverVisuals(); 
-                return 'OK'; 
-            }
-            else if (act === 'DRILL') {
-                let nx = bot.x; let ny = bot.y;
-                if (bot.dir === 0) ny--; else if (bot.dir === 1) nx++; else if (bot.dir === 2) ny++; else if (bot.dir === 3) nx--;
-
-                sfxDrill();
-                let drillFx = document.getElementById('drill-fx');
-                let cellNext = document.getElementById(`cell-${nx}-${ny}`);
-                
-                if (cellNext) {
-                    let rRect = document.getElementById('rover').getBoundingClientRect();
-                    let cRect = document.getElementById('grid').getBoundingClientRect();
-                    
-                    drillFx.style.left = `${rRect.left - cRect.left + rRect.width/2 - 15}px`;
-                    drillFx.style.top = `${rRect.top - cRect.top + rRect.height/2 - 15}px`;
-                    
-                    if(bot.dir===0) drillFx.style.top = `${rRect.top - cRect.top - 15}px`;
-                    if(bot.dir===1) drillFx.style.left = `${rRect.right - cRect.left - 15}px`;
-                    if(bot.dir===2) drillFx.style.top = `${rRect.bottom - cRect.top - 15}px`;
-                    if(bot.dir===3) drillFx.style.left = `${rRect.left - cRect.left - 15}px`;
-
-                    drillFx.classList.remove('anim-drill');
-                    void drillFx.offsetWidth; 
-                    drillFx.classList.add('anim-drill');
-                }
-
-                await sleep(150); 
-
-                if (nx >= 0 && nx < GRID_SIZE && ny >= 0 && ny < GRID_SIZE) {
-                    if (map[ny][nx] === 2) {
-                        map[ny][nx] = 0; 
-                        cellNext.className = 'cell'; 
-                    } else if (map[ny][nx] === 4) {
-                        triggerExplosion("EL TALADRO RESBALÓ EN EL HIELO.\nEl Rover se descontroló y volcó.\n(Para el Hielo debes usar el Láser).");
-                        return 'FATAL';
-                    }
-                }
-                return 'OK';
-            }
-            else if (act === 'LASER') {
-                sfxLaser();
-                
-                let nx = bot.x; let ny = bot.y;
-                if (bot.dir === 0) ny--; else if (bot.dir === 1) nx++; else if (bot.dir === 2) ny++; else if (bot.dir === 3) nx--;
-
-                let laser = document.getElementById('laser');
-                let cellNext = document.getElementById(`cell-${nx}-${ny}`);
-                
-                if (cellNext) {
-                    let rRect = document.getElementById('rover').getBoundingClientRect();
-                    let nRect = cellNext.getBoundingClientRect();
-                    let cRect = document.getElementById('grid').getBoundingClientRect();
-                    
-                    let lw = 6, lh = nRect.height;
-                    if(bot.dir === 1 || bot.dir === 3) { lw = nRect.width; lh = 6; }
-                    
-                    laser.style.width = `${lw}px`; laser.style.height = `${lh}px`;
-                    let lx = rRect.left - cRect.left + rRect.width/2 - lw/2;
-                    let ly = rRect.top - cRect.top + rRect.height/2 - lh/2;
-                    
-                    if (bot.dir === 0) { ly -= nRect.height; }
-                    else if (bot.dir === 1) { lx += rRect.width/2; }
-                    else if (bot.dir === 2) { ly += rRect.height/2; }
-                    else if (bot.dir === 3) { lx -= nRect.width; }
-
-                    laser.style.left = `${lx}px`; laser.style.top = `${ly}px`;
-                    laser.style.opacity = '1';
-                    setTimeout(() => laser.style.opacity = '0', 150);
-
-                    if (map[ny][nx] === 4) {
-                        map[ny][nx] = 0; 
-                        cellNext.className = 'cell'; 
-                    } else if (map[ny][nx] === 2) {
-                        triggerExplosion("EL LÁSER REBOTÓ EN LA ROCA SÓLIDA.\nEl rayo regresó y frió los circuitos del Rover.\n(Para la Roca debes usar el Taladro).");
-                        return 'FATAL';
-                    }
-                }
-                return 'OK';
-            }
-            else if (act === 'COLLECT') {
-                let nx = bot.x; let ny = bot.y;
-                if (bot.dir === 0) ny--; else if (bot.dir === 1) nx++; else if (bot.dir === 2) ny++; else if (bot.dir === 3) nx--;
-
-                if (nx >= 0 && nx < GRID_SIZE && ny >= 0 && ny < GRID_SIZE && map[ny][nx] === 3) {
-                    sfxExtract();
-                    map[ny][nx] = 0; 
-                    document.getElementById(`cell-${nx}-${ny}`).className = 'cell'; 
-                    
-                    bot.x = nx; bot.y = ny;
-                    updateRoverVisuals();
-                    
-                    crystalsCollected++;
-                    document.getElementById('score-display').innerText = `${crystalsCollected}/3`;
-                    return 'OK';
-                } else {
-                    triggerExplosion("INTENTASTE RECOLECTAR BASURA.\n\nEl brazo robótico se atascó con chatarra o golpeó un muro. Asegúrate de pedirle que recolecte SOLO cuando detecte un Cristal.");
-                    return 'FATAL';
-                }
-            }
-        }
-
-        function triggerExplosion(reason) {
-            sfxExplosion();
-            logConsole("> ERROR CRÍTICO. SISTEMAS DESTRUIDOS.", "log-err");
-            
-            document.querySelectorAll('.logic-block').forEach(b => b.classList.remove('executing'));
-            let mapCol = document.querySelector('.map-column');
-            mapCol.classList.add('shake');
-            document.getElementById('explosion').style.opacity = '0.8';
-            
-            setTimeout(() => {
-                mapCol.classList.remove('shake');
-                document.getElementById('explosion').style.opacity = '0';
-                document.getElementById('m-title').style.color = "var(--danger)";
-                showModal("ROVER DESTRUIDO 💥", `${reason}\n\nRevisa el orden y la lógica de tus reglas (Prioridad Arriba-Abajo) e inténtalo de nuevo.`, resetRover);
-            }, 500);
-        }
-
-        function resetRover() {
-            isRunning = false;
-            document.getElementById('run-btn').disabled = false;
-            clearConsole();
-            generateLevel(); 
-        }
-
-        let modalCallback = null;
-        function showModal(title, msg, callback = null) { 
-            document.getElementById('m-title').innerText = title; 
-            document.getElementById('m-msg').innerText = msg; 
-            document.getElementById('modal').classList.add('active'); 
-            modalCallback = callback; 
-        }
-        function closeModal() { 
-            sfxClick(); 
-            document.getElementById('modal').classList.remove('active'); 
-            if(modalCallback) { modalCallback(); modalCallback = null; } 
-        }
-
-        window.addEventListener('resize', () => { if(!isRunning) updateRoverVisuals(true); });
-    </script>
+function tone(freq,duration=.10,type='sine',volume=.055,offset=0){if(isMuted||!audioCtor)return;try{audioCtx??=new audioCtor();audioCtx.resume();const osc=audioCtx.createOscillator(),gain=audioCtx.createGain(),time=audioCtx.currentTime+offset;osc.type=type;osc.frequency.setValueAtTime(freq,time);gain.gain.setValueAtTime(volume,time);gain.gain.exponentialRampToValueAtTime(.001,time+duration);osc.connect(gain);gain.connect(audioCtx.destination);osc.start(time);osc.stop(time+duration+.01)}catch(e){}}
+function sounds(type){if(type==='pick'){tone(730,.13);tone(1050,.24,'sine',.07,.08)}else if(type==='drill'){tone(125,.13,'sawtooth',.06)}else if(type==='laser'){tone(1150,.16,'sawtooth',.05);tone(560,.14,'sine',.04,.07)}else if(type==='fail'){tone(210,.22,'sawtooth');tone(120,.28,'sawtooth',.06,.13)}else if(type==='win'){[523,659,784,1046].forEach((n,i)=>tone(n,.28,'sine',.07,i*.12))}else if(type==='turn')tone(420,.07);else tone(450,.05)}
+document.getElementById('soundToggle').addEventListener('click',async()=>{isMuted=!isMuted;const b=document.getElementById('soundToggle');b.textContent=isMuted?'🔇':'🔊';b.setAttribute('aria-pressed',String(!isMuted));if(isMuted)bgm.pause();else{try{await bgm.play()}catch(e){/* audio file is optional */}sounds('click')}});
+function updateStatus(text,kind=''){statusLine.textContent=text;statusBar.className='status-bar'+(kind?' '+kind:'')}
+function setScore(){scoreDisplay.textContent=crystalsCollected+'/'+CRYSTALS_TOTAL}
+function fillActions(){const defaults=['COLLECT','DRILL','LASER','TURN_RAND','MOVE'];for(let i=1;i<=5;i++){const select=document.getElementById('act-'+i);for(const key of actionOptions){const option=document.createElement('option');option.value=key;option.textContent=actionLabels[key];select.appendChild(option)}select.value=defaults[i-1];select.addEventListener('change',()=>{sounds('turn');updateStatus('Regla '+i+' actualizada: '+actionLabels[select.value])})}for(let i=1;i<=4;i++)document.getElementById('cond-'+i).addEventListener('change',()=>{sounds('turn');updateStatus('Condición de la regla '+i+' actualizada')})}
+function sensor(){const dir=[[0,-1],[1,0],[0,1],[-1,0]][bot.dir];const nx=bot.x+dir[0],ny=bot.y+dir[1];if(nx<0||nx>=GRID_SIZE||ny<0||ny>=GRID_SIZE)return{type:'MURO',x:nx,y:ny};const val=map[ny][nx];return{type:val===2?'ROCA':val===3?'CRISTAL':val===4?'HIELO':'VACIO',x:nx,y:ny}}
+function refreshSensor(){const s=sensor();document.getElementById('sensor-display').textContent=materialNames[s.type];const target=document.querySelector('.cell.targeting');target?.classList.remove('targeting');const cell=document.getElementById('cell-'+s.x+'-'+s.y);if(cell)cell.classList.add('targeting')}
+function copyMap(arr){return arr.map(row=>[...row])}
+function createMap(){map=Array.from({length:GRID_SIZE},()=>Array(GRID_SIZE).fill(0));const center={x:4,y:4};let created=0;while(created<CRYSTALS_TOTAL){const x=Math.floor(Math.random()*GRID_SIZE),y=Math.floor(Math.random()*GRID_SIZE);if((x!==center.x||y!==center.y)&&map[y][x]===0){map[y][x]=3;created++}}for(let y=0;y<GRID_SIZE;y++)for(let x=0;x<GRID_SIZE;x++){if(map[y][x]===0&&(x!==center.x||y!==center.y))map[y][x]=Math.random()<.5?2:4}initialMap=copyMap(map)}
+function clearFx(){document.getElementById('laser').style.opacity='0';document.getElementById('drill-fx').classList.remove('anim-drill');document.getElementById('explosion').style.opacity='0'}
+function stopRun(){runToken++;runActive=false;runButton.classList.remove('running');runButton.textContent='▶ COMPILAR Y EXPLORAR';document.querySelectorAll('.logic-block,.rule').forEach(el=>el.classList.remove('active','invalid'));document.querySelectorAll('.cond,.act').forEach(el=>el.disabled=false);clearFx()}
+function renderMap(){Array.from(grid.querySelectorAll('.cell,.spark')).forEach(n=>n.remove());const frag=document.createDocumentFragment();for(let y=0;y<GRID_SIZE;y++)for(let x=0;x<GRID_SIZE;x++){const div=document.createElement('div');div.id='cell-'+x+'-'+y;div.className='cell';const val=map[y][x];if(val===2)div.classList.add('mat-rock');else if(val===4)div.classList.add('mat-ice');else if(val===3)div.classList.add('mat-crystal');frag.appendChild(div)}grid.appendChild(frag);placeRover(true);refreshSensor()}
+function placeRover(instant=false){const cell=document.getElementById('cell-'+bot.x+'-'+bot.y);if(!cell)return;const cr=cell.getBoundingClientRect(),gr=grid.getBoundingClientRect();rover.style.transition=instant?'none':'left .19s ease,top .19s ease,transform .21s ease';rover.style.width=cr.width+'px';rover.style.height=cr.height+'px';rover.style.left=(cr.left-gr.left)+'px';rover.style.top=(cr.top-gr.top)+'px';rover.style.transform='rotate('+(bot.dir*90)+'deg)';refreshSensor()}
+function resetSame(){stopRun();map=copyMap(initialMap);bot={x:4,y:4,dir:0};crystalsCollected=0;executionSteps=0;setScore();clearFx();renderMap();updateStatus('Mismo terreno restaurado. Ajusta las reglas y vuelve a probar.');sounds('turn')}
+function generateLevel(){stopRun();createMap();map=copyMap(initialMap);bot={x:4,y:4,dir:0};crystalsCollected=0;executionSteps=0;setScore();renderMap();updateStatus('Terreno nuevo escaneado. Tienes 3 cristales por recoger.');sounds('turn')}
+function sizeGrid(){const w=stage.clientWidth-12,h=stage.clientHeight-12;if(w<30||h<30)return;const size=Math.max(90,Math.min(w,h,680));grid.style.width=size+'px';grid.style.height=size+'px';grid.style.setProperty('--cell-font',Math.max(10,Math.min(30,(size-32)/8*.61))+'px');placeRover(true)}
+const resizeObserver=new ResizeObserver(sizeGrid);resizeObserver.observe(stage);window.addEventListener('resize',sizeGrid);
+function animateSparks(x,y,color){const cell=document.getElementById('cell-'+x+'-'+y);if(!cell)return;const g=grid.getBoundingClientRect(),c=cell.getBoundingClientRect();for(let i=0;i<8;i++){const p=document.createElement('div');p.className='spark';p.style.left=(c.left-g.left+c.width/2)+'px';p.style.top=(c.top-g.top+c.height/2)+'px';p.style.setProperty('--spark-color',color);const a=i*Math.PI/4,d=c.width*(.45+Math.random()*.35);p.style.setProperty('--dx',Math.cos(a)*d+'px');p.style.setProperty('--dy',Math.sin(a)*d+'px');grid.appendChild(p);setTimeout(()=>p.remove(),550)}}
+function effectAt(x,y,type){const cell=document.getElementById('cell-'+x+'-'+y);if(!cell)return;const gr=grid.getBoundingClientRect(),cr=cell.getBoundingClientRect();if(type==='drill'){const fx=document.getElementById('drill-fx');fx.style.left=(cr.left-gr.left+cr.width*.2)+'px';fx.style.top=(cr.top-gr.top+cr.height*.08)+'px';fx.classList.remove('anim-drill');void fx.offsetWidth;fx.classList.add('anim-drill')}else{const beam=document.getElementById('laser');const vertical=bot.dir===0||bot.dir===2;beam.style.left=(cr.left-gr.left+(vertical?cr.width*.43:cr.width*.10))+'px';beam.style.top=(cr.top-gr.top+(vertical?cr.height*.10:cr.height*.43))+'px';beam.style.width=(vertical?Math.max(3,cr.width*.14):cr.width*.8)+'px';beam.style.height=(vertical?cr.height*.8:Math.max(3,cr.height*.14))+'px';beam.style.opacity='1';setTimeout(()=>beam.style.opacity='0',160)}}
+function delay(ms){return new Promise(resolve=>setTimeout(resolve,ms))}
+async function doAction(action,s,token){if(action==='TURN_R'){bot.dir=(bot.dir+1)%4;placeRover();sounds('turn');return true}if(action==='TURN_RAND'){bot.dir=(bot.dir+[1,2,3][Math.floor(Math.random()*3)])%4;placeRover();sounds('turn');return true}
+ if(action==='MOVE'){if(s.type==='MURO')return failure('COLISIÓN CONTRA EL BORDE','El rover intentó salir del mapa. Programa una regla para girar cuando detecte el borde.',token);if(s.type==='ROCA'||s.type==='HIELO')return failure('OBSTÁCULO SIN DESTRUIR','El rover intentó avanzar sobre un bloque sólido. Usa primero la herramienta correcta.',token);bot.x=s.x;bot.y=s.y;placeRover();sounds('turn');return true}
+ if(action==='COLLECT'){if(s.type!=='CRISTAL')return failure('RECOLECCIÓN INCORRECTA','Solo puedes recoger cuando el sensor frontal detecta un cristal.',token);bot.x=s.x;bot.y=s.y;map[s.y][s.x]=0;document.getElementById('cell-'+s.x+'-'+s.y).className='cell recent';crystalsCollected++;setScore();placeRover();sounds('pick');animateSparks(s.x,s.y,'#c49aff');updateStatus('💎 Cristal recuperado · '+crystalsCollected+'/3','success');return true}
+ if(action==='DRILL'||action==='LASER'){effectAt(s.x,s.y,action==='DRILL'?'drill':'laser');sounds(action==='DRILL'?'drill':'laser');if(action==='DRILL'&&s.type==='HIELO')return failure('TALADRO SOBRE HIELO','El taladro resbaló. Para romper hielo debes usar el láser.',token);if(action==='LASER'&&s.type==='ROCA')return failure('LÁSER SOBRE ROCA','El láser rebotó. Para destruir roca debes usar el taladro.',token);if((action==='DRILL'&&s.type==='ROCA')||(action==='LASER'&&s.type==='HIELO')){map[s.y][s.x]=0;const cell=document.getElementById('cell-'+s.x+'-'+s.y);cell.className='cell recent';animateSparks(s.x,s.y,action==='DRILL'?'#ffcf79':'#8befff');refreshSensor();updateStatus((action==='DRILL'?'⚙ Roca perforada':'⚡ Hielo fundido')+'. Espacio despejado.');return true}updateStatus('Herramienta activada sin material compatible.');return true}
+ return true}
+function showModal(title,message,icon,callback){modalCallback=callback||null;document.getElementById('m-title').textContent=title;document.getElementById('m-msg').textContent=message;document.getElementById('m-icon').textContent=icon;modal.classList.add('active')}
+function failure(title,message,token){if(token!==runToken)return false;stopRun();sounds('fail');document.getElementById('explosion').style.opacity='.65';stage.classList.remove('shake');void stage.offsetWidth;stage.classList.add('shake');setTimeout(()=>{document.getElementById('explosion').style.opacity='0';stage.classList.remove('shake')},380);updateStatus(title,'error');showModal(title,message+'\nPuedes reintentar exactamente el mismo terreno.','💥',resetSame);return false}
+async function executeCode(){if(runActive){stopRun();updateStatus('Simulación detenida. Puedes reintentar o editar las reglas.');return}if(modal.classList.contains('active'))return;stopRun();runActive=true;const token=runToken;runButton.classList.add('running');runButton.textContent='■ DETENER SIMULACIÓN';document.querySelectorAll('.cond,.act').forEach(el=>el.disabled=true);executionSteps=0;updateStatus('IA iniciada. Evaluando sensores y prioridades.');sounds('turn');while(runActive&&token===runToken&&crystalsCollected<CRYSTALS_TOTAL){if(executionSteps>=MAX_STEPS){failure('LÍMITE DE CICLOS','La IA ejecutó '+MAX_STEPS+' instrucciones sin recoger todos los cristales. Revisa las prioridades y los giros.',token);return}const s=sensor();let fired=5;for(let i=1;i<=4;i++){if(s.type===document.getElementById('cond-'+i).value){fired=i;break}}document.querySelectorAll('.rule').forEach(el=>el.classList.remove('active'));document.getElementById('rule-'+fired).classList.add('active');const action=document.getElementById('act-'+fired).value;if(executionSteps%5===0)updateStatus('Ciclo '+(executionSteps+1)+' · '+materialNames[s.type]+' → Regla '+fired+' → '+actionLabels[action]);const good=await doAction(action,s,token);if(!good||token!==runToken||!runActive)return;executionSteps++;await delay(115);if(token!==runToken)return}
+ if(token!==runToken)return;if(crystalsCollected===CRYSTALS_TOTAL){stopRun();sounds('win');updateStatus('¡Misión completada! Tres cristales recuperados.','success');showModal('¡EXTRACCIÓN COMPLETA!','Tu IA ha encontrado y recogido los tres cristales.\n¡Puedes explorar un nuevo terreno!','🏆',generateLevel)}}
+function closeModal(){modal.classList.remove('active');const cb=modalCallback;modalCallback=null;cb?.()}
+fillActions();generateLevel();sizeGrid();
+document.getElementById('start-btn').addEventListener('click',()=>{document.getElementById('instructions-screen').classList.add('hidden');sizeGrid();sounds('turn')});
+document.getElementById('new-terrain').addEventListener('click',()=>{modal.classList.remove('active');generateLevel()});
+document.getElementById('retry-btn').addEventListener('click',()=>{modal.classList.remove('active');resetSame()});
+document.getElementById('run-btn').addEventListener('click',executeCode);
+document.getElementById('m-btn').addEventListener('click',closeModal);
+</script>
 </body>
 </html>

@@ -1,118 +1,96 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>¡Palabras con la Abejita! 🐝</title>
-    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&display=swap" rel="stylesheet">
-    
-    <style>
-        :root { --p1-main: #3498db; --p1-dark: #2980b9; --p1-light: #d6eaf8; --grid-bg: #8d6e63; }
-        body { font-family: 'Fredoka', sans-serif; display: flex; flex-direction: column; align-items: center; margin: 0; padding: 10px; min-height: 100vh; touch-action: none; color: #333; background-color: transparent; }
-        
-        .decorations { position: fixed; top: 0; left: 0; right: 0; bottom: 0; z-index: -1; pointer-events: none; overflow: hidden; background: linear-gradient(180deg, #74ebd5 0%, #ACB6E5 100%); }
-        .decorations::before { content: ''; position: absolute; inset: 0; background-image: url("data:image/svg+xml,%3Csvg width='60' height='104' viewBox='0 0 60 104' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M30 52l15-26 15 26v52l-15 26-15-26zM0 0l15 26v52L0 104V0zm60 0v104L45 78V26z' fill='%23ffffff' fill-opacity='0.15' fill-rule='evenodd'/%3E%3C/svg%3E"); z-index: 1; }
-        .sun { position: absolute; top: 3%; right: 5%; font-size: 70px; z-index: 2; filter: drop-shadow(0 0 25px rgba(255, 215, 0, 0.8)); animation: pulse-sun 3s infinite alternate; }
-        @keyframes pulse-sun { 0% { transform: scale(1) rotate(0deg); } 100% { transform: scale(1.1) rotate(10deg); } }
-        .cloud { position: absolute; font-size: 60px; opacity: 0.8; z-index: 2; filter: drop-shadow(0 5px 15px rgba(255,255,255,0.5)); }
-        .c1 { top: 8%; left: -20%; animation: drift 35s linear infinite; } .c2 { top: 20%; left: -20%; animation: drift 45s linear infinite 15s; font-size: 45px;} .c3 { top: 5%; left: -20%; animation: drift 55s linear infinite 25s; font-size: 80px;}
-        @keyframes drift { 0% { transform: translateX(-20vw); } 100% { transform: translateX(120vw); } }
-        .grass { position: absolute; bottom: -5vh; left: -10vw; width: 120vw; height: 25vh; background: #a9dfbf; border-radius: 50% 50% 0 0; z-index: 2; box-shadow: inset 0 15px 0 #82e0aa, 0 -30px 50px rgba(46,204,113,0.3); }
-
-        h1 { color: #2c3e50; margin: 0px 0 5px 0; text-align: center; font-size: 26px; text-shadow: 2px 2px 0px #fff; position: relative; }
-
-        .prompt-box { text-align: center; background: rgba(255, 255, 255, 0.95); padding: 10px 20px; border-radius: 15px; font-size: 15px; font-weight: 600; max-width: 550px; margin-bottom: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); position: relative; border: 3px solid #ffb74d; }
-        #target-word-display { font-size: 24px; color: #e67e22; display: block; margin-top: 5px; letter-spacing: 1px; }
-        .first-letter { color: #e74c3c; font-size: 1.3em; text-decoration: underline; }
-
-        .grid-wrapper { position: relative; margin-bottom: 15px; padding: 10px; background: #ffe0b2; border-radius: 15px; box-shadow: 0 8px 0 #ffb74d, 0 15px 25px rgba(0,0,0,0.25); }
-        #grid { display: grid; grid-template-columns: repeat(4, 75px); grid-template-rows: repeat(4, 75px); gap: 6px; background-color: var(--grid-bg); border-radius: 10px; padding: 6px; }
-        #drawing-canvas { position: absolute; top: 10px; left: 10px; z-index: 10; cursor: crosshair; border-radius: 10px; }
-
-        .cell { background-color: #fff9c4; border-radius: 8px; display: flex; justify-content: center; align-items: center; position: relative; user-select: none; box-shadow: inset 0 -4px 0 rgba(0,0,0,0.1); font-size: 13px; font-weight: bold; color: #5d4037; text-align: center; padding: 2px; word-wrap: break-word; transition: all 0.2s; }
-        .cell[data-start="true"] { background-color: #e2f1f8; box-shadow: inset 0 -4px 0 rgba(0,0,0,0.05); }
-        .manual-selected { background-color: #ffe082 !important; color: #d84315; box-shadow: inset 0 0 10px #ffca28, inset 0 -4px 0 rgba(0,0,0,0.1); border: 2px solid #ffb300; transform: scale(0.95); }
-        .visited-correct { background-color: #a9dfbf !important; color: #1e8449; box-shadow: inset 0 0 15px #2ecc71 !important; border: none; transform: scale(1); }
-        .visited-correct::before { content: '💧'; position: absolute; font-size: 20px; top: -5px; right: -5px; animation: popIn 0.3s ease-out; }
-
-        .bee-container { position: absolute; z-index: 15; width: 55px; height: 55px; display: flex; justify-content: center; align-items: center; }
-        .bee-orientation { transition: transform 0.2s ease; display: flex; justify-content: center; align-items: center; }
-        
-        /* Animación ajustada para el sprite */
-        .bee-sprite { display: flex; justify-content: center; align-items: center; animation: float 2s ease-in-out infinite; filter: drop-shadow(0 4px 6px rgba(0,0,0,0.3)); }
-        @keyframes float { 0%, 100% { transform: translateY(0px); } 50% { transform: translateY(-5px); } }
-
-        .panels-container { display: flex; justify-content: center; width: 100%; max-width: 450px; margin-bottom: 20px; position: relative; }
-        .panel { box-sizing: border-box; background: rgba(255, 255, 255, 0.95); padding: 15px; border-radius: 18px; box-shadow: 0 8px 20px rgba(0,0,0,0.15); width: 90%; display: flex; flex-direction: column; align-items: center; border: 4px solid var(--p1-main); }
-        .panel h3 { margin: 0 0 12px 0; font-size: 18px; color: var(--p1-dark); }
-        .btn-group { display: flex; gap: 8px; justify-content: space-between; width: 100%; margin-bottom: 15px; }
-        button { font-family: 'Fredoka', sans-serif; font-weight: 700; border: none; border-radius: 10px; cursor: pointer; transition: all 0.1s; user-select: none; }
-        button:active { transform: translateY(4px); box-shadow: 0 0px 0 transparent !important; }
-        .cmd-btn { padding: 10px 5px; font-size: 14px; color: white; flex: 1; background-color: var(--p1-main); box-shadow: 0 5px 0 var(--p1-dark); }
-        .seq-container { display: flex; flex-wrap: wrap; gap: 5px; min-height: 45px; background: rgba(255,255,255,0.7); padding: 8px; border-radius: 10px; width: 95%; border: 2px dashed rgba(0,0,0,0.1); }
-        .cmd-block { display: inline-flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 6px; color: white; font-weight: bold; font-size: 18px; box-shadow: 0 3px 0 rgba(0,0,0,0.2); animation: popIn 0.2s ease-out; background: var(--p1-main); }
-        @keyframes popIn { 0% { transform: scale(0); } 100% { transform: scale(1); } }
-
-        .global-controls { display: flex; gap: 15px; margin-bottom: 20px; position: relative; }
-        .global-btn { padding: 12px 20px; font-size: 18px; color: white; border-radius: 15px; }
-        #go-btn { background-color: #ff9800; box-shadow: 0 5px 0 #f57c00; }
-        .reset-btn { background-color: #e74c3c; box-shadow: 0 5px 0 #c0392b; }
-
-        .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.6); display: flex; justify-content: center; align-items: center; z-index: 100; visibility: hidden; opacity: 0; transition: all 0.3s; }
-        .modal-overlay.active { visibility: visible; opacity: 1; }
-        .modal-box { background: white; padding: 25px; border-radius: 20px; text-align: center; max-width: 80%; transform: scale(0.7); transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); box-shadow: 0 10px 30px rgba(0,0,0,0.3); }
-        .modal-overlay.active .modal-box { transform: scale(1); }
-        .modal-title { font-size: 24px; margin-bottom: 10px; color: #ff9800; }
-        .modal-msg { font-size: 16px; margin-bottom: 20px; color: #555; white-space: pre-line;}
-        .modal-btn { background: #4CAF50; box-shadow: 0 5px 0 #388E3C; padding: 10px 20px; font-size: 16px; color: white; }
-    </style>
-</head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>¡Atrapa Palabras! · Abejita del Jardín</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Nunito:wght@700;800;900&display=swap');
+:root{--ink:#32485c;--ink2:#678091;--blue:#65b9df;--blue-deep:#337eaa;--coral:#ec838e;--cream:#fffcf5;--yellow:#ffcf74;--shadow:0 12px 30px #395e7852;--line:#f0dfc9}
+*{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden}body{font-family:Fredoka,system-ui,sans-serif;color:var(--ink);background:linear-gradient(175deg,#a8ddec 0%,#c2ecdd 48%,#f9e9bb 100%);user-select:none;-webkit-tap-highlight-color:transparent}
+button{font:inherit;cursor:pointer;border:0}button:focus-visible{outline:3px solid #286a95;outline-offset:3px}button:disabled{cursor:default;opacity:.56}
+.scenery{position:fixed;inset:0;pointer-events:none;z-index:0;overflow:hidden}.scenery:before{content:'';position:absolute;inset:0;background-image:radial-gradient(#fff9 1.1px,transparent 1.1px);background-size:28px 28px;opacity:.5}.sun{position:absolute;top:2%;right:8%;width:135px;height:135px;border-radius:50%;background:#fff2ac;box-shadow:0 0 0 20px #fff9c12e,0 0 0 43px #fff9c11b}.cloud{position:absolute;width:120px;height:38px;top:13%;left:7%;border-radius:60px;background:#ffffffb9;animation:cloud 20s ease-in-out infinite alternate}.cloud:before,.cloud:after{content:'';position:absolute;background:inherit;border-radius:50%}.cloud:before{width:70px;height:59px;left:15px;bottom:3px}.cloud:after{width:60px;height:49px;left:55px;bottom:3px}.cloud.two{left:auto;right:12%;top:32%;transform:scale(.8);animation-delay:-7s}@keyframes cloud{to{translate:32px -6px}}
+.hill{position:absolute;bottom:-15%;height:33%;width:86%;border-radius:50% 50% 0 0;background:#8ac095}.hill.one{left:-22%}.hill.two{right:-27%;bottom:-20%;background:#74b48e}.floral{position:absolute;bottom:3%;font-size:32px;opacity:.8;animation:sway 3s ease-in-out infinite alternate}.floral.a{left:8%}.floral.b{right:9%;animation-delay:-1.2s}.floral.c{left:29%;bottom:0;animation-delay:-.8s}@keyframes sway{to{transform:rotate(11deg)}}
+#app{position:relative;z-index:1;height:100dvh;max-width:1320px;margin:0 auto;padding:clamp(8px,1.55vh,16px) clamp(10px,2vw,28px);display:flex;flex-direction:column;gap:clamp(8px,1.4vh,14px);overflow:hidden}
+.topbar{flex:0 0 57px;display:flex;align-items:center;justify-content:space-between;gap:12px;background:#fffcf4e8;border:2px solid #fff;border-radius:20px;padding:6px 14px;box-shadow:0 6px 20px #43657a23;min-width:0}.brand{display:flex;align-items:center;gap:11px;min-width:0}.brand-stamp{width:41px;height:41px;flex:none;display:grid;place-items:center;background:linear-gradient(155deg,#fff2ad,#ffcb6b);border:2px solid #fff8d0;border-radius:13px;font-size:24px;box-shadow:0 3px 0 #edbd6b}.brand-title{font:900 clamp(18px,2.2vw,25px) Nunito,Fredoka,sans-serif;letter-spacing:-.7px;line-height:1.04;white-space:nowrap}.brand-sub{font-size:10px;letter-spacing:1.45px;font-weight:700;color:#b28069}.top-actions{display:flex;align-items:center;gap:8px}.score-pill{display:flex;align-items:center;gap:7px;background:#f4fbec;border:1.5px solid #cfebc5;border-radius:999px;padding:8px 13px;color:#43815b;font-weight:700;font-size:14px;white-space:nowrap}.score-pill strong{font-size:16px}.mini-btn{border:1.5px solid #f0dfc9;color:#856b5e;background:#fff8e9;border-radius:11px;padding:9px 11px;font-size:13px;box-shadow:0 3px 0 #ead8b9}.mini-btn:active{transform:translateY(3px);box-shadow:none}
+.workspace{display:grid;grid-template-columns:minmax(0,1.08fr) minmax(0,.92fr);gap:clamp(10px,1.4vw,18px);flex:1;min-height:0}
+.board-card,.mission-card,.editor-card{background:#fffcf4f0;border:3px solid #fff;border-radius:24px;box-shadow:var(--shadow);min-width:0}
+.board-card{display:flex;flex-direction:column;min-height:0;padding:clamp(10px,1.5vw,17px);gap:11px}.board-head{display:flex;justify-content:space-between;align-items:center;gap:10px}.kicker{font:900 11px Nunito,sans-serif;letter-spacing:1.7px;color:#c78964;text-transform:uppercase}.board-desc{font-size:12px;color:#8d9ca3}.board-surface{flex:1;min-height:0;display:grid;place-items:center;background:radial-gradient(circle at 50% 43%,#fff9e9,#f6e9ce);border:2px dashed #f1d8af;border-radius:20px;overflow:hidden;padding:10px;container-type:size}
+.board-frame{width:min(100%,100cqh,540px);height:auto;max-height:none;aspect-ratio:1;border:7px solid #ffcd79;border-radius:24px;padding:6px;background:linear-gradient(145deg,#ffdc91,#eba95b);box-shadow:0 7px 0 #d89e52,0 13px 25px #9d663c36;position:relative}
+#grid{display:grid;position:relative;grid-template-columns:repeat(4,minmax(0,1fr));grid-template-rows:repeat(4,minmax(0,1fr));gap:clamp(4px,.75vw,7px);padding:clamp(4px,.65vw,7px);background:#a77955;width:100%;height:100%;border-radius:15px;container-type:inline-size}
+.cell{position:relative;min-width:0;min-height:0;display:flex;align-items:center;justify-content:center;text-align:center;padding:3px 2px;border-radius:11px;background:linear-gradient(180deg,#fff9dc,#ffedb5);box-shadow:inset 0 -4px 0 #d2a35c38,0 2px 2px #634b3322;color:#6d574d;font-size:clamp(10px,3.9cqw,16px);font-weight:700;line-height:1.08;overflow-wrap:anywhere;transition:background .25s,border-color .25s}.cell:after{content:'';position:absolute;inset:5px;border:1.4px dashed #eecb8b6e;border-radius:8px;pointer-events:none}.cell[data-start="true"]{background:linear-gradient(#dbf5ff,#cceefd)}.cell[data-start="true"]:after{border-color:#9dd7eb9a}
+.cell.manual-selected{background:linear-gradient(#fff0a8,#ffdb8c);outline:3px solid #f6b74d;outline-offset:-3px;color:#855723}.cell.manual-selected:before{content:'✎';position:absolute;top:2px;right:4px;color:#b57729;font-size:12px}.cell.visited-correct{background:linear-gradient(#c3f5d6,#87dba9);color:#1b694f;box-shadow:inset 0 -4px 0 #49b283,0 0 0 1px #fff8}.cell.visited-correct:before{content:'✓';position:absolute;right:3px;top:2px;font-size:13px;line-height:1;color:#21845b;font-weight:900}
+#drawing-canvas{position:absolute;inset:0;width:100%;height:100%;z-index:4;touch-action:none;cursor:crosshair;border-radius:13px}.bee-token{position:absolute;width:46px;height:46px;z-index:6;left:0;top:0;transform:translate(-50%,-50%);pointer-events:none;transition:left .33s cubic-bezier(.2,.7,.2,1),top .33s cubic-bezier(.2,.7,.2,1);filter:drop-shadow(0 6px 5px #594b3980)}.bee-orientation{width:100%;height:100%;transition:transform .25s ease}.bee-float{width:100%;height:100%;animation:beeFloat 1.8s ease-in-out infinite}.bee-float svg{width:100%;height:100%;overflow:visible}.wing-a,.wing-b{transform-box:view-box}.wing-a{transform-origin:14px 24px;animation:flapA .22s ease-in-out infinite alternate}.wing-b{transform-origin:46px 24px;animation:flapB .22s ease-in-out infinite alternate}@keyframes flapA{from{transform:rotate(-13deg)}to{transform:rotate(13deg)}}@keyframes flapB{from{transform:rotate(13deg)}to{transform:rotate(-13deg)}}@keyframes beeFloat{50%{transform:translateY(-3px)}}
+.board-footer{display:flex;justify-content:center;gap:15px;font-size:11px;color:#7b8c8c;align-items:center}.dot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:5px;background:#f4c168}.dot.green{background:#6cc894}
+.right-stack{display:flex;flex-direction:column;gap:clamp(10px,1.6vh,15px);min-height:0}.mission-card{padding:clamp(13px,2vw,21px);flex:0 0 auto;background:linear-gradient(140deg,#fffef7,#fff1d5)}.mission-upper{display:flex;align-items:center;justify-content:space-between;gap:9px}.lesson-label{color:#b37b65;font:900 11px Nunito,sans-serif;letter-spacing:1.55px}.count-badge{background:#fff;border:1px solid #eadac9;border-radius:99px;padding:6px 10px;font-size:12px;color:#8b8b83;white-space:nowrap}.mission-card h2{margin:9px 0 3px;font:900 clamp(20px,2.15vw,29px) Nunito,sans-serif;letter-spacing:-.7px;line-height:1.12;color:#42596e}.target-row{display:flex;align-items:center;gap:12px;min-height:63px}.target-letter{background:linear-gradient(155deg,#ff9fa3,#ef6d87);color:white;border:3px solid white;border-radius:16px;width:60px;height:60px;flex:none;display:grid;place-items:center;font:900 37px Nunito,sans-serif;box-shadow:0 4px 0 #ca5f76}.target-example{min-width:0}.target-example small{display:block;font-size:11px;color:#ab8b7f}.target-example strong{display:block;font:900 clamp(21px,2.5vw,33px) Nunito,sans-serif;color:#dc7690;line-height:1.13;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.hint-text{color:#73818e;font-size:12px;line-height:1.25;margin-top:4px}
+.progress-track{height:9px;border-radius:100px;background:#f3ddbf;overflow:hidden;margin-top:12px}.progress-fill{width:0;height:100%;border-radius:100px;background:linear-gradient(90deg,#71c8a0,#4ba875);transition:width .3s ease}.feedback{min-height:19px;font-size:12px;color:#789097;margin-top:8px;line-height:1.25}.feedback.good{color:#238e66}.feedback.warn{color:#c17949}
+.editor-card{flex:1;min-height:0;display:flex;flex-direction:column;gap:12px;padding:clamp(12px,1.6vw,18px)}.editor-header{display:flex;align-items:center;justify-content:space-between;gap:10px}.editor-header strong{font:900 clamp(15px,1.8vw,19px) Nunito,sans-serif;color:#385d74}.editor-header small{font-size:11px;color:#91a0a3}.command-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}.command-btn{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;border-radius:13px;padding:9px 3px;min-width:0;background:linear-gradient(#73bee3,#52a6d0);box-shadow:0 4px 0 #3486af;color:white;font-weight:700;font-size:12px}.command-btn .cmd-icon{font-size:23px;line-height:1}.command-btn.delete{background:linear-gradient(#ef9b9b,#de7987);box-shadow:0 4px 0 #bb5d70}.command-btn:active,.action-btn:active{transform:translateY(3px);box-shadow:0 1px 0 #405e6033}.command-btn:disabled{opacity:.6}
+.seq-panel{background:#fffef9;border:2px dashed #eadfc9;border-radius:13px;padding:10px;flex:1;min-height:0;display:flex;flex-direction:column;gap:8px}.seq-head{display:flex;justify-content:space-between;align-items:center;color:#9b8d80;font-size:12px}.seq-head strong{color:#466e84}.sequence-list{display:flex;flex-wrap:wrap;align-content:flex-start;gap:5px;min-height:0;overflow:hidden}.command-chip{display:inline-flex;justify-content:center;align-items:center;width:28px;height:28px;flex:none;border-radius:8px;background:#e1f3fa;color:#2a7a9f;border:1px solid #b6dcec;font-size:17px;font-weight:700}.command-chip.active{background:#ffcf70;border-color:#e3ab44;color:#8d5b25;transform:scale(1.12)}.command-chip.more{width:auto;padding:0 8px;font-size:12px;background:#fff2d6;color:#a17846;border-color:#ead3a4}.seq-placeholder{font-size:13px;color:#acb2b1;align-self:center;margin:auto}
+.action-grid{display:grid;grid-template-columns:1.2fr 1fr;gap:10px}.action-btn{padding:12px 8px;border-radius:13px;background:linear-gradient(#ffaa61,#f58d43);box-shadow:0 4px 0 #cd6c31;color:#fff;font:900 15px Nunito,sans-serif;min-width:0}.action-btn.secondary{background:linear-gradient(#98b5b4,#7e9c9d);box-shadow:0 4px 0 #5b8082}.action-btn:disabled{opacity:.5}
+.clear-mobile{display:none}.utility-row{display:flex;gap:8px;align-items:center;justify-content:space-between}.utility-button{color:#777e86;background:#f5f5ee;border:1px solid #dce2d9;padding:7px 11px;border-radius:10px;font-size:11px}.status-mini{font-size:11px;color:#94a49e}
+.modal-overlay{position:fixed;inset:0;z-index:90;background:#273b4fa6;backdrop-filter:blur(6px);display:grid;place-items:center;opacity:0;visibility:hidden;transition:opacity .25s,visibility .25s;padding:18px}.modal-overlay.active{opacity:1;visibility:visible}.modal-card{width:min(390px,100%);padding:26px 22px 23px;border:5px solid white;border-radius:27px;background:linear-gradient(#fffdf5,#fff0d3);box-shadow:0 24px 50px #162f4080;text-align:center;transform:scale(.85) translateY(15px);transition:transform .28s}.modal-overlay.active .modal-card{transform:scale(1)}.modal-icon{font-size:60px}.modal-title{margin:7px 0 6px;font:900 28px Nunito,sans-serif;color:#c97063}.modal-msg{margin:0 0 20px;white-space:pre-line;line-height:1.4;font-size:15px;color:#657984}.modal-button{background:linear-gradient(#7ccd9b,#5fb781);box-shadow:0 4px 0 #409467;color:#fff;border-radius:14px;padding:12px 29px;font-weight:700;font-size:16px}
+.floater{position:fixed;z-index:80;pointer-events:none;font-size:20px;animation:flyout .85s ease-out forwards}@keyframes flyout{to{transform:translate(var(--dx),-76px) rotate(30deg);opacity:0}}@keyframes pop{from{transform:scale(.75);opacity:0}to{transform:scale(1);opacity:1}}
+@media(max-width:780px){
+ #app{padding:7px 8px 8px;gap:7px}.topbar{flex-basis:47px;padding:4px 8px;border-radius:15px}.brand-stamp{width:33px;height:33px;border-radius:10px;font-size:19px}.brand{gap:7px}.brand-title{font-size:clamp(16px,4vw,20px)}.brand-sub{display:none}.score-pill{padding:5px 8px;font-size:12px}.score-pill strong{font-size:13px}.mini-btn{padding:6px 8px;font-size:11px}
+ .workspace{display:flex;flex-direction:column;gap:7px;min-height:0}.right-stack{display:contents}.mission-card{order:0;flex:none;padding:9px 12px;border-radius:17px}.mission-upper{display:none}.mission-card h2{display:none}.target-row{min-height:50px;gap:10px}.target-letter{width:47px;height:47px;font-size:29px;border-radius:13px}.target-example small{font-size:10px}.target-example strong{font-size:23px}.hint-text{margin-top:2px;font-size:11px}.progress-track{margin-top:5px;height:5px}.feedback{margin-top:4px;font-size:11px;min-height:14px}
+ .board-card{order:1;flex:1;min-height:0;padding:5px;border-radius:17px;gap:0}.board-head,.board-footer{display:none}.board-surface{padding:4px;border-radius:12px}.board-frame{width:min(100%,100cqh,540px);max-height:none;border-width:5px;border-radius:17px;padding:4px;box-shadow:0 4px 0 #d89e52}.cell{border-radius:7px}.cell:after{inset:3px;border-radius:5px}.bee-token{width:38px;height:38px}
+ .editor-card{order:2;flex:none;padding:8px 10px 10px;gap:7px;border-radius:17px}.editor-header strong{font-size:14px}.editor-header small{display:none}.clear-mobile{display:block;background:#f9eedb;color:#96735b;border:1px solid #e9d9bd;border-radius:7px;padding:4px 7px;font-size:10px}.command-grid{gap:6px}.command-btn{padding:5px 2px;gap:2px;border-radius:9px;font-size:10px;box-shadow:0 3px 0 #3486af;min-height:43px}.command-btn .cmd-icon{font-size:18px}.command-btn.delete{box-shadow:0 3px 0 #bb5d70}.seq-panel{padding:6px;gap:4px;min-height:37px;flex:none}.seq-head{font-size:10px}.sequence-list{min-height:20px}.command-chip{width:20px;height:20px;font-size:13px;border-radius:5px}.seq-placeholder{font-size:10px}.utility-row{display:none}.action-grid{gap:7px}.action-btn{padding:8px 6px;border-radius:10px;font-size:13px;box-shadow:0 3px 0 #cd6c31}
+}
+@media(max-width:380px){.brand-title{font-size:13px;letter-spacing:-.65px}.brand{gap:5px}.brand-stamp{width:27px;height:27px;font-size:17px}.top-actions{gap:4px}.score-pill{font-size:11px}.mini-btn{font-size:10px}}
+@media(max-height:690px) and (max-width:780px){
+ #app{padding:5px 6px;gap:5px}.topbar{flex-basis:41px;padding:3px 7px}.brand-stamp{width:29px;height:29px}.score-pill{padding:4px 6px}.mini-btn{padding:5px 7px}.mission-card{padding:5px 9px}.target-row{min-height:39px;gap:7px}.target-letter{height:38px;width:38px;font-size:25px;border-radius:10px;border-width:2px;box-shadow:0 2px 0 #ca5f76}.target-example strong{font-size:20px}.hint-text{font-size:10px;margin:0}.progress-track{height:4px;margin-top:3px}.feedback{font-size:10px;min-height:11px;margin-top:1px}.board-frame{width:min(100%,100cqh,540px)}.editor-card{padding:6px 8px;gap:5px}.editor-header strong{font-size:12px}.editor-header small{font-size:9px}.command-btn{min-height:37px;padding:3px 2px;gap:1px}.command-btn .cmd-icon{font-size:16px}.command-btn span:last-child{font-size:9px}.seq-panel{min-height:31px;padding:4px;gap:2px}.seq-head{font-size:9px}.sequence-list{min-height:16px;gap:3px}.command-chip{width:17px;height:17px;font-size:12px}.action-btn{padding:6px;font-size:12px}
+}
+@media(max-height:450px) and (orientation:landscape){
+ #app{padding:5px 9px;gap:5px}.topbar{flex-basis:35px}.workspace{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.07fr);grid-template-rows:1fr;gap:7px}.right-stack{display:flex;flex-direction:column;gap:5px;min-height:0}.board-card{order:0;min-height:0}.mission-card{order:initial;flex:none;padding:4px 8px}.target-row{min-height:35px}.target-letter{width:33px;height:33px;font-size:22px}.target-example strong{font-size:17px}.hint-text,.feedback,.progress-track{display:none}.editor-card{order:initial;flex:1;min-height:0;padding:6px;gap:5px}.board-frame{width:min(100%,100cqh,540px);max-height:none}.editor-header{display:none}.command-btn{min-height:36px}.seq-panel{flex:1;min-height:0}.action-btn{padding:6px;font-size:12px}
+}
+@media(prefers-reduced-motion:reduce){*,*:before,*:after{animation-duration:.01ms!important;transition-duration:.01ms!important}}
+</style></head>
 <body>
-
-    <div class="decorations">
-        <div class="sun">☀️</div><div class="cloud c1">☁️</div><div class="cloud c2">☁️</div><div class="cloud c3">☁️</div>
-        <div class="grass"></div>
-    </div>
-
-    <h1>¡Atrapa Palabras! 🐝</h1>
-    <div class="prompt-box">
-        Selecciona todas las palabras que empiecen con la primera letra de:
-        <strong id="target-word-display">Palabra</strong>
-        <div style="font-size: 12px; font-weight: normal; margin-top: 5px;">(Toca las palabras para marcarlas o arrastra para dibujar tu ruta)</div>
-    </div>
-
-    <div class="grid-wrapper">
-        <div id="grid"></div>
-        <canvas id="drawing-canvas"></canvas>
-    </div>
-
-    <div class="panels-container">
-        <div class="panel">
-            <h3>🐝 Programar Abeja</h3>
-            <div class="btn-group">
-                <button class="cmd-btn" onclick="addCommand('L')">↺ Giro Izq</button>
-                <button class="cmd-btn" onclick="addCommand('F')">⬆️ Avanza</button>
-                <button class="cmd-btn" onclick="addCommand('R')">↻ Giro Der</button>
-            </div>
-            <div class="seq-container" id="seq"></div>
-        </div>
-    </div>
-    
-    <div class="global-controls">
-        <button class="global-btn" onclick="executeCommands()" id="go-btn">🚀 ¡VOLAR!</button>
-        <button class="global-btn reset-btn" onclick="resetGame()">🔄 Nueva Partida</button>
-    </div>
-
-    <div class="modal-overlay" id="modal">
-        <div class="modal-box">
-            <h2 class="modal-title" id="m-title">Título</h2>
-            <p class="modal-msg" id="m-msg">Mensaje</p>
-            <button class="modal-btn" onclick="closeModal()">¡Entendido!</button>
-        </div>
-    </div>
-
-    <script>
-        const wordDictionary = {
+<div class="scenery" aria-hidden="true"><div class="sun"></div><div class="cloud"></div><div class="cloud two"></div><div class="hill one"></div><div class="hill two"></div><div class="floral a">🌷</div><div class="floral b">🌼</div><div class="floral c">🌻</div></div>
+<div id="app">
+<header class="topbar">
+ <div class="brand"><div class="brand-stamp">🐝</div><div><div class="brand-title">¡Atrapa Palabras!</div><div class="brand-sub">EL JARDÍN DE LAS LETRAS</div></div></div>
+ <div class="top-actions"><div class="score-pill">🌼 <strong id="progress-count">0 / 4</strong></div><button type="button" id="mute-btn" class="mini-btn" aria-label="Activar o silenciar efectos">🔇</button><button type="button" id="new-btn" class="mini-btn">↻ Nuevo</button></div>
+</header>
+<main class="workspace">
+ <section class="board-card" aria-label="Tablero de palabras">
+   <div class="board-head"><div class="kicker">✦ CAMINO DEL JARDÍN</div><div class="board-desc">Toca para marcar · Arrastra para dibujar</div></div>
+   <div class="board-surface"><div class="board-frame"><div id="grid"><canvas id="drawing-canvas" aria-label="Dibuja tu ruta o toca una palabra para marcarla"></canvas><div id="bee-token" class="bee-token" aria-label="Abejita" role="img"><div id="bee-orientation" class="bee-orientation"><div class="bee-float">
+   <svg viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+     <g class="wing-a"><ellipse cx="15" cy="25" rx="11" ry="16" transform="rotate(-28 15 25)" fill="#d8f9ff" stroke="#8dcee9" stroke-width="2" opacity=".96"/></g>
+     <g class="wing-b"><ellipse cx="45" cy="25" rx="11" ry="16" transform="rotate(28 45 25)" fill="#d8f9ff" stroke="#8dcee9" stroke-width="2" opacity=".96"/></g>
+     <ellipse cx="30" cy="33" rx="20" ry="22" fill="#ffd664" stroke="#d99e46" stroke-width="2"/><path d="M11 31Q30 37 49 31L48 39Q30 45 12 39Z" fill="#835a45"/><path d="M15 43Q30 49 45 43L40 51Q30 55 20 51Z" fill="#835a45"/>
+     <ellipse cx="30" cy="22" rx="18" ry="17" fill="#ffdf78"/><path d="M22 11L20 5M38 11L40 5" stroke="#8b674c" stroke-width="2.6" stroke-linecap="round"/><circle cx="20" cy="5" r="3.5" fill="#955e6a"/><circle cx="40" cy="5" r="3.5" fill="#955e6a"/>
+     <ellipse cx="23" cy="24" rx="2.7" ry="3.6" fill="#443e51"/><ellipse cx="37" cy="24" rx="2.7" ry="3.6" fill="#443e51"/><circle cx="17.5" cy="31" r="4" fill="#ffa4a1" opacity=".9"/><circle cx="42.5" cy="31" r="4" fill="#ffa4a1" opacity=".9"/><path d="M25 33Q30 39 35 33" stroke="#995d5b" stroke-width="2.3" stroke-linecap="round" fill="none"/>
+     <path d="M13 32L6 39M47 32L54 39" stroke="#b9883f" stroke-width="3" stroke-linecap="round"/>
+     <path d="M25 13Q30 8 35 13" stroke="#fff9be" stroke-width="3" stroke-linecap="round" fill="none" opacity=".8"/>
+   </svg></div></div></div></div></div>
+   <div class="board-footer"><span><i class="dot"></i>Marcada para planear</span><span><i class="dot green"></i>Recogida al volar</span></div>
+ </section>
+ <div class="right-stack">
+   <section class="mission-card" aria-label="Objetivo de la partida">
+      <div class="mission-upper"><span class="lesson-label">✦ MISIÓN DE LECTURA</span><span class="count-badge">4 palabras por encontrar</span></div>
+      <h2>¡Busca palabras de la misma familia inicial!</h2>
+      <div class="target-row"><span id="target-letter" class="target-letter">A</span><div class="target-example"><small>Palabra de ejemplo</small><strong id="target-word-display">Abeja</strong><div class="hint-text">Recoge las que empiezan igual.</div></div></div>
+      <div class="progress-track"><div class="progress-fill" id="progress-fill"></div></div><div class="feedback" id="feedback" role="status" aria-live="polite">Programa los movimientos para buscar las 4 palabras.</div>
+   </section>
+   <section class="editor-card" aria-label="Programación de la abejita">
+      <div class="editor-header"><strong>🎮 Programa su vuelo</strong><small>Gira y avanza</small><button type="button" class="clear-mobile" id="clear-plan-mobile">✎ Borrar dibujo</button></div>
+      <div class="command-grid">
+       <button type="button" class="command-btn" data-cmd="L"><span class="cmd-icon">↶</span><span>Izquierda</span></button>
+       <button type="button" class="command-btn" data-cmd="F"><span class="cmd-icon">⬆</span><span>Avanzar</span></button>
+       <button type="button" class="command-btn" data-cmd="R"><span class="cmd-icon">↷</span><span>Derecha</span></button>
+       <button type="button" class="command-btn delete" id="undo-btn"><span class="cmd-icon">⌫</span><span>Deshacer</span></button>
+      </div>
+      <div class="seq-panel"><div class="seq-head"><span>Secuencia de vuelo</span><strong id="seq-count">0 pasos</strong></div><div class="sequence-list" id="seq"><span class="seq-placeholder">Añade movimientos para empezar...</span></div></div>
+      <div class="action-grid"><button type="button" class="action-btn" id="go-btn">▶ ¡Volar!</button><button type="button" class="action-btn secondary" id="retry-btn">↺ Reintentar</button></div>
+      <div class="utility-row"><span class="status-mini">✎ Las marcas son pistas, no cuentan como recogidas.</span><button type="button" class="utility-button" id="clear-plan-btn">Borrar dibujos</button></div>
+   </section>
+ </div>
+</main></div>
+<div id="modal" class="modal-overlay" role="dialog" aria-labelledby="modal-title" aria-modal="true"><div class="modal-card"><div class="modal-icon" id="modal-icon">🏆</div><h2 class="modal-title" id="modal-title">¡Bien hecho!</h2><p class="modal-msg" id="modal-msg"></p><button class="modal-button" id="modal-close">Continuar</button></div></div>
+<script>
+const wordDictionary = {
             'A': ['Avión', 'Árbol', 'Abeja', 'Agua', 'Araña'], 'B': ['Barco', 'Bota', 'Boca', 'Bola', 'Búho'],
             'C': ['Casa', 'Coche', 'Cama', 'Copa', 'Cubo'], 'D': ['Dado', 'Dedo', 'Dona', 'Dulce', 'Diente'],
             'E': ['Elefante', 'Estrella', 'Erizo', 'Escoba', 'Espejo'], 'F': ['Flor', 'Fuego', 'Foca', 'Foco', 'Fresa'],
@@ -124,150 +102,60 @@
             'S': ['Sol', 'Sapo', 'Sopa', 'Silla', 'Seta'], 'T': ['Taza', 'Tren', 'Tigre', 'Toro', 'Tomate'],
             'V': ['Vaca', 'Vaso', 'Vela', 'Viento', 'Vaso'], 'Z': ['Zapato', 'Zorro', 'Zeta', 'Zanahoria', 'Zumo']
         };
-
-        const gridSize = 4; const totalCorrectWords = 4; 
-        let isExecuting = false; let bee = { pos: {x: 0, y: 0}, dir: 0, commands: [] }; let gridData = [];
-        const gridEl = document.getElementById('grid'); const canvas = document.getElementById('drawing-canvas'); const ctx = canvas.getContext('2d');
-        let isDrawing = false; let isDragging = false; let startX = 0; let startY = 0;
-
-        function generateLevel() {
-            const letters = Object.keys(wordDictionary);
-            const targetLetter = letters[Math.floor(Math.random() * letters.length)];
-            const allTargetWords = wordDictionary[targetLetter];
-            const promptWord = allTargetWords[Math.floor(Math.random() * allTargetWords.length)];
-            
-            document.getElementById('target-word-display').innerHTML = `<span class="first-letter">${promptWord.charAt(0)}</span>${promptWord.slice(1)}`;
-
-            let pool = [...allTargetWords]; let correctWords = [];
-            for(let i=0; i < totalCorrectWords; i++) {
-                if(pool.length === 0) pool = [...allTargetWords];
-                let idx = Math.floor(Math.random() * pool.length);
-                correctWords.push(pool[idx]); pool.splice(idx, 1);
-            }
-
-            let incorrectWords = [];
-            for(let i=0; i < 11; i++) {
-                let rLetter = letters[Math.floor(Math.random() * letters.length)];
-                while(rLetter === targetLetter) rLetter = letters[Math.floor(Math.random() * letters.length)];
-                let arr = wordDictionary[rLetter];
-                incorrectWords.push(arr[Math.floor(Math.random() * arr.length)]);
-            }
-
-            let restOfWords = [ ...correctWords, ...incorrectWords ];
-            restOfWords.sort(() => Math.random() - 0.5); 
-
-            gridData = []; let restIndex = 0;
-            for (let y = 0; y < gridSize; y++) {
-                gridData[y] = [];
-                for (let x = 0; x < gridSize; x++) {
-                    if (x === 0 && y === 0) gridData[y][x] = { word: "", correct: false, isStart: true };
-                    else {
-                        let word = restOfWords[restIndex];
-                        gridData[y][x] = { word: word, correct: correctWords.includes(word), isStart: false };
-                        restIndex++;
-                    }
-                }
-            }
-        }
-
-        function initGrid() {
-            gridEl.innerHTML = '';
-            for (let y = 0; y < gridSize; y++) {
-                for (let x = 0; x < gridSize; x++) {
-                    const cell = document.createElement('div'); cell.className = 'cell'; cell.dataset.x = x; cell.dataset.y = y; cell.id = `cell-${x}-${y}`;
-                    let data = gridData[y][x]; cell.innerText = data.word; cell.dataset.correct = data.correct; cell.dataset.start = data.isStart;
-                    gridEl.appendChild(cell);
-                }
-            }
-            setTimeout(() => {
-                canvas.width = gridEl.offsetWidth; canvas.height = gridEl.offsetHeight;
-                ctx.lineWidth = 8; ctx.lineCap = 'round'; ctx.lineJoin = 'round'; ctx.setLineDash([12, 15]); ctx.strokeStyle = 'rgba(255, 152, 0, 0.8)'; 
-            }, 50);
-        }
-
-        function getCursorPos(clientX, clientY) { const rect = canvas.getBoundingClientRect(); return { x: clientX - rect.left, y: clientY - rect.top }; }
-        function startDraw(e) { if (isExecuting) return; isDrawing = true; isDragging = false; let cX = e.clientX; let cY = e.clientY; if (e.touches && e.touches.length > 0) { cX = e.touches[0].clientX; cY = e.touches[0].clientY; } startX = cX; startY = cY; const pos = getCursorPos(cX, cY); ctx.beginPath(); ctx.moveTo(pos.x, pos.y); if(e.cancelable) e.preventDefault(); }
-        function draw(e) { if (!isDrawing || isExecuting) return; let cX = e.clientX; let cY = e.clientY; if (e.touches && e.touches.length > 0) { cX = e.touches[0].clientX; cY = e.touches[0].clientY; } if (Math.abs(cX - startX) > 5 || Math.abs(cY - startY) > 5) { isDragging = true; } const pos = getCursorPos(cX, cY); ctx.lineTo(pos.x, pos.y); ctx.stroke(); if(e.cancelable) e.preventDefault(); }
-        function stopDraw(e) { 
-            if (!isDrawing) return; isDrawing = false; 
-            if (!isDragging && e && !isExecuting) {
-                let cX = e.clientX; let cY = e.clientY;
-                if (e.changedTouches && e.changedTouches.length > 0) { cX = e.changedTouches[0].clientX; cY = e.changedTouches[0].clientY; }
-                if (cX && cY) {
-                    canvas.style.pointerEvents = 'none'; let target = document.elementFromPoint(cX, cY); canvas.style.pointerEvents = 'auto';
-                    if (target) { let cell = target.closest('.cell'); if (cell && cell.dataset.start !== "true") cell.classList.toggle('manual-selected'); }
-                }
-            }
-        }
-
-        canvas.addEventListener('mousedown', startDraw); canvas.addEventListener('mousemove', draw); window.addEventListener('mouseup', stopDraw);
-        canvas.addEventListener('touchstart', startDraw, { passive: false }); canvas.addEventListener('touchmove', draw, { passive: false }); window.addEventListener('touchend', stopDraw);
-
-        // NUEVA LÓGICA DE ROTACIÓN (Para un sprite que mira hacia ARRIBA por defecto)
-        function getTransform(dir) { 
-            if (dir === 0) return 'rotate(90deg)';   // Avanza a la DERECHA
-            if (dir === 1) return 'rotate(180deg)';  // Avanza hacia ABAJO
-            if (dir === 2) return 'rotate(-90deg)';  // Avanza a la IZQUIERDA
-            if (dir === 3) return 'rotate(0deg)';    // Avanza hacia ARRIBA
-        }
-
-        function drawBee() {
-            document.querySelectorAll('.bee-container').forEach(b => b.remove());
-            const cell = document.getElementById(`cell-${bee.pos.x}-${bee.pos.y}`);
-            const container = document.createElement('div'); container.className = `bee-container`;
-            const orientation = document.createElement('div'); orientation.className = 'bee-orientation'; orientation.style.transform = getTransform(bee.dir);
-            const sprite = document.createElement('div'); sprite.className = 'bee-sprite';
-            
-            // Integrando el nuevo sprite personalizado
-            sprite.innerHTML = '<img src="../assets/robots/BeebotEmoji.png" alt="BeeBot" style="width: 48px; height: 48px; object-fit: contain; pointer-events: none;">';
-            
-            orientation.appendChild(sprite); container.appendChild(orientation); cell.appendChild(container);
-        }
-
-        function visitCell(x, y) {
-            const cell = document.getElementById(`cell-${x}-${y}`);
-            if (cell.dataset.start === "true") return;
-            cell.classList.remove('manual-selected');
-            if (cell.classList.contains('visited-correct')) return;
-            if (cell.dataset.correct === "true") cell.classList.add('visited-correct');
-        }
-
-        function addCommand(cmd) { if(isExecuting) return; bee.commands.push(cmd); updateSequenceUI(); }
-        function updateSequenceUI() {
-            const symbols = { 'F': '⬆️', 'R': '↻', 'L': '↺' }; const container = document.getElementById(`seq`); container.innerHTML = ''; 
-            bee.commands.forEach(cmd => { const span = document.createElement('span'); span.className = 'cmd-block'; span.innerText = symbols[cmd]; container.appendChild(span); });
-        }
-
-        function executeCommands() {
-            if (bee.commands.length === 0 || isExecuting) return; isExecuting = true; document.getElementById('go-btn').style.opacity = "0.5";
-            visitCell(bee.pos.x, bee.pos.y);
-            let step = 0;
-            const interval = setInterval(() => {
-                if (step >= bee.commands.length) { clearInterval(interval); checkWin(); return; }
-                const cmd = bee.commands[step];
-                if (cmd === 'F') {
-                    let newX = bee.pos.x, newY = bee.pos.y;
-                    if (bee.dir === 0) newX++; else if (bee.dir === 1) newY++; else if (bee.dir === 2) newX--; else if (bee.dir === 3) newY--; 
-                    if (newX >= 0 && newX < gridSize && newY >= 0 && newY < gridSize) { bee.pos.x = newX; bee.pos.y = newY; visitCell(bee.pos.x, bee.pos.y); }
-                } else if (cmd === 'R') bee.dir = (bee.dir + 1) % 4; else if (cmd === 'L') bee.dir = (bee.dir + 3) % 4; 
-                drawBee(); step++;
-            }, 600); 
-        }
-
-        function showModal(title, msg) { document.getElementById('m-title').innerText = title; document.getElementById('m-msg').innerText = msg; document.getElementById('modal').classList.add('active'); }
-        function closeModal() { document.getElementById('modal').classList.remove('active'); }
-
-        function checkWin() {
-            const visitedCorrect = document.querySelectorAll('.visited-correct').length;
-            setTimeout(() => {
-                if (visitedCorrect === totalCorrectWords) showModal("¡Felicidades! 🎉", "¡Encontraste todas las palabras correctas!");
-                else showModal("¡Faltan palabras! 🤔", `Atrapaste ${visitedCorrect} de ${totalCorrectWords} palabras correctas.\n¡Sigue buscando!`);
-                document.getElementById('go-btn').style.opacity = "1"; isExecuting = false;
-            }, 400);
-        }
-
-        function resetGame() { bee = { pos: {x: 0, y: 0}, dir: 0, commands: [] }; isExecuting = false; updateSequenceUI(); document.getElementById('go-btn').style.opacity = "1"; ctx.clearRect(0, 0, canvas.width, canvas.height); generateLevel(); initGrid(); drawBee(); }
-        resetGame();
-    </script>
-</body>
-</html>
+const N=4, GOAL=4;
+const grid=document.getElementById('grid'), canvas=document.getElementById('drawing-canvas'),ctx=canvas.getContext('2d'),beeToken=document.getElementById('bee-token'),beeOrient=document.getElementById('bee-orientation');
+const seqEl=document.getElementById('seq'),feedbackEl=document.getElementById('feedback');
+let data=[],targetLetter='A',promptWord='',bee={x:0,y:0,dir:0},commands=[],collected=new Set(),drawing=false,dragged=false,points=[],strokes=[],activeStroke=null,executionToken=0,running=false,done=false,letterBag=[],soundEnabled=false,audioCtx=null;
+const dirs=[[1,0],[0,1],[-1,0],[0,-1]];
+const sounds={tap:[540,.06,'sine'],step:[400,.09,'triangle'],find:[785,.17,'sine'],win:[950,.3,'sine']};
+function sound(kind){if(!soundEnabled)return;try{audioCtx ||= new (window.AudioContext||window.webkitAudioContext)();if(audioCtx.state==='suspended')audioCtx.resume();const [f,d,type]=sounds[kind];const o=audioCtx.createOscillator(),g=audioCtx.createGain(),t=audioCtx.currentTime;o.type=type;o.frequency.setValueAtTime(f,t);g.gain.setValueAtTime(.065,t);g.gain.exponentialRampToValueAtTime(.001,t+d);o.connect(g);g.connect(audioCtx.destination);o.start(t);o.stop(t+d)}catch(e){}}
+function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
+function nextLetter(){if(!letterBag.length)letterBag=shuffle(Object.keys(wordDictionary).slice());return letterBag.pop()}
+function generateLevel(){
+  targetLetter=nextLetter();const correct=shuffle([...new Set(wordDictionary[targetLetter])]);promptWord=correct[Math.floor(Math.random()*correct.length)];const targets=correct.slice(0,GOAL);const letters=Object.keys(wordDictionary).filter(l=>l!==targetLetter),decoys=[];
+  const possibilities=shuffle(letters.flatMap(l=>[...new Set(wordDictionary[l])].map(word=>({word,correct:false}))));
+  const used=new Set(targets.map(w=>w.toLocaleLowerCase('es')));
+  for(const entry of possibilities){if(decoys.length===11)break;const key=entry.word.toLocaleLowerCase('es');if(!used.has(key)){used.add(key);decoys.push(entry)}}
+  const tiles=shuffle([...targets.map(word=>({word,correct:true})),...decoys]);let idx=0;
+  data=Array.from({length:N},(_,y)=>Array.from({length:N},(_,x)=>x===0&&y===0?{word:'',start:true,correct:false}:tiles[idx++]));
+  document.getElementById('target-letter').textContent=targetLetter;document.getElementById('target-word-display').textContent=promptWord;
+}
+function buildBoard(){grid.querySelectorAll('.cell').forEach(el=>el.remove());for(let y=0;y<N;y++)for(let x=0;x<N;x++){const cell=document.createElement('div');cell.className='cell';cell.id=`cell-${x}-${y}`;cell.dataset.x=x;cell.dataset.y=y;const tile=data[y][x];cell.dataset.start=String(!!tile.start);if(tile.start){cell.setAttribute('aria-label','Punto de partida');}else{cell.textContent=tile.word;cell.setAttribute('aria-label',tile.word)}grid.insertBefore(cell,canvas)}requestAnimationFrame(()=>{sizeCanvas();positionBee(true)})}
+function cellEl(x,y){return document.getElementById(`cell-${x}-${y}`)}
+function positionBee(instant=false){const cell=cellEl(bee.x,bee.y);if(!cell)return;if(instant)beeToken.style.transition='none';else beeToken.style.transition='left .33s cubic-bezier(.2,.7,.2,1),top .33s cubic-bezier(.2,.7,.2,1)';beeToken.style.left=(cell.offsetLeft+cell.offsetWidth/2)+'px';beeToken.style.top=(cell.offsetTop+cell.offsetHeight/2)+'px';beeOrient.style.transform=`rotate(${bee.dir*90}deg)`}
+function sizeCanvas(){const r=grid.getBoundingClientRect(),dpr=Math.min(2,window.devicePixelRatio||1);if(!r.width||!r.height)return;canvas.width=Math.round(r.width*dpr);canvas.height=Math.round(r.height*dpr);ctx.setTransform(dpr,0,0,dpr,0,0);drawStrokes()}
+function drawStrokes(){const w=canvas.width/(Math.min(2,devicePixelRatio||1)),h=canvas.height/(Math.min(2,devicePixelRatio||1));ctx.clearRect(0,0,w,h);ctx.strokeStyle='#e18e4c';ctx.lineWidth=Math.max(3,w*.012);ctx.lineCap='round';ctx.lineJoin='round';ctx.setLineDash([8,8]);for(const stroke of strokes){if(stroke.length<2)continue;ctx.beginPath();stroke.forEach((p,i)=>i?ctx.lineTo(p.x*w,p.y*h):ctx.moveTo(p.x*w,p.y*h));ctx.stroke()}ctx.setLineDash([])}
+function planPos(e){const r=canvas.getBoundingClientRect();return{x:Math.max(0,Math.min(1,(e.clientX-r.left)/r.width)),y:Math.max(0,Math.min(1,(e.clientY-r.top)/r.height))}}
+canvas.addEventListener('pointerdown',e=>{if(running||done)return;drawing=true;dragged=false;points=[planPos(e)];activeStroke=points;strokes.push(points);canvas.setPointerCapture?.(e.pointerId);e.preventDefault()});
+canvas.addEventListener('pointermove',e=>{if(!drawing||running)return;const p=planPos(e),last=points[points.length-1];if(Math.hypot(p.x-last.x,p.y-last.y)<.012)return;points.push(p);dragged=true;drawStrokes();e.preventDefault()});
+function endPointer(e){if(!drawing)return;drawing=false;if(!dragged){strokes.pop();const r=grid.getBoundingClientRect(),px=e.clientX,py=e.clientY;const cell=Array.from(grid.querySelectorAll('.cell')).find(el=>{const a=el.getBoundingClientRect();return px>=a.left&&px<a.right&&py>=a.top&&py<a.bottom});if(cell&&cell.dataset.start!=='true'&&!cell.classList.contains('visited-correct')){cell.classList.toggle('manual-selected');sound('tap');setFeedback('✎ Marca amarilla: solo te ayuda a planear la ruta.')}}else{setFeedback('✎ Ruta dibujada. Ahora programa los movimientos para recorrerla.')}}
+canvas.addEventListener('pointerup',endPointer);canvas.addEventListener('pointercancel',()=>{if(drawing&&!dragged)strokes.pop();drawing=false});
+function clearPlanning(){strokes=[];drawStrokes();grid.querySelectorAll('.manual-selected').forEach(el=>el.classList.remove('manual-selected'));if(!running)setFeedback('Dibujos y marcas borrados.','')}
+function setFeedback(msg,type=''){feedbackEl.textContent=msg;feedbackEl.className='feedback '+type}
+function updateProgress(){document.getElementById('progress-count').textContent=`${collected.size} / ${GOAL}`;document.getElementById('progress-fill').style.width=`${collected.size/GOAL*100}%`}
+function renderCommands(){seqEl.innerHTML='';document.getElementById('seq-count').textContent=`${commands.length} ${commands.length===1?'paso':'pasos'}`;if(!commands.length){seqEl.innerHTML='<span class="seq-placeholder">Añade movimientos para empezar...</span>'}else{let view=commands.map((c,i)=>({c,i}));if(view.length>21){view=[...view.slice(0,7),{c:'more',count:commands.length-19},...view.slice(-12)]}for(const item of view){const chip=document.createElement('span');chip.className='command-chip';if(item.c==='more'){chip.classList.add('more');chip.textContent=`+${item.count}`;chip.title='Comandos intermedios';}else{chip.dataset.index=item.i;chip.textContent={F:'↑',L:'↶',R:'↷'}[item.c];chip.title=`${item.i+1}. ${{F:'Avanzar',L:'Girar izquierda',R:'Girar derecha'}[item.c]}`;}seqEl.appendChild(chip)}}updateButtons()}
+function updateButtons(){document.querySelectorAll('[data-cmd],#undo-btn').forEach(b=>b.disabled=running||done);document.getElementById('go-btn').disabled=running||!commands.length||done;document.getElementById('retry-btn').disabled=false;document.getElementById('go-btn').textContent=running?'🐝 Volando...':'▶ ¡Volar!'}
+function addCommand(c){if(running||done)return;commands.push(c);sound('tap');renderCommands()}
+function undoCommand(){if(running||done||!commands.length)return;commands.pop();renderCommands()}
+function floating(x,y){const el=document.createElement('span');el.className='floater';el.style.left=x+'px';el.style.top=y+'px';el.style.setProperty('--dx',`${(Math.random()-.5)*70}px`);el.textContent=['✨','🌼','⭐'][Math.floor(Math.random()*3)];document.body.appendChild(el);setTimeout(()=>el.remove(),900)}
+function visitCell(x,y){const tile=data[y][x];if(!tile||tile.start||!tile.correct)return;const key=`${x},${y}`;if(collected.has(key))return;collected.add(key);const el=cellEl(x,y);el.classList.add('visited-correct');el.classList.remove('manual-selected');const r=el.getBoundingClientRect();floating(r.left+r.width/2,r.top+r.height/2);sound('find');updateProgress();setFeedback(`🌼 ¡Bien! Encontraste «${tile.word}». Quedan ${GOAL-collected.size}.`,'good')}
+function wait(ms){return new Promise(resolve=>setTimeout(resolve,ms))}
+async function executeCommands(){if(running||done||!commands.length)return;const token=++executionToken;running=true;updateButtons();setFeedback('🐝 La abejita está siguiendo tu programa...');const run=commands.slice();for(let i=0;i<run.length;i++){if(token!==executionToken)return;seqEl.querySelectorAll('.command-chip').forEach(el=>el.classList.remove('active'));seqEl.querySelector(`[data-index="${i}"]`)?.classList.add('active');const cmd=run[i];if(cmd==='F'){const [dx,dy]=dirs[bee.dir],nx=bee.x+dx,ny=bee.y+dy;if(nx>=0&&nx<N&&ny>=0&&ny<N){bee.x=nx;bee.y=ny;positionBee();visitCell(nx,ny);sound('step')}else{setFeedback('↗️ El borde del jardín bloquea ese movimiento.','warn')}}else{bee.dir=(bee.dir+(cmd==='R'?1:3))%4;positionBee();sound('tap')}await wait(385)}if(token!==executionToken)return;running=false;commands=[];renderCommands();if(collected.size===GOAL){done=true;updateButtons();sound('win');showModal('¡Todas las palabras!','¡Recogiste las cuatro palabras que comienzan con '+targetLetter+'!\n¡Misión completada!','🏆')}else{setFeedback(`🌻 Llevas ${collected.size} de ${GOAL}. ¡Programa otra ruta desde donde quedó la abejita!`,'warn')}}
+function showModal(title,msg,emoji){document.getElementById('modal-title').textContent=title;document.getElementById('modal-msg').textContent=msg;document.getElementById('modal-icon').textContent=emoji;document.getElementById('modal').classList.add('active')}
+function closeModal(){document.getElementById('modal').classList.remove('active')}
+function initState(rebuild){executionToken++;running=false;done=false;bee={x:0,y:0,dir:0};commands=[];collected=new Set();strokes=[];if(rebuild){generateLevel();buildBoard()}else{grid.querySelectorAll('.cell').forEach(el=>el.classList.remove('manual-selected','visited-correct'));requestAnimationFrame(()=>positionBee(true))}drawStrokes();closeModal();updateProgress();renderCommands();setFeedback('Programa los movimientos para buscar las 4 palabras.','')}
+function newGame(){initState(true)}function retry(){initState(false)}
+document.querySelectorAll('[data-cmd]').forEach(b=>b.addEventListener('click',()=>addCommand(b.dataset.cmd)));
+document.getElementById('undo-btn').addEventListener('click',undoCommand);
+document.getElementById('go-btn').addEventListener('click',executeCommands);
+document.getElementById('retry-btn').addEventListener('click',retry);
+document.getElementById('new-btn').addEventListener('click',newGame);
+document.getElementById('clear-plan-btn').addEventListener('click',clearPlanning);
+document.getElementById('clear-plan-mobile').addEventListener('click',clearPlanning);
+document.getElementById('modal-close').addEventListener('click',()=>{closeModal();newGame()});
+document.getElementById('mute-btn').addEventListener('click',()=>{soundEnabled=!soundEnabled;document.getElementById('mute-btn').textContent=soundEnabled?'🔊':'🔇';sound('tap')});
+if('ResizeObserver'in window)new ResizeObserver(()=>{sizeCanvas();positionBee(true)}).observe(grid);else window.addEventListener('resize',()=>{sizeCanvas();positionBee(true)});
+window.addEventListener('keydown',e=>{if(e.key==='Escape')closeModal();if(e.target.matches('button,input,select,textarea'))return;if(e.key==='ArrowUp'){addCommand('F');e.preventDefault()}else if(e.key==='ArrowLeft'){addCommand('L');e.preventDefault()}else if(e.key==='ArrowRight'){addCommand('R');e.preventDefault()}else if(e.key==='Backspace'){undoCommand();e.preventDefault()}else if(e.key==='Enter'&&!running){executeCommands();e.preventDefault()}});
+newGame();
+</script>
+</body></html>

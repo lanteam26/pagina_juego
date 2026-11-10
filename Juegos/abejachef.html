@@ -1,218 +1,497 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>¡Abejita Chef! 🐝</title>
-    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&display=swap" rel="stylesheet">
-    <style>
-        :root { --p1-main: #3498db; --p1-dark: #2980b9; --p1-light: #d6eaf8; --grid-bg: #8d6e63; }
-        body { font-family: 'Fredoka', sans-serif; display: flex; flex-direction: column; align-items: center; margin: 0; padding: 10px; min-height: 100vh; touch-action: none; color: #333; background-color: transparent; }
-        .decorations { position: fixed; top: 0; left: 0; right: 0; bottom: 0; z-index: -1; pointer-events: none; overflow: hidden; background: linear-gradient(180deg, #74ebd5 0%, #ACB6E5 100%); }
-        .decorations::before { content: ''; position: absolute; inset: 0; background-image: url("data:image/svg+xml,%3Csvg width='60' height='104' viewBox='0 0 60 104' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M30 52l15-26 15 26v52l-15 26-15-26zM0 0l15 26v52L0 104V0zm60 0v104L45 78V26z' fill='%23ffffff' fill-opacity='0.15' fill-rule='evenodd'/%3E%3C/svg%3E"); z-index: 1; }
-        .sun { position: absolute; top: 3%; right: 5%; font-size: 70px; z-index: 2; filter: drop-shadow(0 0 25px rgba(255, 215, 0, 0.8)); animation: pulse-sun 3s infinite alternate; }
-        @keyframes pulse-sun { 0% { transform: scale(1) rotate(0deg); } 100% { transform: scale(1.1) rotate(10deg); } }
-        .cloud { position: absolute; font-size: 60px; opacity: 0.8; z-index: 2; filter: drop-shadow(0 5px 15px rgba(255,255,255,0.5)); }
-        .c1 { top: 8%; left: -20%; animation: drift 35s linear infinite; }
-        .c2 { top: 20%; left: -20%; animation: drift 45s linear infinite 15s; font-size: 45px;}
-        .c3 { top: 5%; left: -20%; animation: drift 55s linear infinite 25s; font-size: 80px;}
-        @keyframes drift { 0% { transform: translateX(-20vw); } 100% { transform: translateX(120vw); } }
-        .grass { position: absolute; bottom: -5vh; left: -10vw; width: 120vw; height: 25vh; background: #a9dfbf; border-radius: 50% 50% 0 0; z-index: 2; box-shadow: inset 0 15px 0 #82e0aa, 0 -30px 50px rgba(46,204,113,0.3); }
-        .flower-bg { position: absolute; font-size: 35px; bottom: 15vh; z-index: 3; transform-origin: bottom center; animation: sway 2.5s ease-in-out infinite alternate; }
-        .f1 { left: 12%; animation-delay: 0s; font-size: 45px; } .f2 { left: 28%; animation-delay: 1s; bottom: 12vh; font-size: 30px;} .f3 { right: 25%; animation-delay: 0.5s; bottom: 18vh; font-size: 40px; } .f4 { right: 8%; animation-delay: 1.5s; font-size: 50px;}
-        @keyframes sway { 0% { transform: rotate(-12deg); } 100% { transform: rotate(12deg); } }
-        
-        h1 { color: #2c3e50; margin: 0px 0 5px 0; text-align: center; font-size: 26px; text-shadow: 2px 2px 0px #fff; position: relative; }
-        .prompt-box { text-align: center; background: rgba(255, 255, 255, 0.95); padding: 10px 20px; border-radius: 15px; font-size: 16px; font-weight: 600; max-width: 550px; margin-bottom: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); position: relative; border: 3px solid #ffb74d; }
-        .grid-wrapper { position: relative; margin-bottom: 15px; padding: 10px; background: #ffe0b2; border-radius: 15px; box-shadow: 0 8px 0 #ffb74d, 0 15px 25px rgba(0,0,0,0.25); }
-        #grid { display: grid; grid-template-columns: repeat(4, 75px); grid-template-rows: repeat(4, 75px); gap: 6px; background-color: var(--grid-bg); border-radius: 10px; padding: 6px; }
-        #drawing-canvas { position: absolute; top: 10px; left: 10px; z-index: 10; cursor: crosshair; border-radius: 10px; }
-        
-        .cell { background-color: #fff9c4; border-radius: 8px; display: flex; justify-content: center; align-items: center; position: relative; user-select: none; box-shadow: inset 0 -4px 0 rgba(0,0,0,0.1); font-size: 35px;}
-        .cell[data-start="true"] { background-color: #e2f1f8; box-shadow: inset 0 -4px 0 rgba(0,0,0,0.05); }
-        .visited-correct { background-color: #a9dfbf !important; box-shadow: inset 0 0 15px #2ecc71 !important; transform: scale(0.9); }
-        .visited-correct::before { content: '✔️'; position: absolute; font-size: 20px; top: -5px; left: -5px; z-index: 20;}
-        .visited-wrong { background-color: #f5b7b1 !important; box-shadow: inset 0 0 15px #e74c3c !important; animation: shake 0.4s; }
-        @keyframes shake { 0%, 100% {transform: translateX(0);} 25%, 75% {transform: translateX(-4px);} 50% {transform: translateX(4px);} }
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Abejita Chef · Edición Ilustrada</title>
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Nunito:wght@700;800;900&display=swap" rel="stylesheet">
+  <style>
+    :root{
+      --sky-top:#8fd4ef;
+      --sky-mid:#c8f0e2;
+      --sky-bottom:#ffe6b9;
+      --panel:#fffdf7;
+      --panel-2:#fff6e6;
+      --ink:#32485f;
+      --muted:#6e7f8e;
+      --line:#eadbc0;
+      --brown:#8d6e63;
+      --yellow:#ffd66f;
+      --yellow-dark:#f2b94f;
+      --blue:#66b6e7;
+      --blue-dark:#418cc1;
+      --pink:#ff84a8;
+      --pink-dark:#e3668c;
+      --green:#73c988;
+      --green-dark:#4da566;
+      --orange:#ffad49;
+      --orange-dark:#e4881d;
+      --gray:#98a8ad;
+      --gray-dark:#76868b;
+      --red:#e66c61;
+      --red-dark:#c34f46;
+      --shadow:0 16px 40px rgba(59,88,110,.18);
+    }
+    *{box-sizing:border-box}
+    html,body{margin:0;min-height:100%;font-family:'Fredoka',system-ui,sans-serif;color:var(--ink)}
+    body{
+      background:linear-gradient(180deg,var(--sky-top) 0%, var(--sky-mid) 55%, var(--sky-bottom) 100%);
+      overflow-x:hidden;
+      user-select:none;
+      touch-action:manipulation;
+    }
+    .decorations{position:fixed;inset:0;overflow:hidden;pointer-events:none;z-index:-2}
+    .decorations::before{content:'';position:absolute;inset:0;opacity:.14;background-image:radial-gradient(#fff 1.15px,transparent 1.15px);background-size:25px 25px}
+    .sun{position:absolute;right:7%;top:6%;width:126px;height:126px;border-radius:50%;background:#fff5a8;box-shadow:0 0 0 22px rgba(255,244,168,.18),0 0 0 46px rgba(255,244,168,.08);animation:pulseSun 3.5s ease-in-out infinite alternate}
+    @keyframes pulseSun{from{transform:scale(1)}to{transform:scale(1.08)}}
+    .cloud{position:absolute;width:160px;height:44px;border-radius:999px;background:rgba(255,255,255,.7);filter:drop-shadow(0 10px 10px rgba(255,255,255,.18));animation:drift 26s ease-in-out infinite alternate}
+    .cloud::before,.cloud::after{content:'';position:absolute;border-radius:50%;background:inherit}
+    .cloud::before{width:70px;height:62px;left:22px;bottom:8px}
+    .cloud::after{width:78px;height:58px;left:68px;bottom:7px}
+    .c1{left:7%;top:12%}.c2{right:10%;top:23%;transform:scale(.82);animation-delay:-7s}.c3{left:42%;top:8%;transform:scale(.65);animation-delay:-11s}
+    @keyframes drift{to{transform:translateX(40px) translateY(-8px)}}
+    .hill{position:absolute;bottom:-8vh;width:85vw;height:24vh;border-radius:50% 50% 0 0}.h1{left:-18%;background:#99c79a;transform:rotate(4deg)}.h2{right:-20%;background:#77af89;transform:rotate(-5deg)}
+    .flower-bg{position:absolute;bottom:12vh;font-size:34px;animation:sway 2.5s ease-in-out infinite alternate;transform-origin:bottom center}.f1{left:8%}.f2{left:20%;font-size:28px;bottom:15vh;animation-delay:.6s}.f3{right:18%;font-size:38px;bottom:16vh;animation-delay:1.2s}.f4{right:7%;font-size:44px;animation-delay:.9s}
+    @keyframes sway{from{transform:rotate(-10deg)}to{transform:rotate(10deg)}}
 
-        .bee-container { position: absolute; z-index: 15; width: 55px; height: 55px; display: flex; justify-content: center; align-items: center; }
-        .bee-orientation { transition: transform 0.2s ease; display: flex; justify-content: center; align-items: center; }
-        
-        .bee-sprite { display: flex; justify-content: center; align-items: center; animation: float 2s ease-in-out infinite; filter: drop-shadow(0 4px 6px rgba(0,0,0,0.3)); }
-        @keyframes float { 0%, 100% { transform: translateY(0px); } 50% { transform: translateY(-5px); } }
+    .app-shell{width:min(980px,100%);margin:0 auto;padding:24px 14px 28px;display:flex;flex-direction:column;align-items:center;gap:16px}
+    .header-card{width:min(920px,100%);background:rgba(255,253,247,.92);border:4px solid rgba(255,255,255,.95);border-radius:28px;box-shadow:0 18px 48px rgba(46,79,103,.18);padding:16px 18px 18px;position:relative;overflow:hidden}
+    .header-card::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(255,255,255,.28),transparent 36%);pointer-events:none}
+    .header-top{display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:6px;position:relative;z-index:1}
+    .mini-badge{display:inline-flex;align-items:center;gap:8px;background:#fff;border:2px solid #efe3cf;color:#b47a59;padding:8px 14px;border-radius:999px;font:900 11px 'Nunito',sans-serif;letter-spacing:1.8px;text-transform:uppercase}
+    h1{margin:0;text-align:center;font-family:'Nunito',sans-serif;font-size:clamp(31px,5vw,48px);line-height:1;color:#38516b;text-shadow:0 3px 0 #fff}
+    .title-accent{display:block;color:#f1897f}
+    .subtitle{margin:8px auto 0;text-align:center;max-width:630px;color:var(--muted);font-size:15px;line-height:1.45;position:relative;z-index:1}
 
-        .panels-container { display: flex; justify-content: center; width: 100%; max-width: 450px; margin-bottom: 20px; position: relative; }
-        .panel { box-sizing: border-box; background: rgba(255, 255, 255, 0.95); padding: 15px; border-radius: 18px; box-shadow: 0 8px 20px rgba(0,0,0,0.15); width: 95%; display: flex; flex-direction: column; align-items: center; border: 4px solid var(--p1-main); }
-        .panel h3 { margin: 0 0 10px 0; font-size: 18px; color: var(--p1-dark); }
-        .btn-group { display: flex; gap: 6px; justify-content: space-between; width: 100%; margin-bottom: 15px; }
-        button { font-family: 'Fredoka', sans-serif; font-weight: 700; border: none; border-radius: 10px; cursor: pointer; transition: all 0.1s; user-select: none; }
-        button:active { transform: translateY(4px); box-shadow: 0 0px 0 transparent !important; }
-        .cmd-btn { padding: 10px 2px; font-size: 13px; color: white; flex: 1; background-color: var(--p1-main); box-shadow: 0 5px 0 var(--p1-dark); white-space: nowrap; }
-        .undo-btn { background-color: #e74c3c; box-shadow: 0 5px 0 #c0392b; flex: 0.8; }
-        
-        .seq-container { display: flex; flex-wrap: wrap; gap: 5px; min-height: 45px; background: rgba(255,255,255,0.7); padding: 8px; border-radius: 10px; width: 95%; border: 2px dashed rgba(0,0,0,0.1); }
-        .cmd-block { display: inline-flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 6px; color: white; font-weight: bold; font-size: 18px; box-shadow: 0 3px 0 rgba(0,0,0,0.2); background: var(--p1-main); }
+    .prompt-box{width:min(920px,100%);display:grid;grid-template-columns:1.08fr .92fr;gap:16px;align-items:stretch}
+    .recipe-card,.info-card{background:rgba(255,253,248,.94);border:3px solid rgba(255,255,255,.92);border-radius:24px;box-shadow:var(--shadow);padding:18px;position:relative;overflow:hidden}
+    .recipe-card::before,.info-card::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(255,255,255,.22),transparent 40%);pointer-events:none}
+    .section-kicker{font:900 11px 'Nunito',sans-serif;letter-spacing:1.9px;text-transform:uppercase;color:#c27d58;margin-bottom:10px;display:flex;align-items:center;gap:8px}
+    .recipe-title{font-family:'Nunito',sans-serif;font-size:29px;line-height:1.05;margin:0 0 10px;color:#314d61}
+    .recipe-copy{margin:0;color:#66798a;font-size:15px;line-height:1.45}
+    .ingredient-row{display:flex;flex-wrap:wrap;gap:10px;margin-top:15px}
+    .ingredient-chip{display:flex;align-items:center;gap:10px;background:#fff;border:2px solid #f1e4d0;padding:10px 13px;border-radius:16px;box-shadow:0 4px 0 #efe0c7;min-width:102px}
+    .ingredient-icon{font-size:24px}
+    .ingredient-name{display:flex;flex-direction:column;line-height:1.05}
+    .ingredient-name strong{font-size:14px;color:#3b5c70}.ingredient-name span{font-size:11px;color:#98a3af}
+    .info-card{display:flex;flex-direction:column;justify-content:center;gap:11px}
+    .tip-line{display:flex;align-items:flex-start;gap:10px;background:#fff;padding:10px 12px;border:2px solid #efe7d8;border-radius:16px}
+    .tip-icon{font-size:22px;line-height:1}.tip-line strong{display:block;font-size:14px;color:#39566b}.tip-line span{display:block;font-size:12px;color:#7d8c98;line-height:1.35}
 
-        .global-controls { display: flex; gap: 15px; margin-bottom: 20px; position: relative; }
-        .global-btn { padding: 12px 20px; font-size: 18px; color: white; border-radius: 15px; }
-        #go-btn { background-color: #ff9800; box-shadow: 0 5px 0 #f57c00; }
-        .reset-btn { background-color: #95a5a6; box-shadow: 0 5px 0 #7f8c8d; }
+    .game-board-wrap{width:min(920px,100%);display:flex;justify-content:center}
+    .grid-shell{background:rgba(255,247,230,.96);padding:16px;border-radius:30px;border:4px solid rgba(255,255,255,.92);box-shadow:0 18px 42px rgba(53,78,100,.18);position:relative}
+    .grid-shell::before{content:'✦ DESPENSA DE LA ABEJITA ✦';position:absolute;left:50%;transform:translateX(-50%);top:-13px;background:#fff;border:2px solid #efe2cf;color:#c57f5d;padding:7px 14px;border-radius:999px;font:900 11px 'Nunito',sans-serif;letter-spacing:1.5px;white-space:nowrap}
+    .grid-wrapper{position:relative;padding:10px;background:#ffd78a;border-radius:22px;box-shadow:inset 0 0 0 4px rgba(255,255,255,.46),0 8px 0 #e5a640}
+    #grid{display:grid;grid-template-columns:repeat(4,minmax(62px,84px));grid-template-rows:repeat(4,minmax(62px,84px));gap:8px;background:var(--brown);padding:8px;border-radius:18px}
+    #drawing-canvas{position:absolute;top:10px;left:10px;z-index:10;cursor:crosshair;border-radius:16px}
+    .cell{background:linear-gradient(180deg,#fff3be,#ffe494);border-radius:14px;display:flex;justify-content:center;align-items:center;position:relative;box-shadow:inset 0 -5px 0 rgba(173,122,39,.18);font-size:34px;transition:transform .2s, background .2s, box-shadow .2s}
+    .cell::after{content:'';position:absolute;inset:8px;border-radius:10px;border:2px dashed rgba(255,255,255,.35);pointer-events:none}
+    .cell[data-start="true"]{background:linear-gradient(180deg,#dff4ff,#c8ebfb);box-shadow:inset 0 -5px 0 rgba(74,151,184,.12)}
+    .cell[data-start="true"]::before{content:'🏠';position:absolute;top:4px;left:6px;font-size:12px;opacity:.85}
+    .visited-correct{background:linear-gradient(180deg,#c5f3ca,#93e0a4)!important;box-shadow:inset 0 0 18px #4eb76a,0 0 0 3px rgba(255,255,255,.35)!important;transform:scale(.96)}
+    .visited-correct::before{content:'✔️';position:absolute;top:-7px;left:-6px;font-size:19px;z-index:20}
+    .visited-wrong{background:linear-gradient(180deg,#ffd0cb,#ffb4aa)!important;box-shadow:inset 0 0 18px #ea6759!important;animation:shake .4s;transform:scale(.97)}
+    @keyframes shake{0%,100%{transform:translateX(0) scale(.97)}25%,75%{transform:translateX(-3px) scale(.97)}50%{transform:translateX(3px) scale(.97)}}
 
-        .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.6); display: flex; justify-content: center; align-items: center; z-index: 100; visibility: hidden; opacity: 0; transition: all 0.3s; }
-        .modal-overlay.active { visibility: visible; opacity: 1; }
-        .modal-box { background: white; padding: 25px; border-radius: 20px; text-align: center; max-width: 80%; transform: scale(0.7); transition: 0.3s; box-shadow: 0 10px 30px rgba(0,0,0,0.3); }
-        .modal-overlay.active .modal-box { transform: scale(1); }
-        .modal-title { font-size: 24px; margin-bottom: 10px; color: #ff9800; }
-        .modal-msg { font-size: 16px; margin-bottom: 20px; color: #555; white-space: pre-line;}
-        .modal-btn { background: #4CAF50; box-shadow: 0 5px 0 #388E3C; padding: 10px 20px; font-size: 16px; color: white; }
-    </style>
+    .bee-container{position:absolute;z-index:15;width:56px;height:56px;display:flex;justify-content:center;align-items:center;pointer-events:none}
+    .bee-orientation{transition:transform .22s ease;display:flex;justify-content:center;align-items:center}
+    .bee-sprite{width:52px;height:52px;display:flex;justify-content:center;align-items:center;animation:floatBee 2s ease-in-out infinite;filter:drop-shadow(0 6px 8px rgba(0,0,0,.25))}
+    @keyframes floatBee{0%,100%{transform:translateY(0)}50%{transform:translateY(-4px)}}
+    .bee-svg{width:52px;height:52px;overflow:visible}
+    .bee-wing-left,.bee-wing-right{transform-box:fill-box;transform-origin:center;animation:wingL .18s ease-in-out infinite alternate}
+    .bee-wing-right{animation-name:wingR}
+    @keyframes wingL{from{transform:rotate(-8deg)}to{transform:rotate(18deg)}}
+    @keyframes wingR{from{transform:rotate(8deg)}to{transform:rotate(-18deg)}}
+
+    .panels-container{width:min(920px,100%);display:flex;justify-content:center}
+    .panel{background:rgba(255,253,248,.96);padding:18px;border-radius:26px;box-shadow:var(--shadow);width:100%;border:4px solid rgba(255,255,255,.92);display:flex;flex-direction:column;align-items:center;gap:14px}
+    .panel h3{margin:0;font-family:'Nunito',sans-serif;font-size:24px;color:#355269}
+    .btn-group{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;width:100%}
+    button{font-family:'Fredoka',sans-serif;font-weight:700;border:none;cursor:pointer;transition:transform .12s,box-shadow .12s,filter .12s;-webkit-tap-highlight-color:transparent}
+    button:hover{filter:brightness(1.03)}
+    button:active{transform:translateY(4px);box-shadow:0 0 0 transparent!important}
+    .cmd-btn{padding:12px 8px;font-size:14px;color:white;border-radius:16px;box-shadow:0 6px 0 var(--blue-dark);background:linear-gradient(180deg,var(--blue),#59a9de);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;min-height:68px}
+    .cmd-btn .icon{font-size:22px;line-height:1}
+    .cmd-btn .label{font-size:12px;line-height:1.1}
+    .undo-btn{background:linear-gradient(180deg,var(--red),#dc665d);box-shadow:0 6px 0 var(--red-dark)}
+    .seq-wrap{width:100%;background:#fff;border:2px dashed #e8ddc9;padding:12px;border-radius:18px}
+    .seq-header{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:9px;color:#7d8e98;font-size:13px;font-weight:600}
+    .seq-container{display:flex;flex-wrap:wrap;gap:7px;min-height:48px;align-items:flex-start}
+    .cmd-block{display:inline-flex;align-items:center;justify-content:center;width:38px;height:38px;border-radius:11px;color:white;font-weight:700;font-size:18px;box-shadow:0 4px 0 rgba(0,0,0,.14);background:linear-gradient(180deg,var(--blue),#56a5da)}
+    .placeholder-text{font-size:13px;color:#a0a9b3}
+
+    .global-controls{display:flex;gap:14px;flex-wrap:wrap;justify-content:center;width:min(920px,100%)}
+    .global-btn{padding:14px 22px;font-size:18px;color:white;border-radius:18px;min-width:186px;box-shadow:0 6px 0 var(--orange-dark)}
+    #go-btn{background:linear-gradient(180deg,var(--orange),#ffa735);box-shadow:0 6px 0 var(--orange-dark)}
+    .reset-btn{background:linear-gradient(180deg,var(--gray),#8d9da1);box-shadow:0 6px 0 var(--gray-dark)}
+
+    .modal-overlay{position:fixed;inset:0;background:rgba(29,45,59,.58);display:flex;justify-content:center;align-items:center;z-index:100;visibility:hidden;opacity:0;transition:all .28s;backdrop-filter:blur(6px)}
+    .modal-overlay.active{visibility:visible;opacity:1}
+    .modal-box{background:linear-gradient(180deg,#fffdf8,#fff2dc);padding:30px 26px;border-radius:28px;text-align:center;max-width:min(440px,88vw);transform:scale(.74) translateY(20px);transition:.3s;box-shadow:0 18px 36px rgba(0,0,0,.26);border:5px solid rgba(255,255,255,.94)}
+    .modal-overlay.active .modal-box{transform:scale(1) translateY(0)}
+    .modal-emoji{font-size:58px;display:block;margin-bottom:6px}
+    .modal-title{font-family:'Nunito',sans-serif;font-size:31px;line-height:1.06;margin:0 0 10px;color:#ef8b44}
+    .modal-msg{font-size:16px;line-height:1.5;margin:0 0 20px;color:#5f6d78;white-space:pre-line}
+    .modal-btn{background:linear-gradient(180deg,#6dcf82,#59b96e);box-shadow:0 6px 0 #419853;padding:12px 24px;font-size:17px;color:white;border-radius:16px}
+
+    @media (max-width:840px){
+      .prompt-box{grid-template-columns:1fr}
+      .btn-group{grid-template-columns:repeat(2,1fr)}
+      .header-card{padding:16px}
+      .recipe-title{font-size:25px}
+    }
+    @media (max-width:560px){
+      body{padding-bottom:16px}
+      .app-shell{padding:14px 10px 24px;gap:13px}
+      .header-card{border-radius:22px}
+      .mini-badge{font-size:10px;padding:7px 11px}
+      h1{font-size:36px}
+      .subtitle{font-size:14px}
+      .recipe-card,.info-card,.panel{padding:14px;border-radius:20px}
+      .grid-shell{padding:12px;border-radius:24px}
+      #grid{grid-template-columns:repeat(4,minmax(56px,1fr));grid-template-rows:repeat(4,minmax(56px,1fr));gap:6px}
+      .cell{font-size:29px}
+      .btn-group{gap:8px}
+      .cmd-btn{min-height:62px;padding:10px 6px}
+      .cmd-btn .label{font-size:11px}
+      .global-btn{flex:1;min-width:0;font-size:16px;padding:13px 14px}
+      .ingredient-chip{min-width:0;flex:1}
+      .modal-title{font-size:27px}
+    }
+  </style>
 </head>
 <body>
-    <div class="decorations">
-        <div class="sun">☀️</div><div class="cloud c1">☁️</div><div class="cloud c2">☁️</div><div class="cloud c3">☁️</div>
-        <div class="grass"></div><div class="flower-bg f1">🌻</div><div class="flower-bg f2">🌸</div><div class="flower-bg f3">🌷</div><div class="flower-bg f4">🌼</div>
-    </div>
+  <div class="decorations" aria-hidden="true">
+    <div class="sun"></div>
+    <div class="cloud c1"></div><div class="cloud c2"></div><div class="cloud c3"></div>
+    <div class="hill h1"></div><div class="hill h2"></div>
+    <div class="flower-bg f1">🌻</div><div class="flower-bg f2">🌸</div><div class="flower-bg f3">🌷</div><div class="flower-bg f4">🌼</div>
+  </div>
 
-    <h1>¡Abejita Chef! 👩‍🍳</h1>
-    <div class="prompt-box">
-        Recolecta <b>SOLO</b> los ingredientes para un Pastel:
-        <div style="font-size: 24px; margin-top: 5px;">🌾 🥚 🍓</div>
-    </div>
+  <div class="app-shell">
+    <section class="header-card">
+      <div class="header-top"><span class="mini-badge">✦ LA COCINA DEL JARDÍN ✦</span></div>
+      <h1>¡Abejita <span class="title-accent">Chef!</span></h1>
+      <p class="subtitle">Programa a la abejita para recorrer la despensa, recoger solo los ingredientes correctos y preparar un delicioso pastel.</p>
+    </section>
 
-    <div class="grid-wrapper">
-        <div id="grid"></div><canvas id="drawing-canvas"></canvas>
-    </div>
-
-    <div class="panels-container">
-        <div class="panel">
-            <h3>🐝 Programar Abeja</h3>
-            <div class="btn-group">
-                <button class="cmd-btn" onclick="addCommand('L')">↺ Giro Izq</button>
-                <button class="cmd-btn" onclick="addCommand('F')">⬆️ Avanza</button>
-                <button class="cmd-btn" onclick="addCommand('R')">↻ Giro Der</button>
-                <button class="cmd-btn undo-btn" onclick="undoCommand()">🔙 Borrar</button>
-            </div>
-            <div class="seq-container" id="seq"></div>
+    <section class="prompt-box">
+      <div class="recipe-card">
+        <div class="section-kicker">🧁 RECETA DEL DÍA</div>
+        <h2 class="recipe-title">Pastel de fresa</h2>
+        <p class="recipe-copy">La abejita debe encontrar <strong>solo</strong> los ingredientes necesarios. Si recoge algo que no corresponde, ¡la receta saldrá mal!</p>
+        <div class="ingredient-row">
+          <div class="ingredient-chip"><span class="ingredient-icon">🌾</span><span class="ingredient-name"><strong>Harina</strong><span>Base del pastel</span></span></div>
+          <div class="ingredient-chip"><span class="ingredient-icon">🥚</span><span class="ingredient-name"><strong>Huevo</strong><span>Para mezclar</span></span></div>
+          <div class="ingredient-chip"><span class="ingredient-icon">🍓</span><span class="ingredient-name"><strong>Fresa</strong><span>Toque dulce</span></span></div>
         </div>
-    </div>
-    
+      </div>
+      <div class="info-card">
+        <div class="section-kicker">💡 CÓMO JUGAR</div>
+        <div class="tip-line"><span class="tip-icon">1️⃣</span><div><strong>Programa su ruta</strong><span>Usa girar y avanzar para crear la secuencia de movimientos.</span></div></div>
+        <div class="tip-line"><span class="tip-icon">2️⃣</span><div><strong>Dibuja tu idea</strong><span>Traza un camino sobre el tablero si quieres planear antes de cocinar.</span></div></div>
+        <div class="tip-line"><span class="tip-icon">3️⃣</span><div><strong>Presiona “¡Cocinar!”</strong><span>La abejita seguirá tu programa y comprobará si la receta está completa.</span></div></div>
+      </div>
+    </section>
+
+    <section class="game-board-wrap">
+      <div class="grid-shell">
+        <div class="grid-wrapper">
+          <div id="grid"></div>
+          <canvas id="drawing-canvas"></canvas>
+        </div>
+      </div>
+    </section>
+
+    <section class="panels-container">
+      <div class="panel">
+        <h3>🐝 Programa a la abejita</h3>
+        <div class="btn-group">
+          <button class="cmd-btn" onclick="addCommand('L')"><span class="icon">↺</span><span class="label">Giro izquierda</span></button>
+          <button class="cmd-btn" onclick="addCommand('F')"><span class="icon">⬆️</span><span class="label">Avanzar</span></button>
+          <button class="cmd-btn" onclick="addCommand('R')"><span class="icon">↻</span><span class="label">Giro derecha</span></button>
+          <button class="cmd-btn undo-btn" onclick="undoCommand()"><span class="icon">🗑️</span><span class="label">Borrar último</span></button>
+        </div>
+        <div class="seq-wrap">
+          <div class="seq-header"><span>Secuencia preparada</span><span id="seq-count">0 pasos</span></div>
+          <div class="seq-container" id="seq"><span class="placeholder-text">Aquí aparecerán tus movimientos.</span></div>
+        </div>
+      </div>
+    </section>
+
     <div class="global-controls">
-        <button class="global-btn" onclick="executeCommands()" id="go-btn">🚀 ¡COCINAR!</button>
-        <button class="global-btn reset-btn" onclick="resetGame()">🔄 Otro Nivel</button>
+      <button class="global-btn" onclick="executeCommands()" id="go-btn">🚀 ¡COCINAR!</button>
+      <button class="global-btn reset-btn" onclick="resetGame()">🔄 Otro nivel</button>
     </div>
+  </div>
 
-    <div class="modal-overlay" id="modal">
-        <div class="modal-box">
-            <h2 class="modal-title" id="m-title">Título</h2><p class="modal-msg" id="m-msg">Mensaje</p>
-            <button class="modal-btn" onclick="closeModal()">¡Entendido!</button>
-        </div>
+  <div class="modal-overlay" id="modal">
+    <div class="modal-box">
+      <span class="modal-emoji" id="m-emoji">🎂</span>
+      <h2 class="modal-title" id="m-title">Título</h2>
+      <p class="modal-msg" id="m-msg">Mensaje</p>
+      <button class="modal-btn" onclick="closeModal()">¡Entendido!</button>
     </div>
+  </div>
 
-    <script>
-        const gridSize = 4; let isExecuting = false;
-        let bee = { pos: {x: 0, y: 0}, dir: 0, commands: [] }; 
-        let gridData = {}; let collectedCorrect = new Set(); let collectedWrong = 0;
-        const correctItems = ['🌾', '🥚', '🍓']; const wrongItems = ['🐟', '👢', '🦴'];
-        const gridEl = document.getElementById('grid'); const canvas = document.getElementById('drawing-canvas'); const ctx = canvas.getContext('2d');
-        let isDrawing = false; let startX, startY;
+  <script>
+    const gridSize = 4;
+    let isExecuting = false;
+    let bee = { pos: {x: 0, y: 0}, dir: 0, commands: [] };
+    let gridData = {};
+    let collectedCorrect = new Set();
+    let collectedWrong = 0;
+    const correctItems = ['🌾', '🥚', '🍓'];
+    const wrongItems = ['🐟', '👢', '🦴'];
+    const gridEl = document.getElementById('grid');
+    const canvas = document.getElementById('drawing-canvas');
+    const ctx = canvas.getContext('2d');
+    let isDrawing = false;
 
-        function generateLevel() {
-            gridData = {}; let coords = [];
-            for (let y = 0; y < gridSize; y++) for (let x = 0; x < gridSize; x++) if (x !== 0 || y !== 0) coords.push({x, y});
-            coords.sort(() => Math.random() - 0.5);
-            let items = [...correctItems, ...wrongItems];
-            items.forEach((item, i) => gridData[`${coords[i].x},${coords[i].y}`] = item);
+    function generateLevel() {
+      gridData = {};
+      let coords = [];
+      for (let y = 0; y < gridSize; y++) {
+        for (let x = 0; x < gridSize; x++) {
+          if (x !== 0 || y !== 0) coords.push({x, y});
         }
+      }
+      coords.sort(() => Math.random() - 0.5);
+      const items = [...correctItems, ...wrongItems];
+      items.forEach((item, i) => { gridData[`${coords[i].x},${coords[i].y}`] = item; });
+    }
 
-        function initGrid() {
-            gridEl.innerHTML = '';
-            for (let y = 0; y < gridSize; y++) {
-                for (let x = 0; x < gridSize; x++) {
-                    const cell = document.createElement('div'); cell.className = 'cell'; cell.id = `cell-${x}-${y}`;
-                    if (x===0 && y===0) cell.dataset.start = "true";
-                    let item = gridData[`${x},${y}`]; if (item) cell.innerText = item;
-                    gridEl.appendChild(cell);
-                }
-            }
-            setTimeout(() => {
-                canvas.width = gridEl.offsetWidth; canvas.height = gridEl.offsetHeight;
-                ctx.lineWidth = 8; ctx.lineCap = 'round'; ctx.lineJoin = 'round'; ctx.setLineDash([12, 15]); ctx.strokeStyle = 'rgba(255, 152, 0, 0.8)'; 
-            }, 50);
+    function initGrid() {
+      gridEl.innerHTML = '';
+      for (let y = 0; y < gridSize; y++) {
+        for (let x = 0; x < gridSize; x++) {
+          const cell = document.createElement('div');
+          cell.className = 'cell';
+          cell.id = `cell-${x}-${y}`;
+          if (x === 0 && y === 0) cell.dataset.start = 'true';
+          const item = gridData[`${x},${y}`];
+          if (item) cell.innerText = item;
+          gridEl.appendChild(cell);
         }
+      }
+      setTimeout(() => {
+        canvas.width = gridEl.offsetWidth;
+        canvas.height = gridEl.offsetHeight;
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.lineWidth = 8;
+        ctx.lineCap = 'round';
+        ctx.lineJoin = 'round';
+        ctx.setLineDash([14, 14]);
+        ctx.strokeStyle = 'rgba(255, 167, 53, 0.82)';
+      }, 60);
+    }
 
-        function getCursorPos(cX, cY) { const r = canvas.getBoundingClientRect(); return { x: cX - r.left, y: cY - r.top }; }
-        function startDraw(e) { if (isExecuting) return; isDrawing = true; let cX = e.touches?e.touches[0].clientX:e.clientX; let cY = e.touches?e.touches[0].clientY:e.clientY; const p = getCursorPos(cX, cY); ctx.beginPath(); ctx.moveTo(p.x, p.y); if(e.cancelable) e.preventDefault(); }
-        function draw(e) { if (!isDrawing || isExecuting) return; let cX = e.touches?e.touches[0].clientX:e.clientX; let cY = e.touches?e.touches[0].clientY:e.clientY; const p = getCursorPos(cX, cY); ctx.lineTo(p.x, p.y); ctx.stroke(); if(e.cancelable) e.preventDefault(); }
-        canvas.addEventListener('mousedown', startDraw); canvas.addEventListener('mousemove', draw); window.addEventListener('mouseup', ()=>isDrawing=false);
-        canvas.addEventListener('touchstart', startDraw, {passive:false}); canvas.addEventListener('touchmove', draw, {passive:false}); window.addEventListener('touchend', ()=>isDrawing=false);
+    function getCursorPos(cX, cY) {
+      const r = canvas.getBoundingClientRect();
+      return { x: cX - r.left, y: cY - r.top };
+    }
 
-        // NUEVA LÓGICA DE ROTACIÓN (Para un sprite que mira hacia ARRIBA por defecto)
-        function getTransform(dir) { 
-            if (dir === 0) return 'rotate(90deg)';   // Avanza a la DERECHA
-            if (dir === 1) return 'rotate(180deg)';  // Avanza hacia ABAJO
-            if (dir === 2) return 'rotate(-90deg)';  // Avanza a la IZQUIERDA
-            if (dir === 3) return 'rotate(0deg)';    // Avanza hacia ARRIBA
+    function startDraw(e) {
+      if (isExecuting) return;
+      isDrawing = true;
+      let cX = e.touches ? e.touches[0].clientX : e.clientX;
+      let cY = e.touches ? e.touches[0].clientY : e.clientY;
+      const p = getCursorPos(cX, cY);
+      ctx.beginPath();
+      ctx.moveTo(p.x, p.y);
+      if (e.cancelable) e.preventDefault();
+    }
+
+    function draw(e) {
+      if (!isDrawing || isExecuting) return;
+      let cX = e.touches ? e.touches[0].clientX : e.clientX;
+      let cY = e.touches ? e.touches[0].clientY : e.clientY;
+      const p = getCursorPos(cX, cY);
+      ctx.lineTo(p.x, p.y);
+      ctx.stroke();
+      if (e.cancelable) e.preventDefault();
+    }
+
+    canvas.addEventListener('mousedown', startDraw);
+    canvas.addEventListener('mousemove', draw);
+    window.addEventListener('mouseup', () => isDrawing = false);
+    canvas.addEventListener('touchstart', startDraw, { passive: false });
+    canvas.addEventListener('touchmove', draw, { passive: false });
+    window.addEventListener('touchend', () => isDrawing = false);
+
+    function getTransform(dir) {
+      if (dir === 0) return 'rotate(90deg)';
+      if (dir === 1) return 'rotate(180deg)';
+      if (dir === 2) return 'rotate(-90deg)';
+      return 'rotate(0deg)';
+    }
+
+    function getBeeSVG() {
+      return `
+        <svg class="bee-svg" viewBox="0 0 64 64" aria-hidden="true">
+          <g class="bee-wing-left">
+            <ellipse cx="18" cy="23" rx="11" ry="16" fill="#dff5ff" opacity="0.95" stroke="#9bd7eb" stroke-width="2" transform="rotate(-28 18 23)"/>
+          </g>
+          <g class="bee-wing-right">
+            <ellipse cx="46" cy="23" rx="11" ry="16" fill="#dff5ff" opacity="0.95" stroke="#9bd7eb" stroke-width="2" transform="rotate(28 46 23)"/>
+          </g>
+          <ellipse cx="32" cy="56" rx="15" ry="4" fill="rgba(38,66,84,0.18)"/>
+          <path d="M18 28c0-10 7-18 14-18s14 8 14 18v10c0 10-7 18-14 18s-14-8-14-18z" fill="#f7c953" stroke="#cf9c32" stroke-width="2.5"/>
+          <rect x="18" y="30" width="28" height="6" rx="3" fill="#6e4f3a"/>
+          <rect x="19" y="40" width="26" height="5.6" rx="3" fill="#6e4f3a"/>
+          <circle cx="27" cy="28" r="2.6" fill="#47394d"/>
+          <circle cx="37" cy="28" r="2.6" fill="#47394d"/>
+          <path d="M27 35c1.8 2.2 8.2 2.2 10 0" fill="none" stroke="#8f5a44" stroke-width="2.4" stroke-linecap="round"/>
+          <circle cx="22" cy="34" r="2.8" fill="#f5a0a3" opacity="0.85"/>
+          <circle cx="42" cy="34" r="2.8" fill="#f5a0a3" opacity="0.85"/>
+          <path d="M25 9c0-5 2.6-8 7-8 4.6 0 7.2 2.8 7.2 8" fill="#f2949b" stroke="#c56d74" stroke-width="2"/>
+          <path d="M26 8h12" stroke="#ffffff" stroke-width="2" stroke-linecap="round" opacity="0.7"/>
+          <path d="M25 14l-4-7" stroke="#7e5f4e" stroke-width="2.2" stroke-linecap="round"/>
+          <path d="M39 14l4-7" stroke="#7e5f4e" stroke-width="2.2" stroke-linecap="round"/>
+          <circle cx="20.5" cy="6" r="2.8" fill="#925d7e"/>
+          <circle cx="43.5" cy="6" r="2.8" fill="#925d7e"/>
+          <path d="M18 31l-8 7" stroke="#c38a34" stroke-width="3" stroke-linecap="round"/>
+          <path d="M46 31l8 7" stroke="#c38a34" stroke-width="3" stroke-linecap="round"/>
+        </svg>`;
+    }
+
+    function drawBee() {
+      document.querySelectorAll('.bee-container').forEach(b => b.remove());
+      const cell = document.getElementById(`cell-${bee.pos.x}-${bee.pos.y}`);
+      const container = document.createElement('div');
+      container.className = 'bee-container';
+      const orient = document.createElement('div');
+      orient.className = 'bee-orientation';
+      orient.style.transform = getTransform(bee.dir);
+      const sprite = document.createElement('div');
+      sprite.className = 'bee-sprite';
+      sprite.innerHTML = getBeeSVG();
+      orient.appendChild(sprite);
+      container.appendChild(orient);
+      cell.appendChild(container);
+    }
+
+    function addCommand(cmd) {
+      if (isExecuting) return;
+      bee.commands.push(cmd);
+      updateUI();
+    }
+
+    function undoCommand() {
+      if (isExecuting || bee.commands.length === 0) return;
+      bee.commands.pop();
+      updateUI();
+    }
+
+    function updateUI() {
+      const sym = { F: '⬆️', R: '↻', L: '↺' };
+      const seq = document.getElementById('seq');
+      const count = document.getElementById('seq-count');
+      seq.innerHTML = '';
+      count.textContent = `${bee.commands.length} ${bee.commands.length === 1 ? 'paso' : 'pasos'}`;
+      if (bee.commands.length === 0) {
+        const placeholder = document.createElement('span');
+        placeholder.className = 'placeholder-text';
+        placeholder.textContent = 'Aquí aparecerán tus movimientos.';
+        seq.appendChild(placeholder);
+        return;
+      }
+      bee.commands.forEach(c => {
+        const s = document.createElement('span');
+        s.className = 'cmd-block';
+        s.innerText = sym[c];
+        seq.appendChild(s);
+      });
+    }
+
+    function visitCell(x, y) {
+      const cell = document.getElementById(`cell-${x}-${y}`);
+      const item = gridData[`${x},${y}`];
+      if (item) {
+        if (correctItems.includes(item)) {
+          cell.classList.add('visited-correct');
+          collectedCorrect.add(item);
+        } else if (wrongItems.includes(item)) {
+          cell.classList.add('visited-wrong');
+          collectedWrong++;
         }
-        
-        function drawBee() {
-            document.querySelectorAll('.bee-container').forEach(b => b.remove());
-            const cell = document.getElementById(`cell-${bee.pos.x}-${bee.pos.y}`);
-            const container = document.createElement('div'); container.className = 'bee-container';
-            const orient = document.createElement('div'); orient.className = 'bee-orientation'; orient.style.transform = getTransform(bee.dir);
-            const sprite = document.createElement('div'); sprite.className = 'bee-sprite'; 
-            
-            // Imagen Custom
-            sprite.innerHTML = '<img src="../assets/robots/BeebotEmoji.png" alt="BeeBot" style="width: 48px; height: 48px; object-fit: contain; pointer-events: none;">';
-            
-            orient.appendChild(sprite); container.appendChild(orient); cell.appendChild(container);
-        }
+      }
+    }
 
-        function addCommand(cmd) { if(isExecuting) return; bee.commands.push(cmd); updateUI(); }
-        function undoCommand() { if(isExecuting || bee.commands.length===0) return; bee.commands.pop(); updateUI(); }
-        function updateUI() {
-            const sym = { 'F': '⬆️', 'R': '↻', 'L': '↺' }; const seq = document.getElementById('seq'); seq.innerHTML = ''; 
-            bee.commands.forEach(c => { const s = document.createElement('span'); s.className = 'cmd-block'; s.innerText = sym[c]; seq.appendChild(s); });
+    function executeCommands() {
+      if (bee.commands.length === 0 || isExecuting) return;
+      isExecuting = true;
+      document.getElementById('go-btn').style.opacity = '0.6';
+      collectedCorrect.clear();
+      collectedWrong = 0;
+      document.querySelectorAll('.cell').forEach(c => c.classList.remove('visited-correct', 'visited-wrong'));
+      visitCell(bee.pos.x, bee.pos.y);
+      let step = 0;
+      const interval = setInterval(() => {
+        if (step >= bee.commands.length) {
+          clearInterval(interval);
+          checkWin();
+          return;
         }
-
-        function visitCell(x, y) {
-            const cell = document.getElementById(`cell-${x}-${y}`); let item = gridData[`${x},${y}`];
-            if (item) {
-                if (correctItems.includes(item)) { cell.classList.add('visited-correct'); collectedCorrect.add(item); } 
-                else if (wrongItems.includes(item)) { cell.classList.add('visited-wrong'); collectedWrong++; }
-            }
+        const cmd = bee.commands[step];
+        if (cmd === 'F') {
+          let nx = bee.pos.x, ny = bee.pos.y;
+          if (bee.dir === 0) nx++;
+          else if (bee.dir === 1) ny++;
+          else if (bee.dir === 2) nx--;
+          else ny--;
+          if (nx >= 0 && nx < gridSize && ny >= 0 && ny < gridSize) {
+            bee.pos.x = nx;
+            bee.pos.y = ny;
+            visitCell(nx, ny);
+          }
+        } else if (cmd === 'R') {
+          bee.dir = (bee.dir + 1) % 4;
+        } else if (cmd === 'L') {
+          bee.dir = (bee.dir + 3) % 4;
         }
+        drawBee();
+        step++;
+      }, 600);
+    }
 
-        function executeCommands() {
-            if (bee.commands.length === 0 || isExecuting) return; isExecuting = true; document.getElementById('go-btn').style.opacity = "0.5";
-            collectedCorrect.clear(); collectedWrong = 0;
-            document.querySelectorAll('.cell').forEach(c => c.classList.remove('visited-correct', 'visited-wrong'));
-            visitCell(bee.pos.x, bee.pos.y);
-            let step = 0;
-            const interval = setInterval(() => {
-                if (step >= bee.commands.length) { clearInterval(interval); checkWin(); return; }
-                const cmd = bee.commands[step];
-                if (cmd === 'F') {
-                    let nx = bee.pos.x, ny = bee.pos.y;
-                    if (bee.dir===0) nx++; else if (bee.dir===1) ny++; else if (bee.dir===2) nx--; else ny--; 
-                    if (nx>=0 && nx<gridSize && ny>=0 && ny<gridSize) { bee.pos.x = nx; bee.pos.y = ny; visitCell(nx, ny); }
-                } else if (cmd === 'R') bee.dir = (bee.dir+1)%4; else if (cmd === 'L') bee.dir = (bee.dir+3)%4;
-                drawBee(); step++;
-            }, 600); 
+    function showModal(title, msg, emoji = '🎂') {
+      document.getElementById('m-title').innerText = title;
+      document.getElementById('m-msg').innerText = msg;
+      document.getElementById('m-emoji').innerText = emoji;
+      document.getElementById('modal').classList.add('active');
+    }
+
+    function closeModal() {
+      document.getElementById('modal').classList.remove('active');
+    }
+
+    function checkWin() {
+      setTimeout(() => {
+        if (collectedWrong > 0) {
+          showModal('¡Sabe feo! 🤢', 'Recogiste un ingrediente incorrecto.\n¡Esquiva lo que no sea parte del pastel!', '😵');
+        } else if (collectedCorrect.size === 3) {
+          showModal('¡Pastel listo! 🎂', '¡Excelente! Recogiste todos los ingredientes perfectos para la receta.', '🎉');
+        } else {
+          showModal('¡Faltan ingredientes! 🤔', 'Olvidaste algunos ingredientes del pastel.\nPrueba otra ruta.', '🧁');
         }
+        document.getElementById('go-btn').style.opacity = '1';
+        isExecuting = false;
+      }, 400);
+    }
 
-        function showModal(t, m) { document.getElementById('m-title').innerText = t; document.getElementById('m-msg').innerText = m; document.getElementById('modal').classList.add('active'); }
-        function closeModal() { document.getElementById('modal').classList.remove('active'); }
-        function checkWin() {
-            setTimeout(() => {
-                if (collectedWrong > 0) showModal("¡Sabe feo! 🤢", "Recogiste un ingrediente incorrecto. ¡Esquiva lo que no sea del pastel!");
-                else if (collectedCorrect.size === 3) showModal("¡Pastel Horneado! 🎂", "¡Recogiste todos los ingredientes perfectos!");
-                else showModal("¡Faltan cosas! 🤔", "Olvidaste algunos ingredientes para hacer el pastel.");
-                document.getElementById('go-btn').style.opacity = "1"; isExecuting = false;
-            }, 400);
-        }
+    function resetGame() {
+      bee = { pos: { x: 0, y: 0 }, dir: 0, commands: [] };
+      isExecuting = false;
+      generateLevel();
+      updateUI();
+      document.getElementById('go-btn').style.opacity = '1';
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      initGrid();
+      drawBee();
+    }
 
-        function resetGame() { bee = { pos:{x:0,y:0}, dir:0, commands:[] }; isExecuting=false; generateLevel(); updateUI(); document.getElementById('go-btn').style.opacity="1"; ctx.clearRect(0,0,canvas.width,canvas.height); initGrid(); drawBee(); }
-        resetGame();
-    </script>
+    resetGame();
+  </script>
 </body>
 </html>

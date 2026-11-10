@@ -134,17 +134,140 @@
         @keyframes damageShake { 0%, 100% { transform: translateX(0); } 20%, 60% { transform: translateX(-10px); } 40%, 80% { transform: translateX(10px); } }
         .shake { animation: damageShake 0.4s both; }
     </style>
+
+<style id="premium-redesign">
+/* Neon Coder — visual layer. All gameplay IDs and callbacks retained. */
+:root{--bg-color:#050b1c;--cyber-cyan:#64eff9;--cyber-pink:#ff6ba4;--cyber-green:#75fac4;--cyber-yellow:#ffdb76;--cyber-purple:#b18cff;--cyber-orange:#ff9e76;--grid-bg:#0b1c33;--cell-border:#2b5277;--text-gray:#9ab4c6;--panel:#0b172d;--line:#264367;--tile:clamp(41px,min(12vw,9.3vh),66px)}
+*,*:before,*:after{box-sizing:border-box}
+html,body{min-height:100%;height:auto;width:100%;overflow-x:hidden;overflow-y:auto}
+body{display:flex;flex-direction:column;align-items:center;min-height:100dvh;background:#061327;color:#eafaff;font-family:'Rajdhani',sans-serif;letter-spacing:.12px;touch-action:manipulation}
+body button{font-family:'Rajdhani',sans-serif;font-weight:700}button:focus-visible{outline:3px solid #d3faff;outline-offset:4px}
+.decorations{z-index:-1;background:radial-gradient(ellipse 100% 70% at 50% 12%,#153352 0%,#08172e 56%,#030b19 100%)}
+.cyber-grid{position:absolute;inset:-35% -15%;background-image:linear-gradient(rgba(88,186,211,.08) 1px,transparent 1px),linear-gradient(90deg,rgba(88,186,211,.08) 1px,transparent 1px);background-size:58px 58px;transform:perspective(700px) rotateX(46deg);transform-origin:center bottom;animation:gridFlow 26s linear infinite;opacity:.65}
+@keyframes gridFlow{to{background-position:0 116px,116px 0}}
+.ambient-orb{position:absolute;border-radius:50%;filter:blur(65px);opacity:.27}.orb-a{width:420px;height:360px;left:-180px;top:10%;background:#1377cc}.orb-b{width:420px;height:380px;right:-160px;bottom:5%;background:#6935bd}
+.star-field{position:absolute;inset:0;background-image:radial-gradient(#c4ffff 1px,transparent 1px),radial-gradient(#71afe9 1px,transparent 1px);background-size:180px 160px,265px 243px;background-position:40px 80px,150px 25px;opacity:.2}
+.scanlines{z-index:200;box-shadow:none;background-size:100% 7px;opacity:.13}
+.sound-toggle{position:fixed;right:15px;top:18px;z-index:800;background:#0f2b44ea;border:1px solid #56cddd;width:45px;height:45px;border-radius:13px;color:#93f5ff;box-shadow:0 0 0 4px #6cf6ff10,0 10px 22px #0005;font-size:20px}
+/* Launch screen */
+#instructions-screen{position:fixed;inset:0;z-index:600;min-height:100dvh;overflow-y:auto;display:flex;justify-content:center;align-items:center;padding:34px 18px;background:#031120dc;backdrop-filter:blur(15px)}
+.instructions-card{width:min(960px,100%);max-width:960px;padding:0;overflow:hidden;border-radius:28px;background:linear-gradient(155deg,#132945,#0b1830 65%,#121b37);border:1px solid #5a9bc879;box-shadow:0 28px 80px #0009,0 0 0 7px #6cd7ff08;gap:0;position:relative}
+.instructions-card::before{content:'';pointer-events:none;position:absolute;inset:0;border-radius:28px;background:linear-gradient(125deg,#ffffff15,transparent 36%);z-index:0}
+.boot-header{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:16px 24px;background:#071326;border-bottom:1px solid #2b5572;position:relative;z-index:1}
+.boot-tag{display:flex;align-items:center;gap:9px;letter-spacing:2px;font:700 11px 'Share Tech Mono',monospace;color:#8bd8ee}.boot-version{color:#7193a8;letter-spacing:1.5px;font:12px 'Share Tech Mono',monospace}
+.live-dot,.status-led i{height:8px;width:8px;display:inline-block;background:#78ffd0;border-radius:50%;box-shadow:0 0 11px #66ffdd;animation:heartbeat 1.7s infinite}
+@keyframes heartbeat{50%{opacity:.55}}
+.intro-art{height:185px;position:relative;background:radial-gradient(ellipse at center,#2e416b,#0e2345 70%,#091a33);overflow:hidden;border-bottom:1px solid #32557880}
+.intro-art svg{height:100%;width:100%;display:block;animation:artHover 5s ease-in-out infinite alternate}
+@keyframes artHover{to{transform:translateY(-4px)}}
+.intro-art-label{position:absolute;bottom:15px;font:11px 'Share Tech Mono',monospace;color:#83b8dc;letter-spacing:1px}.label-left{left:26px}.label-right{right:26px;color:#89ebcc}
+.intro-title-wrap{text-align:center;padding:19px 20px 18px}
+.tiny-kicker{font:700 11px 'Share Tech Mono',monospace;letter-spacing:2.3px;color:#81d5e7}
+.instructions-card h1{font:900 clamp(40px,6.4vw,62px) 'Rajdhani',sans-serif;letter-spacing:1.1px;line-height:.96;color:#f4fbff;margin:6px 0 7px;text-align:center;text-shadow:none}
+.instructions-card h1 span{color:#6beffc;text-shadow:0 0 25px #3ccde144}
+.intro-title-wrap p{color:#9ebdcf;font-size:17px;margin:0}
+.instruction-step{margin:0 28px 10px;background:#102943bb;border:1px solid #36607f77;border-radius:13px;gap:13px;padding:12px 16px;font-size:15px;align-items:center;color:#c5ddeb;line-height:1.25}
+.instruction-step:last-of-type{margin-bottom:0}
+.instruction-icon{font-size:25px;background:#153854;border-radius:12px;width:44px;height:44px;display:grid;place-items:center;flex-shrink:0}
+.instruction-text b{color:#8deffe}.instruction-text b.warn{color:#ffe08b}.instruction-text b.err{color:#ff9ab8}
+.start-btn{display:block;align-self:center;margin:18px auto 27px;padding:14px 37px;border-radius:13px;background:linear-gradient(135deg,#6bffee,#3ec8e7);box-shadow:0 5px 0 #187eaa,0 10px 28px #21b9e74a;font-size:20px;color:#08253b;letter-spacing:1px;font-family:'Rajdhani',sans-serif;transition:transform .16s,box-shadow .16s}
+.start-btn:hover{transform:translateY(-2px);box-shadow:0 7px 0 #187eaa,0 15px 34px #21b9e759}
+/* Header */
+.game-header{max-width:1260px;padding:23px 26px 17px;gap:14px;width:100%;flex-wrap:wrap;justify-content:space-between}
+.brand-mark{display:flex;align-items:center;gap:12px}.brand-icon{display:grid;place-items:center;font-size:29px;color:#80f9ff;width:51px;height:51px;border:1px solid #448ea8;border-radius:15px;background:linear-gradient(145deg,#173954,#10263d);box-shadow:0 0 0 5px #88f5fa09,0 5px 20px #0004}
+.brand-text{display:flex;flex-direction:column;line-height:1.05}.brand-text strong{font:800 25px 'Rajdhani',sans-serif;letter-spacing:1.5px;color:#f1faff}.brand-text small{font:10px 'Share Tech Mono',monospace;letter-spacing:1px;color:#80abbe;margin-top:5px}
+.header-actions{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.status-led{display:flex;align-items:center;gap:9px;border:1px solid #2a536d;background:#0e263d;color:#8acdbb;border-radius:12px;padding:12px;font:11px 'Share Tech Mono',monospace;letter-spacing:.6px}
+.hud-box{display:flex;flex-direction:column;background:#102741;border:1px solid #32617c;padding:6px 14px;border-radius:12px;min-width:78px;text-align:center;box-shadow:inset 0 1px 0 #ffffff12;font-family:'Rajdhani',sans-serif;line-height:1.05}
+.hud-box small{color:#85afc0;font:10px 'Share Tech Mono',monospace;letter-spacing:1px}.hud-box span{font-size:24px;font-weight:800;color:#8ffde0}
+.back-menu-btn{border:1px solid #5a869b;background:#13304c;padding:13px 15px;border-radius:12px;color:#d5f5ff;font-size:13px;font-weight:700;letter-spacing:.6px;box-shadow:0 4px 0 #081b2c}.back-menu-btn:hover{background:#1a405c}
+/* Main */
+.main-layout{display:grid;grid-template-columns:minmax(0,1.12fr) minmax(340px,.88fr);max-width:1260px;margin:0 auto;padding:0 26px 28px;gap:19px;width:100%;flex:1;min-height:0;overflow:visible;align-items:stretch}
+.board-container,.code-panel{background:linear-gradient(155deg,#112c49eF,#0a1b32f4);border:1px solid #4b8fa878;border-radius:24px;box-shadow:inset 0 1px 0 #ffffff14,0 15px 36px #0007;position:relative}
+.board-container{padding:21px 16px 18px;display:flex;flex-direction:column;justify-content:space-between;align-items:center;gap:15px;min-height:550px;overflow:hidden}
+.board-container::before{content:'';position:absolute;inset:0;background:radial-gradient(circle at center,#2ba0da1b,transparent 65%);pointer-events:none}
+.board-top{display:flex;align-items:center;justify-content:space-between;width:100%;gap:12px;padding:0 9px;position:relative;z-index:2}.board-top h2{font-size:23px;line-height:1;margin:7px 0 0;color:#e2f6ff;letter-spacing:.4px}.board-map-count{color:#7c9bb5;font:11px 'Share Tech Mono',monospace;border:1px solid #315979;background:#102d4a;padding:8px 10px;border-radius:9px;white-space:nowrap}
+.grid-board{--gap:6px;display:grid;grid-template-columns:repeat(6,var(--tile))!important;grid-template-rows:repeat(6,var(--tile))!important;gap:var(--gap);width:max-content;padding:10px;background:linear-gradient(145deg,#1b4364,#112d4b);border:2px solid #4887a4;border-radius:18px;box-shadow:0 0 0 6px #4b94b412,0 12px 35px #0007, inset 0 1px 0 #9bc6d34d;z-index:1;position:relative;align-self:center}
+.cell{width:var(--tile);height:var(--tile);border-radius:10px;background:linear-gradient(150deg,#132f4b,#10223c);border:1px solid #3455729a;font-size:clamp(20px,3vw,30px);transition:background .2s,box-shadow .2s,transform .18s}
+.cell:before{pointer-events:none}
+.cell.wall{background:repeating-linear-gradient(140deg,#38223e,#38223e 9px,#42273c 9px,#42273c 18px);border:1px solid #c252818a;box-shadow:inset 0 0 18px #60184744}.cell.wall:after{content:'▦';font:900 27px 'Rajdhani',sans-serif;color:#bd6e99;text-shadow:0 0 14px #ff6ba440;opacity:.9}
+.cell.target{background:radial-gradient(circle,#134b51,#103d3d 60%,#102c3d)}.cell.target:before{content:'◆';font-size:34px;color:#97ffe0;text-shadow:0 0 10px #5affe5,0 0 25px #4bf0be;animation:corePulse 1.8s infinite ease-in-out}
+@keyframes corePulse{50%{transform:scale(1.14);filter:brightness(1.25)}}
+.cell.door{background:linear-gradient(145deg,#442141,#341d38)!important;box-shadow:inset 0 0 18px #9d31635c!important;border:1px solid #ff7cb5!important}.cell.door:after{content:'🔒';font-size:25px;filter:drop-shadow(0 0 8px #ff6ba46e)}
+.cell.door-open{background:#0d3034!important;border:1px solid #5befc49a!important;box-shadow:inset 0 0 17px #49e4b73d!important}.cell.door-open:after{content:'🔓';font-size:18px;top:1px;right:3px}
+.cell.switch{background:linear-gradient(145deg,#514222,#3b3523);border:1px solid #ebd26c;box-shadow:inset 0 0 14px #f2be5550}.cell.switch:after{content:'⚡';font-size:27px;filter:drop-shadow(0 0 7px #ffda63);animation:pulse 1s infinite alternate}.cell.switch-active{background:linear-gradient(145deg,#144e43,#123e3a)!important;border-color:#6df3c1!important;box-shadow:inset 0 0 16px #5cffba55!important}.cell.switch-active:after{content:'✔';color:#92ffcc;text-shadow:0 0 15px #46fb9d;font:900 32px 'Rajdhani',sans-serif}
+.board-legend{display:flex;gap:8px 18px;flex-wrap:wrap;justify-content:center;color:#94b2c2;font-size:13px;position:relative;z-index:2}.board-legend span{display:flex;align-items:center;gap:8px}.legend-dot{width:10px;height:10px;border-radius:3px}.legend-dot.green{background:#67edc7;box-shadow:0 0 8px #4fffc5}.legend-dot.amber{background:#f6d574;box-shadow:0 0 8px #ffe36a}.legend-dot.rose{background:#f779b6;box-shadow:0 0 8px #ff70a7}
+.drone{position:absolute;z-index:30;width:53px;height:53px;font-size:initial;filter:drop-shadow(0 3px 7px #0009) drop-shadow(0 0 11px #67eff9);transform-origin:center center;pointer-events:none}.drone>svg{width:100%;height:100%;display:block;animation:droneBob 1.4s infinite ease-in-out}.drone-engine{position:absolute;left:50%;bottom:-4px;transform:translateX(-50%);width:13px;height:14px;border-radius:50% 50% 70% 70%;background:radial-gradient(#b1fff4,#44dff3 60%,transparent 70%);opacity:.62;filter:blur(3px);animation:engineFlash .28s infinite alternate}
+@keyframes droneBob{50%{translate:0 -3px}}@keyframes engineFlash{to{height:19px;opacity:.95}}
+/* Editor */
+.code-panel{width:auto;min-width:0;min-height:550px;display:flex;flex-direction:column;overflow:hidden;border:1px solid #497f997f}
+.code-header{padding:17px 18px 13px;background:#0b233c;border-bottom:1px solid #2c5570;color:#ceeaff;align-items:center;font-size:12px;font-family:'Share Tech Mono',monospace;letter-spacing:.65px;gap:9px}
+.terminal-dot{display:inline-block;height:8px;width:8px;background:#6dfed5;border-radius:50%;margin-right:7px;box-shadow:0 0 10px #6ffdd1}
+.mem-indicator{white-space:nowrap;color:#87f4d7;font-size:11px}.mem-indicator.full{color:#ff8aaf}
+.memory-track{height:5px;background:#123149;overflow:hidden}.memory-fill{height:100%;width:0;background:linear-gradient(90deg,#65ebfa,#67ffcf);box-shadow:0 0 9px #6af7ed;transition:width .18s}.memory-fill.full{background:linear-gradient(90deg,#ffbc72,#ff699e)}
+.palette-heading,.queue-title{display:flex;justify-content:space-between;align-items:center;padding:14px 17px 8px;font:11px 'Share Tech Mono',monospace;letter-spacing:.55px;color:#8db0c7;gap:10px}.palette-heading span:last-child,.queue-title span:last-child{color:#5b8a9f;font-size:10px}
+.command-palette{grid-template-columns:repeat(3,minmax(0,1fr));padding:8px 14px 15px;gap:8px;background:transparent;border-bottom:1px solid #2b5671}
+.cmd-btn{min-height:77px;border-radius:12px;background:linear-gradient(155deg,#1c3b58,#142a48);border:1px solid #477991;box-shadow:0 3px 0 #081b2f;color:#d8f3fc;padding:9px 4px;font:700 13px 'Rajdhani',sans-serif;letter-spacing:.3px;gap:4px}
+.cmd-btn .icon{font-size:23px;color:#72f1f9;filter:drop-shadow(0 0 6px #38d7f25c)}.cmd-btn[id^="btn-bx"]{background:linear-gradient(155deg,#342f5f,#24284e);border-color:#776ca8!important}.cmd-btn[id^="btn-bx"] .icon{color:#c1a0ff!important}
+.cmd-btn:hover:not(:disabled){background:#235371;border-color:#80edff;transform:translateY(-2px);box-shadow:0 5px 0 #0c203a}.cmd-btn:disabled{opacity:.44;filter:grayscale(.6)}
+.queue-title{padding-top:15px}
+.code-queue{padding:9px 14px 14px;flex:1;gap:7px;min-height:110px;max-height:320px;overflow-y:auto;scrollbar-width:thin;scrollbar-color:#427e98 #0e2136}
+.code-line{border:1px solid #365c78;background:#132d47;border-radius:11px;padding:9px 10px;font:14px 'Rajdhani',sans-serif;color:#cee5f0;min-height:41px;gap:6px;word-break:break-word}.code-line>div{flex:1}.code-line.active{background:#134861;border-color:#65e2ef;color:#fff;box-shadow:0 0 0 2px #66e9f522,0 0 22px #00eaff29}.code-line.error{background:#562640;border-color:#fd7fac;color:#ffb3ca}
+.delete-btn{border-radius:8px;background:#2b3b57;color:#a5c7d6;min-width:26px;min-height:28px}.delete-btn:hover{color:white;background:#a14267}
+.run-hint{font-size:12px;color:#8bafc0;padding:9px 14px;text-align:center;border-top:1px solid #2c4c68;background:#10243c}
+.run-controls{padding:14px;gap:9px;background:#0b2035;border-top:1px solid #35617b;align-items:stretch}
+.run-btn{border-radius:12px;padding:13px;background:linear-gradient(135deg,#91ffcc,#4ed9b7);box-shadow:0 4px 0 #1e957a,0 8px 20px #3aecb22b;font:900 18px 'Rajdhani',sans-serif;letter-spacing:.5px;color:#073e37}.run-btn:hover:not(:disabled){filter:brightness(1.08)}.run-btn:disabled{background:#384f5e;color:#93aab3;box-shadow:none}
+.clear-btn{border:1px solid #c26b91;border-radius:12px;color:#ffacc9;background:#41283f;padding:10px 12px;font:700 13px 'Rajdhani',sans-serif}.clear-btn:hover{background:#63304f}
+/* Dialog */
+.modal-overlay{background:#010b1cd9;backdrop-filter:blur(10px)}.modal-box{width:min(440px,93vw);max-width:93vw;border:1px solid #64b7d9;border-radius:24px;padding:33px;background:linear-gradient(140deg,#193753,#0d1b34);box-shadow:0 25px 65px #0009,0 0 0 6px #4fe7fa0b}.modal-emblem{display:block;font-size:52px;color:#85f1fa;text-shadow:0 0 25px #32d9f5}.modal-title{font:900 28px 'Rajdhani',sans-serif;letter-spacing:.8px;margin:4px 0 8px}.modal-msg{font:500 17px 'Rajdhani',sans-serif;color:#b9d5e3;line-height:1.45}.modal-btn{padding:12px 30px;border-radius:11px;background:#103b51;border:1px solid #5bdff0;color:#acfbff;font:800 17px 'Rajdhani',sans-serif}.modal-btn:hover{background:#65f0f3;color:#062938}
+@media(min-width:1000px){.main-layout{min-height:660px}.board-container,.code-panel{min-height:620px}}
+@media(max-width:830px){.game-header{padding:17px 14px 13px}.main-layout{grid-template-columns:minmax(0,1fr);padding:0 13px 24px;gap:14px}.board-container{min-height:0;padding:17px 10px 18px}.code-panel{min-height:0;height:auto}.code-queue{flex:0 0 175px;max-height:220px;overflow-y:auto}.brand-text strong{font-size:20px}.brand-icon{width:42px;height:42px;font-size:24px}.status-led{font-size:10px}}
+@media(max-width:480px){:root{--tile:min(11.4vw,57px)}.game-header{align-items:center}.header-actions{width:100%;justify-content:space-between}.brand-mark{width:100%;padding-right:42px}.status-led{flex:1;min-width:0;justify-content:center;padding:9px 6px}.hud-box{min-width:64px;padding:5px 8px}.hud-box span{font-size:20px}.back-menu-btn{padding:11px 8px;font-size:11px}.sound-toggle{top:14px;right:15px;width:40px;height:40px}.board-top{padding:0 4px}.board-top h2{font-size:20px}.board-map-count{font-size:9px;padding:7px}.board-legend{gap:5px 10px;font-size:11px}.grid-board{gap:5px;padding:7px;border-radius:13px}.cell{border-radius:7px}.drone{width:40px;height:40px}.code-header{padding:14px}.intro-art{height:150px}.instructions-card{border-radius:21px}.boot-header{padding:13px 12px}.boot-tag{font-size:9px;letter-spacing:.8px}.boot-version{font-size:9px}.intro-title-wrap{padding:17px 8px}.instruction-step{margin:0 13px 7px;padding:10px 9px;font-size:13px}.instruction-icon{width:34px;height:34px;font-size:19px}.intro-title-wrap p{font-size:14px}.palette-heading,.queue-title{font-size:10px}.cmd-btn{min-height:70px;font-size:12px}.cmd-btn .icon{font-size:20px}}
+@media(max-height:650px) and (min-width:831px){.board-container,.code-panel{min-height:540px}.main-layout{min-height:540px}}
+@media(prefers-reduced-motion:reduce){*,*:before,*:after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}
+</style>
 </head>
 <body>
 
     <audio id="bgm" loop><source src="../assets/musicaFondo/cancion1.mp3" type="audio/mpeg"></audio>
-    <div class="decorations"><div class="scanlines"></div></div>
+    <div class="decorations"><div class="cyber-grid"></div><div class="ambient-orb orb-a"></div><div class="ambient-orb orb-b"></div><div class="star-field"></div><div class="scanlines"></div></div>
     <button id="soundToggle" class="sound-toggle" aria-label="Activar sonido">🔇</button>
 
     <!-- INSTRUCCIONES -->
     <div id="instructions-screen">
         <div class="instructions-card">
-            <h1>ALGORITMOS AVANZADOS</h1>
+            <div class="boot-header"><span class="boot-tag"><span class="live-dot"></span> ACADEMIA DE PROGRAMACIÓN · MISIÓN 01</span><span class="boot-version">v. 2.0 // ONLINE</span></div>
+            <div class="intro-art" aria-hidden="true">
+              <svg viewBox="0 0 700 210" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg">
+                <defs>
+                  <linearGradient id="robotMetal" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#65f7ff"/><stop offset=".5" stop-color="#3e82cc"/><stop offset="1" stop-color="#252d87"/></linearGradient>
+                  <radialGradient id="orbGrad"><stop stop-color="#ffffff"/><stop offset=".28" stop-color="#87ffe0"/><stop offset="1" stop-color="#01c7ce" stop-opacity=".14"/></radialGradient>
+                  <filter id="blueGlow" x="-100%" y="-100%" width="300%" height="300%"><feGaussianBlur stdDeviation="7"/></filter>
+                </defs>
+                <g stroke="#44bfd4" stroke-width="1.2" opacity=".23"><path d="M0 155H700M0 105H700M0 54H700M84 0V210M174 0V210M264 0V210M354 0V210M444 0V210M534 0V210M624 0V210"/></g>
+                <path d="M35 120H130L160 83H237" stroke="#14e4f3" stroke-width="2" stroke-dasharray="5 7" fill="none" opacity=".6"/>
+                <path d="M461 97H546L578 129H669" stroke="#f35cb8" stroke-width="2" stroke-dasharray="6 7" fill="none" opacity=".65"/>
+                <g opacity=".7"><rect x="34" y="99" width="70" height="42" rx="10" fill="#112e4d" stroke="#44d7df"/><path d="M49 118h26m-26 10h13" stroke="#5ae5e7" stroke-width="3" stroke-linecap="round"/><circle cx="88" cy="119" r="5" fill="#38e4e8"/></g>
+                <g opacity=".85"><rect x="572" y="92" width="89" height="73" rx="14" fill="#192743" stroke="#fd64ad"/><rect x="587" y="108" width="59" height="37" rx="8" fill="#1d3e53" stroke="#80fce4"/><path d="M603 121l6 6-6 6m12 0h18" fill="none" stroke="#7bf8e2" stroke-width="3" stroke-linecap="round"/></g>
+                <circle cx="350" cy="100" r="89" fill="#32e4ee" opacity=".10" filter="url(#blueGlow)"/>
+                <circle cx="350" cy="100" r="87" stroke="#35cced" stroke-width="2" stroke-dasharray="6 8" fill="none" opacity=".52"/>
+                <circle cx="350" cy="100" r="69" stroke="#947dff" stroke-width="4" fill="#0b1634"/>
+                <g transform="translate(350 97)">
+                  <path d="M-59 -7L-81 -25L-93 0L-81 26L-59 7Z" fill="#122a57" stroke="#29e6f2" stroke-width="3"/>
+                  <path d="M59 -7L81 -25L93 0L81 26L59 7Z" fill="#122a57" stroke="#29e6f2" stroke-width="3"/>
+                  <circle cx="-91" r="10" fill="#68eaff" opacity=".8"/><circle cx="91" r="10" fill="#68eaff" opacity=".8"/>
+                  <path d="M-43 -39H43L57 -26V28L43 43H-43L-57 28V-26Z" fill="url(#robotMetal)" stroke="#9cfaff" stroke-width="4"/>
+                  <path d="M-42 -23H42V23H-42Z" fill="#0b243e" stroke="#50f1eb" stroke-width="2"/>
+                  <rect x="-29" y="-11" width="21" height="14" rx="6" fill="#89f9ff"/><rect x="8" y="-11" width="21" height="14" rx="6" fill="#89f9ff"/>
+                  <path d="M-15 16q15 9 30 0" fill="none" stroke="#83fbdc" stroke-linecap="round" stroke-width="4"/>
+                  <rect x="-23" y="44" width="46" height="13" rx="6" fill="#4c7fa8" stroke="#6bdef5" stroke-width="2"/>
+                  <path d="M-34 57L-23 76L-14 55M34 57L23 76L14 55" stroke="#48e8ff" stroke-width="4" fill="none"/>
+                </g>
+                <circle cx="350" cy="100" r="13" fill="url(#orbGrad)" opacity=".35"/>
+              </svg>
+              <span class="intro-art-label label-left">01 / ENLAZAR</span><span class="intro-art-label label-right">● DRON ACTIVO</span>
+            </div>
+            <div class="intro-title-wrap"><div class="tiny-kicker">✦ LA RED TE NECESITA ✦</div><h1>NEON <span>CODER</span></h1><p>Convierte instrucciones en movimientos, abre el firewall y llega al núcleo.</p></div>
             <div class="instruction-step">
                 <span class="instruction-icon">🚀</span>
                 <span class="instruction-text"><b>OBJETIVO:</b> Guía al Dron de Datos hasta el Núcleo (💠).</span>
@@ -167,24 +290,28 @@
 
     <!-- JUEGO -->
     <div class="game-header">
-        <button class="back-menu-btn" onclick="generateAndLoadLevel()">[ SALTAR NIVEL ]</button>
-        <div class="hud-box">HACKEOS: <span id="level-display">0</span></div>
+        <div class="brand-mark"><span class="brand-icon">⬡</span><span class="brand-text"><strong>NEON CODER</strong><small>LABORATORIO DE ALGORITMOS</small></span></div>
+        <div class="header-actions"><span class="status-led" id="status-indicator"><i></i> SISTEMA LISTO</span><div class="hud-box"><small>HACKEOS</small><span id="level-display">0</span></div><button class="back-menu-btn" onclick="generateAndLoadLevel()">↻ NUEVO MAPA</button></div>
     </div>
 
     <div class="main-layout">
         <!-- TABLERO -->
         <div class="board-container">
+            <div class="board-top"><div><span class="tiny-kicker">MAPA TÁCTICO</span><h2>Red de seguridad</h2></div><span class="board-map-count">SECTOR · 06 × 06</span></div>
             <div class="grid-board" id="board" style="grid-template-columns: repeat(6, 1fr); grid-template-rows: repeat(6, 1fr);">
                 <!-- Celdas generadas por JS -->
             </div>
+            <div class="board-legend"><span><i class="legend-dot green"></i> Núcleo</span><span><i class="legend-dot amber"></i> Llave</span><span><i class="legend-dot rose"></i> Firewall</span></div>
         </div>
 
         <!-- EDITOR DE CÓDIGO -->
         <div class="code-panel">
             <div class="code-header">
-                <span>>_ SECUENCIA</span>
+                <span><span class="terminal-dot"></span> EDITOR DE SECUENCIAS</span>
                 <span class="mem-indicator" id="mem-indicator">MEMORIA: 0/15</span>
             </div>
+            <div class="memory-track"><div id="memory-fill" class="memory-fill"></div></div>
+            <div class="palette-heading"><span>01 · COMANDOS Y BUCLES</span><span>TOCA PARA AÑADIR</span></div>
             
             <div class="command-palette">
                 <button class="cmd-btn" id="btn-avz" onclick="addCommand('AVANZAR')"><span class="icon">⬆️</span> AVANZAR</button>
@@ -195,10 +322,12 @@
                 <button class="cmd-btn" id="btn-bx5" style="border-color:var(--cyber-purple)" onclick="addCommand('BUCLE_X5')"><span class="icon" style="color:var(--cyber-purple)">🔁</span> BUCLE x5</button>
             </div>
 
+            <div class="queue-title"><span>02 · TU PROGRAMA</span><span id="queue-hint">LISTO PARA EDITAR</span></div>
             <div class="code-queue" id="code-queue">
                 <!-- Comandos aquí -->
             </div>
 
+            <div class="run-hint">⚡ Un bucle repite el comando que está justo antes.</div>
             <div class="run-controls">
                 <button class="clear-btn" onclick="clearCode()">[ BORRAR ]</button>
                 <button class="run-btn" id="run-btn" onclick="runCode()">▶ EJECUTAR</button>
@@ -209,7 +338,7 @@
     <!-- MODAL -->
     <div class="modal-overlay" id="modal">
         <div class="modal-box">
-            <h2 class="modal-title" id="m-title">Título</h2>
+            <span class="modal-emblem">⬡</span><h2 class="modal-title" id="m-title">Título</h2>
             <p class="modal-msg" id="m-msg">Mensaje</p>
             <button class="modal-btn" id="m-btn" onclick="closeModal()">ACEPTAR</button>
         </div>
@@ -251,6 +380,7 @@
         let isRunning = false;
         let codeSequence = [];
         let executionIndex = 0;
+        let runGeneration = 0;
         
         let drone = { x: 0, y: 0, dir: 1 };
         let droneElement = null;
@@ -322,7 +452,11 @@
         }
 
         function generateAndLoadLevel() {
+            runGeneration++;
+            isRunning = false;
             currentLevelDef = createProceduralLevel();
+            const status = document.getElementById('status-indicator');
+            if (status) status.innerHTML = '<i></i> SISTEMA LISTO';
             document.getElementById('level-display').innerText = levelsCompleted;
             
             drone = { ...currentLevelDef.start };
@@ -358,7 +492,7 @@
             if (!droneElement) {
                 droneElement = document.createElement('div');
                 droneElement.className = 'drone';
-                droneElement.innerText = '🛸';
+                droneElement.innerHTML = `<svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" aria-label="Dron" role="img"><defs><linearGradient id="d-metal" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#7aeaff"/><stop offset=".55" stop-color="#3c8acb"/><stop offset="1" stop-color="#24388b"/></linearGradient></defs><path d="M32 1L39 17L25 17Z" fill="#83fff4"/><path d="M16 27L3 21L4 42L17 38M48 27L61 21L60 42L47 38" fill="#28538b" stroke="#5df4f2" stroke-width="2"/><rect x="14" y="14" width="36" height="38" rx="12" fill="url(#d-metal)" stroke="#a0fbff" stroke-width="2.5"/><rect x="20" y="21" width="24" height="22" rx="8" fill="#0a2949"/><path d="M25 27h5m5 0h5" stroke="#9dfdff" stroke-width="4" stroke-linecap="round"/><path d="M27 35q5 4 10 0" fill="none" stroke="#79f8dc" stroke-width="2"/><path d="M24 52L19 61L32 56L45 61L40 52" fill="#43a0d4" stroke="#77ebff" stroke-width="1"/></svg><span class="drone-engine"></span>`;
                 document.querySelector('.board-container').appendChild(droneElement);
             }
             updateDroneVisuals(true);
@@ -373,8 +507,8 @@
                 let rect = cell.getBoundingClientRect();
                 let containerRect = document.querySelector('.board-container').getBoundingClientRect();
                 
-                let left = rect.left - containerRect.left + (rect.width/2) - 20; 
-                let top = rect.top - containerRect.top + (rect.height/2) - 20;
+                let left = rect.left - containerRect.left + (rect.width/2) - (droneElement.offsetWidth / 2);
+                let top = rect.top - containerRect.top + (rect.height/2) - (droneElement.offsetHeight / 2);
 
                 droneElement.style.transition = instant ? 'none' : 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)';
                 droneElement.style.left = `${left}px`;
@@ -402,6 +536,8 @@
             let ind = document.getElementById('mem-indicator');
             ind.innerText = `MEMORIA: ${current}/${max}`;
             
+            const fill = document.getElementById('memory-fill');
+            if (fill) { fill.style.width = Math.min(100,(current/max)*100)+'%'; fill.classList.toggle('full',current>=max); }
             let isFull = current >= max;
             if(isFull) ind.classList.add('full'); else ind.classList.remove('full');
             
@@ -478,6 +614,9 @@
             if(codeSequence.length === 0 || isRunning) return;
             sfxClick();
             isRunning = true;
+            const runId = ++runGeneration;
+            const status = document.getElementById('status-indicator');
+            if(status) status.innerHTML = '<i></i> EJECUTANDO';
             document.getElementById('run-btn').disabled = true;
             document.querySelectorAll('.cmd-btn').forEach(btn => btn.disabled = true);
             
@@ -517,10 +656,11 @@
             }
 
             executionIndex = 0;
-            setTimeout(() => executeStep(flatExecution), 400);
+            setTimeout(() => { if (runId === runGeneration) executeStep(flatExecution, runId); }, 400);
         }
 
-        function executeStep(flatExecution) {
+        function executeStep(flatExecution, runId) {
+            if (runId !== runGeneration || !isRunning) return;
             if (executionIndex >= flatExecution.length) {
                 checkWinCondition();
                 return;
@@ -577,6 +717,7 @@
                 setTimeout(() => document.querySelector('.board-container').classList.remove('shake'), 400);
                 
                 setTimeout(() => {
+                    if(runId !== runGeneration) return;
                     document.getElementById('m-title').style.color = "var(--cyber-pink)";
                     document.getElementById('m-title').style.textShadow = "0 0 10px var(--cyber-pink)";
                     showModal("CORRUPCIÓN CRÍTICA 💥", "El dron ha chocado contra un muro, intentó entrar a un candado cerrado o ha salido de la red.\nDepura tu código.", resetExecutionState);
@@ -585,7 +726,7 @@
             }
 
             executionIndex++;
-            setTimeout(() => executeStep(flatExecution), 500);
+            setTimeout(() => { if(runId === runGeneration) executeStep(flatExecution, runId); }, 500);
         }
 
         function checkWinCondition() {
@@ -607,7 +748,10 @@
         }
 
         function resetExecutionState() {
+            runGeneration++;
             isRunning = false;
+            const status = document.getElementById('status-indicator');
+            if(status) status.innerHTML = '<i></i> SISTEMA LISTO';
             document.getElementById('run-btn').disabled = false;
             updateMemoryIndicator(); 
             document.querySelectorAll('.code-line').forEach(el => { el.classList.remove('active'); el.classList.remove('error'); });

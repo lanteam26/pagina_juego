@@ -1,579 +1,205 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Vector Drive: Sintaxis Synthwave 📼</title>
-    <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Righteous&display=swap" rel="stylesheet">
-    
-    <style>
-        :root { 
-            --bg-color: #090014;
-            --neon-magenta: #ff00ff;
-            --neon-cyan: #00ffff;
-            --neon-purple: #8a2be2;
-            --neon-yellow: #ffea00;
-            --panel-bg: rgba(20, 0, 40, 0.85);
-        }
-
-        body, html { 
-            font-family: 'Share Tech Mono', monospace; 
-            display: flex; flex-direction: column; align-items: center; justify-content: flex-start;
-            margin: 0; padding: 0; width: 100vw; height: 100vh; 
-            color: #fff; background-color: var(--bg-color); 
-            overflow: hidden; box-sizing: border-box; user-select: none;
-        }
-
-        /* EFECTOS SYNTHWAVE / RETRO 80s */
-        .decorations { position: fixed; inset: 0; z-index: -1; pointer-events: none; overflow: hidden; background: linear-gradient(180deg, #1a0033 0%, #090014 60%, #000 100%); }
-        
-        .retro-sun { position: absolute; top: 10%; left: 50%; transform: translateX(-50%); width: 300px; height: 300px; border-radius: 50%; background: linear-gradient(180deg, var(--neon-yellow) 0%, var(--neon-magenta) 100%); box-shadow: 0 0 50px var(--neon-magenta), 0 0 100px var(--neon-yellow); z-index: 1; }
-        .sun-lines { position: absolute; bottom: 0; width: 100%; height: 50%; background: repeating-linear-gradient(180deg, transparent, transparent 15px, var(--bg-color) 15px, var(--bg-color) 20px); border-radius: 0 0 150px 150px; z-index: 2;}
-        
-        .synth-grid { position: absolute; bottom: -50%; left: -50%; width: 200%; height: 100%; background-image: linear-gradient(var(--neon-cyan) 2px, transparent 2px), linear-gradient(90deg, var(--neon-cyan) 2px, transparent 2px); background-size: 50px 50px; transform: perspective(600px) rotateX(75deg); animation: gridScroll 1s linear infinite; z-index: 3; box-shadow: inset 0 100px 100px var(--bg-color);}
-        @keyframes gridScroll { from { transform: perspective(600px) rotateX(75deg) translateY(0); } to { transform: perspective(600px) rotateX(75deg) translateY(50px); } }
-
-        .scanlines { position: fixed; inset: 0; z-index: 999; pointer-events: none; background: linear-gradient(rgba(0, 0, 0, 0) 50%, rgba(0, 0, 0, 0.25) 50%); background-size: 100% 4px; box-shadow: inset 0 0 150px rgba(0,0,0,0.9); }
-
-        .sound-toggle { position: absolute; top: 15px; right: 15px; background: rgba(0,0,0,0.8); border: 2px solid var(--neon-cyan); border-radius: 8px; width: 45px; height: 45px; font-size: 20px; display: flex; justify-content: center; align-items: center; cursor: pointer; z-index: 1000; box-shadow: 0 0 15px var(--neon-cyan); transition: all 0.2s; color: var(--neon-cyan);}
-        .sound-toggle:active { transform: scale(0.9); box-shadow: 0 0 5px var(--neon-cyan); }
-
-        /* PANTALLA DE INSTRUCCIONES */
-        #instructions-screen { position: absolute; inset: 0; z-index: 600; display: flex; flex-direction: column; justify-content: center; align-items: center; background: rgba(9,0,20,0.9); backdrop-filter: blur(5px); }
-        .instructions-card { background: var(--panel-bg); padding: 40px; border-radius: 10px; border: 2px solid var(--neon-magenta); max-width: 90%; width: 600px; display: flex; flex-direction: column; gap: 20px; box-shadow: 0 0 50px rgba(255,0,255,0.3); position: relative; z-index: 10;}
-        .instructions-card h1 { font-family: 'Righteous', cursive; font-size: 40px; color: transparent; -webkit-text-stroke: 1px var(--neon-cyan); text-shadow: 4px 4px 0 var(--neon-magenta); margin: 0; text-align: center; letter-spacing: 2px;}
-        .instruction-step { display: flex; gap: 15px; align-items: center; font-size: 16px; background: rgba(255,0,255,0.05); padding: 12px; border-radius: 8px; border: 1px solid rgba(255,0,255,0.2);}
-        .instruction-icon { font-size: 28px; flex-shrink: 0; filter: drop-shadow(0 0 5px var(--neon-cyan));}
-        .instruction-text code { color: var(--neon-yellow); font-weight: bold; background: rgba(0,0,0,0.5); padding: 2px 6px; border-radius: 4px;}
-        .start-btn { background: var(--neon-magenta); border: none; padding: 15px 40px; font-size: 22px; color: #fff; border-radius: 5px; text-transform: uppercase; font-family: 'Righteous', cursive; cursor:pointer; transition: all 0.1s; align-self: center; box-shadow: 0 0 20px var(--neon-magenta); letter-spacing: 2px; text-shadow: 2px 2px 0px #000;}
-        .start-btn:active { transform: scale(0.95); box-shadow: 0 0 10px var(--neon-magenta); }
-
-        /* HEADER DEL JUEGO */
-        .game-header { display: flex; justify-content: space-between; align-items: center; width: 100%; max-width: 900px; padding: 15px 2vw; z-index: 10; box-sizing: border-box; position: relative;}
-        .back-menu-btn { background: transparent; border: 2px solid var(--neon-magenta); padding: 8px 15px; border-radius: 5px; font-size: 14px; color: #fff; cursor: pointer; transition: all 0.2s; font-family: 'Share Tech Mono', monospace; text-shadow: 0 0 5px var(--neon-magenta); box-shadow: inset 0 0 10px rgba(255,0,255,0.3);}
-        .back-menu-btn:hover { background: var(--neon-magenta); color: #000; text-shadow: none;}
-        
-        .hud-box { background: rgba(0,0,0,0.8); padding: 8px 15px; border-radius: 5px; border: 1px solid var(--neon-cyan); font-size: 18px; color: #fff; box-shadow: 0 0 15px rgba(0,255,255,0.2); backdrop-filter: blur(5px);}
-        .hud-box span { color: var(--neon-cyan); font-weight: bold; font-size: 22px;}
-        .hud-moves { border-color: var(--neon-yellow); box-shadow: 0 0 15px rgba(255,234,0,0.2); margin-left: 15px;}
-        .hud-moves span { color: var(--neon-yellow); }
-
-        .main-layout { display: flex; flex-direction: column; gap: 15px; width: 100%; max-width: 900px; flex: 1; padding: 0 2vw 2vh 2vw; box-sizing: border-box; align-items: center; position: relative; z-index: 10;}
-
-        /* ASISTENTE VIRTUAL (HINTS) */
-        .level-hint-box { width: 100%; background: rgba(0, 255, 255, 0.1); border: 1px dashed var(--neon-cyan); padding: 10px 15px; border-radius: 5px; font-size: 14px; color: #fff; display: flex; align-items: center; gap: 10px; box-sizing: border-box; text-shadow: 0 0 5px rgba(0,255,255,0.5);}
-        .level-hint-box span { color: var(--neon-cyan); font-size: 20px;}
-
-        /* VISUALIZADOR DE ARRAYS */
-        .array-container { width: 100%; background: var(--panel-bg); border: 2px solid var(--neon-purple); border-radius: 10px; padding: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.8), inset 0 0 20px rgba(138,43,226,0.2); backdrop-filter: blur(5px); box-sizing: border-box;}
-        
-        .array-header { font-family: 'Righteous', cursive; font-size: 18px; color: var(--neon-cyan); margin-bottom: 10px; text-transform: uppercase; letter-spacing: 1px; border-bottom: 1px solid rgba(0,255,255,0.3); padding-bottom: 5px; text-shadow: 0 0 5px var(--neon-cyan);}
-        .target-header { color: var(--neon-magenta); border-bottom-color: rgba(255,0,255,0.3); text-shadow: 0 0 5px var(--neon-magenta);}
-        
-        .array-track { display: flex; gap: 10px; min-height: 70px; align-items: center; padding: 10px; background: rgba(0,0,0,0.6); border-radius: 8px; border: 1px dashed rgba(255,255,255,0.1); overflow-x: auto;}
-        
-        .data-block { width: 50px; height: 50px; background: linear-gradient(135deg, #111, #333); border: 2px solid #555; border-radius: 8px; display: flex; justify-content: center; align-items: center; font-size: 30px; box-shadow: 0 5px 15px rgba(0,0,0,0.8); position: relative; transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);}
-        .data-block::before { content: ''; position: absolute; inset: 0; background: linear-gradient(180deg, rgba(255,255,255,0.1) 0%, transparent 50%); border-radius: 6px;}
-        
-        /* Animaciones */
-        @keyframes popOut { 0% { transform: scale(1) translateY(0); opacity: 1; } 100% { transform: scale(0) translateY(-50px) translateX(50px); opacity: 0; } }
-        @keyframes shiftOut { 0% { transform: scale(1) translateY(0); opacity: 1; } 100% { transform: scale(0) translateY(-50px) translateX(-50px); opacity: 0; } }
-        @keyframes pushIn { 0% { transform: scale(0) translateX(50px); opacity: 0; } 100% { transform: scale(1) translateX(0); opacity: 1; } }
-        @keyframes unshiftIn { 0% { transform: scale(0) translateX(-50px); opacity: 0; } 100% { transform: scale(1) translateX(0); opacity: 1; } }
-
-        .anim-pop { animation: popOut 0.4s forwards; }
-        .anim-shift { animation: shiftOut 0.4s forwards; }
-        .anim-push { animation: pushIn 0.4s forwards; }
-        .anim-unshift { animation: unshiftIn 0.4s forwards; }
-
-        /* CONSOLA DE COMANDOS (BOTONES) */
-        .console-panel { width: 100%; background: var(--panel-bg); border: 2px solid var(--neon-cyan); border-radius: 10px; padding: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.8); backdrop-filter: blur(5px); display: flex; flex-direction: column; gap: 15px; box-sizing: border-box;}
-        
-        .console-title { font-family: 'Share Tech Mono', monospace; color: #fff; font-size: 16px; border-bottom: 1px dashed var(--neon-cyan); padding-bottom: 5px;}
-        
-        .btn-row { display: flex; gap: 15px; justify-content: center; flex-wrap: wrap;}
-        
-        .method-group { flex: 1; min-width: 150px; background: rgba(0,0,0,0.6); border: 1px solid #444; border-radius: 8px; padding: 10px; display: flex; flex-direction: column; gap: 8px; position: relative;}
-        
-        .method-btn { width: 100%; background: rgba(0,0,0,0.8); border: 2px solid #555; padding: 12px 10px; border-radius: 6px; color: #fff; font-family: 'Share Tech Mono', monospace; font-size: 16px; cursor: pointer; transition: all 0.1s; display: flex; flex-direction: column; align-items: center; gap: 5px;}
-        .method-btn:hover { background: rgba(255,255,255,0.1); transform: translateY(-2px); }
-        .method-btn:active { transform: translateY(3px); }
-        
-        .method-name { color: var(--neon-yellow); font-weight: bold; font-size: 18px;}
-        .method-desc { font-size: 11px; color: #aaa; text-align: center;}
-
-        /* Colores específicos para botones */
-        .btn-pop { border-color: var(--neon-magenta); } .btn-pop .method-name { color: var(--neon-magenta); }
-        .btn-shift { border-color: var(--neon-magenta); } .btn-shift .method-name { color: var(--neon-magenta); }
-        .btn-push { border-color: var(--neon-green); } .btn-push .method-name { color: var(--neon-green); }
-        .btn-unshift { border-color: var(--neon-green); } .btn-unshift .method-name { color: var(--neon-green); }
-        .btn-rev { border-color: var(--neon-cyan); } .btn-rev .method-name { color: var(--neon-cyan); }
-
-        .item-selector { display: flex; flex-direction: column; align-items: center; gap: 5px; background: #000; padding: 5px; border-radius: 5px; border: 1px solid #333;}
-        .item-selector-title { font-size: 10px; color: #888; text-transform: uppercase;}
-        .item-palette { display: flex; gap: 5px;}
-        .item-btn { width: 35px; height: 35px; background: #222; border: 1px solid #555; border-radius: 4px; font-size: 20px; cursor: pointer; transition: all 0.1s;}
-        .item-btn:hover { border-color: #fff; background: #444;}
-        .item-btn:active { transform: scale(0.9); }
-
-        /* MODAL */
-        .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.85); display: flex; justify-content: center; align-items: center; z-index: 1000; visibility: hidden; opacity: 0; transition: all 0.3s; backdrop-filter: blur(5px);}
-        .modal-overlay.active { visibility: visible; opacity: 1; }
-        .modal-box { background: var(--bg-color); padding: 40px; border-radius: 12px; text-align: center; max-width: 85%; width: 450px; transform: scale(0.9); transition: transform 0.3s; border: 2px solid var(--neon-cyan); box-shadow: 0 0 50px rgba(0,255,255,0.2);}
-        .modal-overlay.active .modal-box { transform: scale(1); }
-        .modal-title { font-family: 'Righteous', cursive; font-size: 32px; margin-top: 0; margin-bottom: 15px; color: var(--neon-cyan); text-shadow: 0 0 15px var(--neon-cyan);}
-        .modal-msg { font-size: 18px; margin-bottom: 30px; color: #fff; white-space: pre-line; line-height: 1.5; font-family: 'Share Tech Mono', monospace;}
-        .modal-btn { background: transparent; border: 2px solid var(--neon-cyan); color: var(--neon-cyan); padding: 12px 30px; font-size: 18px; border-radius: 6px; text-transform: uppercase; font-weight: bold; cursor:pointer; font-family: 'Share Tech Mono', monospace; transition: all 0.2s;}
-        .modal-btn:hover { background: var(--neon-cyan); color: #000; box-shadow: 0 0 15px var(--neon-cyan);}
-    </style>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="theme-color" content="#090b23" />
+<title>Vector Drive · Sintaxis Synthwave</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet" />
+<style>
+:root{--bg:#090b23;--panel:#141934;--panel-deep:#10152d;--outline:#303958;--text:#f4f2ff;--muted:#9ba9c8;--cyan:#62e7ef;--pink:#ff76bc;--yellow:#ffd474;--violet:#aa8cf9;--green:#9cf5c9;--red:#ff8795;--shadow:0 16px 38px #070818a0}
+*{box-sizing:border-box}html,body{margin:0;min-height:100%;width:100%}body{font-family:'Space Grotesk',sans-serif;color:var(--text);background:var(--bg);overflow-x:hidden}button{font:inherit;cursor:pointer}button:focus-visible{outline:3px solid var(--yellow);outline-offset:3px}button:disabled{opacity:.42;cursor:not-allowed;filter:grayscale(.45)}
+.background{position:fixed;inset:0;pointer-events:none;z-index:0;overflow:hidden;background:radial-gradient(ellipse 55% 55% at 50% 25%,#42225e 0%,#151535 58%,#090b23 100%)}.stars{position:absolute;inset:0;background-image:radial-gradient(#ffffff8c 1px,transparent 1px),radial-gradient(#ff99dc55 1px,transparent 1px);background-size:57px 67px,107px 103px;background-position:10px 22px,45px 11px;opacity:.4}.sun{position:absolute;top:7%;left:50%;width:min(28vw,340px);aspect-ratio:1;border-radius:50%;transform:translateX(-50%);background:linear-gradient(180deg,#ffe0a2 10%,#ff9aaf 46%,#a961d2 85%);box-shadow:0 0 90px #e769b65c,0 0 180px #f19a9f33;opacity:.69}.sun:after{content:'';position:absolute;inset:54% 0 0;background:repeating-linear-gradient(to bottom,transparent 0 14px,#171134 15px 20px);border-radius:0 0 999px 999px}.horizon{position:absolute;left:-50%;bottom:-35vh;width:200%;height:65vh;transform:perspective(360px) rotateX(65deg);transform-origin:50% 100%;background-image:linear-gradient(#e16dd266 2px,transparent 2px),linear-gradient(90deg,#cf62ce58 2px,transparent 2px);background-size:65px 65px;mask-image:linear-gradient(transparent,#000 34%);animation:gridMove 8s linear infinite}.vignette{position:absolute;inset:0;background:linear-gradient(90deg,#090b2388,transparent 30% 70%,#090b2388),linear-gradient(to top,#090b23 0%,transparent 48%)}
+@keyframes gridMove{to{background-position:0 65px}}@keyframes float{50%{transform:translateY(-6px)}}@keyframes breathe{50%{opacity:.62}}@keyframes popIn{from{transform:translateY(13px) scale(.94);opacity:0}to{transform:translateY(0) scale(1);opacity:1}}@keyframes pulse{50%{box-shadow:0 0 23px #62e7ef66,inset 0 0 22px #62e7ef22}}@keyframes sparkle{to{transform:translateY(-50px) rotate(120deg);opacity:0}}
+.app{position:relative;z-index:2;margin:0 auto;width:min(1120px,100%);min-height:100dvh;display:flex;flex-direction:column;gap:12px;padding:16px 24px 18px}.header{display:flex;align-items:center;gap:14px;justify-content:space-between;min-height:66px}.brand{display:flex;align-items:center;gap:13px;min-width:0}.brand-icon{width:51px;height:51px;display:grid;place-items:center;border-radius:15px;background:linear-gradient(145deg,#563779,#243b70);box-shadow:inset 0 2px 2px #ffffff35,0 5px 0 #0a1128,0 0 20px #c564ff26;border:1px solid #ab88ff88;font-family:'Space Mono',monospace;font-size:21px;font-weight:700;color:#b6f7f6;white-space:nowrap}.brand-name{font-weight:700;font-size:clamp(17px,2vw,22px);line-height:1.04;letter-spacing:1.6px}.brand-name span{color:var(--cyan)}.brand-sub{margin-top:5px;color:#a6a2ce;font:700 10px 'Space Mono',monospace;letter-spacing:1.8px}.header-right{display:flex;gap:10px;align-items:center}.stat{display:flex;align-items:center;gap:10px;padding:9px 14px;border:1px solid #4b426d;background:#191c3bdc;border-radius:14px;box-shadow:0 4px 0 #070b1e77;min-width:102px}.stat-icon{font-size:22px}.stat-label{display:block;font:700 10px 'Space Mono',monospace;color:#9d9dbd;letter-spacing:.8px}.stat-value{display:block;margin-top:1px;font-size:22px;font-weight:700;line-height:1.05;color:var(--cyan)}.stat.cycles .stat-value{color:var(--yellow)}.stat.cycles.warning{border-color:#e88d8f;animation:pulse 1s infinite}.sound-btn{width:47px;height:47px;border:1px solid #655487;border-radius:14px;background:#201b3d;color:var(--cyan);font-size:20px}
+.mission{display:flex;justify-content:space-between;align-items:center;gap:18px;border:1px solid #544774;border-radius:18px;padding:14px 18px;background:linear-gradient(100deg,#281f4bde,#171b3bdd);box-shadow:var(--shadow)}.mission-title{font:700 11px 'Space Mono',monospace;color:var(--pink);letter-spacing:1.1px}.mission p{margin:5px 0 0;font-size:14px;color:#d4d4ee;line-height:1.45}.mission-pill{border:1px solid #6c547f;color:#f6bdff;background:#4c315b85;border-radius:100px;padding:9px 13px;white-space:nowrap;font:700 11px 'Space Mono',monospace}
+.monitor{display:flex;flex-direction:column;gap:9px;padding:15px 20px 13px;background:linear-gradient(145deg,#191d3aea,#10172fed);border:1px solid #5d537e;border-radius:24px;box-shadow:0 8px 0 #070b19,0 18px 55px #08081fc2, inset 0 1px 0 #ffffff18;position:relative;overflow:hidden}.monitor:before{content:'';position:absolute;pointer-events:none;inset:0;border-radius:24px;background:linear-gradient(115deg,#ffffff09,transparent 40%)}.monitor-line{display:flex;justify-content:space-between;align-items:center;gap:12px;font:700 11px 'Space Mono',monospace;letter-spacing:1.3px}.monitor-line span{color:var(--muted)}.monitor-led{display:inline-flex;align-items:center;gap:8px;color:var(--cyan)!important}.monitor-led::before{content:'';width:8px;height:8px;border-radius:50%;background:var(--green);box-shadow:0 0 11px var(--green)}.array-panel{border:1px solid #3e4466;border-radius:16px;background:#090e26ae;padding:10px 15px 10px;position:relative}.array-panel.target{border-color:#9a4d89a3;background:linear-gradient(90deg,#24142cbf,#101027a0)}.array-panel.current{border-color:#397f92a3;background:linear-gradient(90deg,#0b2736b9,#12132da0)}.array-meta{display:flex;justify-content:space-between;gap:10px;align-items:center;margin-bottom:10px}.array-title{display:flex;align-items:center;gap:8px;font:700 12px 'Space Mono',monospace;letter-spacing:1px}.array-title .tag{font:700 9px 'Space Mono',monospace;border-radius:6px;padding:5px 6px;color:#201123;background:#ff96cf}.current .array-title .tag{background:var(--cyan);color:#08252c}.array-desc{font-size:12px;color:#8b9abd}.array-track{display:flex;align-items:center;justify-content:center;gap:11px;min-height:70px;flex-wrap:wrap}.data-block{position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;width:63px;height:63px;border-radius:14px;background:linear-gradient(150deg,#343054,#181b39);border:1px solid #74658f;box-shadow:inset 0 2px 1px #ffffff1a,0 5px 0 #080a1e;will-change:transform}.target .data-block{border-color:#b865a4;background:linear-gradient(140deg,#48315b,#281d46)}.current .data-block{border-color:#3e98aa;background:linear-gradient(140deg,#254e60,#15263e)}.data-block.same{border-color:#74d5b5;box-shadow:inset 0 2px 1px #ffffff15,0 5px 0 #080a1e,0 0 13px #65dbc33d}.data-block .emoji{font-size:31px;line-height:1.1;filter:drop-shadow(0 3px 3px #0005)}.data-block .idx{position:absolute;bottom:5px;font:700 9px 'Space Mono',monospace;color:#a5b6cb}.empty-array{color:#6e7d98;font:12px 'Space Mono',monospace}.sync-bridge{display:flex;align-items:center;justify-content:center;gap:12px;font:700 10px 'Space Mono',monospace;letter-spacing:1px;color:#9fa5ce}.sync-bridge:before,.sync-bridge:after{content:'';height:1px;flex:1;max-width:190px;background:linear-gradient(90deg,transparent,#7262a4,transparent)}.sync-dot{background:#7a5cc4;color:white;padding:5px 10px;border-radius:30px}.sync-meter{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:7px 1px 0;font-size:12px;color:#a9b5ce}.sync-track{height:6px;flex:1;border-radius:10px;max-width:300px;background:#303049;overflow:hidden}.sync-fill{height:100%;width:0;background:linear-gradient(90deg,#7b9dfd,#5de7d7);border-radius:10px;transition:width .35s}.sync-count{font:700 11px 'Space Mono',monospace;color:#88e5e0}
+.workspace{display:grid;grid-template-columns:1fr 1.02fr;gap:15px;min-height:215px}.tool-panel{border:1px solid #4e4b72;border-radius:21px;padding:14px;background:linear-gradient(145deg,#191b3deb,#131832eb);box-shadow:0 6px 0 #090c23,0 12px 30px #080a2377;display:flex;flex-direction:column;gap:12px}.panel-top{display:flex;justify-content:space-between;align-items:center;gap:10px}.panel-title{font:700 12px 'Space Mono',monospace;color:#e7dbff;letter-spacing:1px}.panel-sub{font-size:11px;color:#929dbb}.tool-rows{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px;flex:1;align-items:stretch}.method-btn{border:1px solid #656182;border-radius:14px;background:linear-gradient(180deg,#2b2d51,#202341);color:#f3efff;min-height:94px;padding:12px 7px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;box-shadow:inset 0 1px 0 #ffffff18,0 5px 0 #0b1027;transition:transform .15s,background .15s,border-color .15s,box-shadow .15s}.method-btn:hover:not(:disabled){transform:translateY(-2px);border-color:var(--cyan);background:#303854}.method-btn:active:not(:disabled){transform:translateY(4px);box-shadow:0 1px 0 #0b1027}.method-icon{font-size:25px;color:var(--pink)}.method-btn.reverse .method-icon{color:var(--cyan)}.method-name{font:700 clamp(12px,1.3vw,15px) 'Space Mono',monospace}.method-caption{font-size:11px;color:#aab3ca;text-align:center}.insert-panel{border-color:#5c497f;background:linear-gradient(140deg,#241c43ed,#181a38ef)}.item-row{display:flex;align-items:center;gap:9px}.item-row-label{font-size:11px;color:#aeadcb;white-space:nowrap}.palette{display:flex;gap:8px;flex:1;justify-content:space-between}.item-btn{width:44px;height:43px;border:1px solid #6b5d83;background:#31284a;border-radius:12px;font-size:22px;transition:all .15s}.item-btn:hover{transform:translateY(-2px);background:#46365b}.item-btn.selected{background:#684681;border-color:var(--pink);box-shadow:0 0 0 2px #fa98ca39,inset 0 1px 0 #fff4;transform:translateY(-2px)}.insert-actions{display:grid;grid-template-columns:1fr 1fr;gap:9px}.insert-btn{min-height:70px;border:1px solid #6593a6;border-radius:13px;background:linear-gradient(145deg,#254964,#213453);box-shadow:0 4px 0 #101a31;color:#e3faff;display:flex;flex-direction:column;justify-content:center;gap:6px;align-items:center;font:700 13px 'Space Mono',monospace;transition:all .15s}.insert-btn:hover:not(:disabled){background:#32627b;transform:translateY(-2px)}.insert-btn:active:not(:disabled){transform:translateY(3px);box-shadow:0 1px 0 #101a31}.insert-btn small{font:11px 'Space Grotesk',sans-serif;color:#b1cde0}.preview{background:#0e122b;color:#a7f2e3;border:1px solid #48436a;border-radius:11px;padding:8px 11px;font:11px 'Space Mono',monospace;min-height:34px;display:flex;align-items:center}.preview .typed{color:#ffd47d}
+.bottom-bar{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:11px 16px;background:#161a35e8;border:1px solid #484766;border-radius:16px;color:#a8b6ce;min-height:58px}.action-status{font-size:13px;line-height:1.35}.action-status strong{color:var(--cyan)}.actions{display:flex;gap:8px;flex-shrink:0}.minor-btn{border:1px solid #625a86;border-radius:10px;padding:10px 12px;background:#272343;color:#e5dbff;font-size:12px;font-weight:700}.minor-btn:hover{background:#34305a}.minor-btn.primary{border-color:#a96e9d;color:#ffc2e4;background:#49314d}
+.overlay{position:fixed;inset:0;z-index:50;background:#08091bdf;backdrop-filter:blur(12px);display:flex;align-items:center;justify-content:center;padding:18px;transition:opacity .3s,visibility .3s}.overlay.hidden{opacity:0;visibility:hidden;pointer-events:none}.intro{width:min(900px,100%);display:grid;grid-template-columns:.93fr 1.07fr;border:1px solid #8565a9;border-radius:30px;overflow:hidden;box-shadow:0 32px 110px #040611bf,0 0 75px #ab64e42a;background:#17152d;animation:popIn .4s ease both}.intro-art{position:relative;min-height:485px;display:flex;align-items:center;justify-content:center;overflow:hidden;background:radial-gradient(circle at 50% 45%,#773775 0%,#2e1e53 51%,#16122b 100%)}.intro-art::before{content:'';position:absolute;width:270px;height:270px;border-radius:50%;background:linear-gradient(#ffd69b,#f575b1 55%,#875ec5);box-shadow:0 0 70px #ec88cc99;top:65px;left:50%;transform:translateX(-50%)}.intro-art::after{content:'';position:absolute;inset:50% -50% -35%;transform:perspective(230px) rotateX(52deg);background:repeating-linear-gradient(90deg,transparent 0 35px,#f38ec059 36px 38px),repeating-linear-gradient(0deg,transparent 0 35px,#f38ec059 36px 38px);mask-image:linear-gradient(transparent,#000)}.intro-label{position:absolute;top:25px;left:26px;z-index:2;font:700 11px 'Space Mono',monospace;letter-spacing:1.2px;color:#ffd4ed;border:1px solid #fa9ece9a;border-radius:30px;background:#37194e9c;padding:9px 12px}.illustration{position:relative;z-index:3;width:290px;height:235px;transform:rotate(-5deg);filter:drop-shadow(0 18px 15px #190d36a8);animation:float 3.5s ease-in-out infinite}.ill-window{position:absolute;inset:10px 18px;background:#111b3d;border:3px solid #9c84ee;border-radius:20px;box-shadow:inset 0 0 40px #36357d,0 0 28px #eb8ddd70}.ill-top{height:32px;border-bottom:2px solid #6d62b2;display:flex;gap:7px;padding:11px 13px}.ill-top i{width:9px;height:9px;border-radius:50%;background:#ff81ae}.ill-top i:nth-child(2){background:#ffd477}.ill-top i:nth-child(3){background:#85ebca}.ill-array{display:flex;justify-content:center;gap:12px;margin-top:28px}.ill-array b{width:61px;height:69px;border:2px solid #7dd9f2;border-radius:15px;background:#29435d;display:grid;place-items:center;font-size:34px}.ill-arrow{position:absolute;bottom:25px;left:68px;font:700 18px 'Space Mono',monospace;color:#ffcc92}.ill-spark{position:absolute;z-index:3;font-size:27px;color:#ffe19a}.ill-spark.a{top:90px;left:26px}.ill-spark.b{right:30px;bottom:105px}.intro-info{padding:32px 30px 27px;display:flex;flex-direction:column;gap:17px}.intro-kicker{font:700 11px 'Space Mono',monospace;color:#f48bd0;letter-spacing:2px}.intro-title{margin:0;font-size:44px;line-height:1;font-weight:700;letter-spacing:-1.5px}.intro-title span{display:block;color:var(--cyan)}.intro-sub{margin:0;color:#bdc7db;font-size:14px;line-height:1.5}.instruction-step{display:flex;align-items:flex-start;gap:12px;padding:11px 13px;border-radius:13px;background:#27244099;border:1px solid #4d476b;font-size:13px;line-height:1.4}.instruction-step .num{background:#513b73;color:#ffe1fe;border-radius:9px;min-width:27px;height:27px;display:grid;place-items:center;font:700 12px 'Space Mono',monospace}.instruction-step strong{color:#fff}.start-btn{background:linear-gradient(120deg,#ff85bb,#d786fb);border:none;border-radius:14px;padding:15px 20px;font:700 15px 'Space Mono',monospace;color:#181326;box-shadow:0 5px 0 #a44a97,0 0 21px #f36cc342;transition:transform .15s}.start-btn:hover{transform:translateY(-2px)}.start-btn:active{transform:translateY(3px)}
+.result-overlay{z-index:60}.result-card{width:min(445px,100%);border-radius:27px;border:2px solid #7a67a9;background:linear-gradient(165deg,#242040,#131b34);padding:29px;text-align:center;box-shadow:0 20px 75px #000b;animation:popIn .3s ease both}.result-symbol{font-size:57px;display:block;margin:0 0 12px}.result-card h2{font-size:30px;line-height:1.1;margin:0;color:var(--cyan)}.result-card.failed h2{color:var(--pink)}.result-card p{color:#c3c9db;font-size:14px;line-height:1.55;white-space:pre-line;margin:14px 0 20px}.result-card button{width:100%}
+.confetti{position:fixed;inset:0;z-index:65;pointer-events:none;overflow:hidden}.confetti i{position:absolute;width:9px;height:16px;top:-30px;background:var(--cyan);animation:fall var(--duration) linear forwards;left:var(--left);animation-delay:var(--delay)}@keyframes fall{to{transform:translate(var(--drift),110vh) rotate(780deg)}}
+@media(max-width:760px){.app{padding:14px 13px 30px;gap:12px}.header{flex-wrap:wrap;gap:11px}.brand-icon{width:45px;height:45px}.header-right{gap:6px}.stat{min-width:81px;padding:7px 8px;gap:5px}.stat-icon{font-size:18px}.stat-value{font-size:19px}.sound-btn{width:42px;height:42px}.mission{padding:12px;gap:8px}.mission-pill{display:none}.mission p{font-size:12px}.monitor{padding:13px 12px}.array-panel{padding:11px 8px}.array-track{gap:6px;min-height:74px}.data-block{width:clamp(40px,12vw,59px);height:62px;border-radius:11px}.data-block .emoji{font-size:27px}.array-title{font-size:11px}.array-desc{font-size:10px}.workspace{grid-template-columns:1fr;gap:12px}.method-btn{min-height:78px}.tool-panel{padding:14px}.bottom-bar{flex-wrap:wrap}.intro{grid-template-columns:1fr;max-width:520px}.intro-art{min-height:185px}.intro-art::before{width:180px;height:180px;top:15px}.illustration{transform:scale(.63) rotate(-5deg)}.intro-info{padding:20px;gap:12px}.intro-title{font-size:32px}.intro-sub{font-size:12px}.instruction-step{padding:9px;font-size:12px}}
+@media(max-width:425px){.brand-sub{font-size:8px}.brand-name{font-size:17px}.brand-icon{width:38px;height:38px}.header-right{width:100%;justify-content:space-between}.stat{flex:1}.array-track{gap:5px}.data-block{width:clamp(35px,12.1vw,48px);height:54px}.data-block .emoji{font-size:23px}.array-meta{flex-wrap:wrap;gap:5px}.panel-sub{font-size:10px}.item-btn{width:40px;height:40px}.item-row{flex-wrap:wrap}.item-row-label{width:100%}.insert-actions{gap:7px}.insert-btn{font-size:12px}.minor-btn{font-size:11px}}
+@media(max-height:740px) and (min-width:761px){.app{padding:11px 20px 15px;gap:9px}.header{min-height:54px}.brand-icon{width:42px;height:42px}.mission{padding:9px 14px}.monitor{padding:12px 17px 10px;gap:7px}.array-panel{padding:8px 12px}.array-track{min-height:71px}.data-block{height:59px;width:61px}.data-block .emoji{font-size:27px}.tool-panel{padding:10px;gap:8px}.method-btn{min-height:75px}.workspace{min-height:205px}.bottom-bar{padding:8px 13px;min-height:45px}}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.001ms!important;transition-duration:.001ms!important}}
+</style>
 </head>
 <body>
+<div class="background" aria-hidden="true"><div class="stars"></div><div class="sun"></div><div class="horizon"></div><div class="vignette"></div></div>
+<div class="app">
+ <header class="header">
+   <div class="brand"><div class="brand-icon">⌘</div><div><div class="brand-name">VECTOR <span>DRIVE</span></div><div class="brand-sub">SINTAXIS · SYNTHWAVE</div></div></div>
+   <div class="header-right"><div class="stat"><span class="stat-icon">◈</span><span><span class="stat-label">SECTOR</span><strong class="stat-value" id="level-display">01</strong></span></div><div class="stat cycles" id="cycles-stat"><span class="stat-icon">⚡</span><span><span class="stat-label">CICLOS CPU</span><strong class="stat-value" id="moves-display">3</strong></span></div><button class="sound-btn" id="soundToggle" aria-label="Activar o desactivar sonido">🔇</button></div>
+ </header>
+ <section class="mission"><div><div class="mission-title">// MISIÓN ACTUAL</div><p>Transforma tu secuencia hasta que sea <strong>idéntica</strong> al objetivo, usando exactamente los métodos necesarios.</p></div><span class="mission-pill">JAVASCRIPT · ARRAYS</span></section>
+ <section class="monitor" aria-label="Comparación de arrays">
+   <div class="monitor-line"><span>◦ VISUALIZADOR DE DATOS</span><span class="monitor-led">SISTEMA EN LÍNEA</span></div>
+   <div class="array-panel target"><div class="array-meta"><div class="array-title"><span class="tag">TARGET</span> SECUENCIA OBJETIVO</div><span class="array-desc">Esto debes conseguir</span></div><div class="array-track" id="target-track"></div></div>
+   <div class="sync-bridge"><span class="sync-dot">⇣ TRANSFORMAR ⇣</span></div>
+   <div class="array-panel current"><div class="array-meta"><div class="array-title"><span class="tag">LIVE</span> TU SECUENCIA ACTUAL</div><span class="array-desc">Cambiará con cada comando</span></div><div class="array-track" id="current-track"></div></div>
+   <div class="sync-meter"><span>Coincidencia de posiciones</span><div class="sync-track"><div class="sync-fill" id="sync-fill"></div></div><strong class="sync-count" id="sync-count">0 / 3</strong></div>
+ </section>
+ <section class="workspace" aria-label="Consola de métodos">
+   <div class="tool-panel"><div class="panel-top"><div class="panel-title">01 / MODIFICAR ARRAY</div><span class="panel-sub">Cada acción consume 1 ciclo</span></div><div class="tool-rows">
+     <button class="method-btn" id="method-shift" onclick="executeMethod('shift')"><span class="method-icon">⇤</span><span class="method-name">shift()</span><span class="method-caption">Quita el primero</span></button>
+     <button class="method-btn reverse" id="method-reverse" onclick="executeMethod('reverse')"><span class="method-icon">⇄</span><span class="method-name">reverse()</span><span class="method-caption">Invierte el orden</span></button>
+     <button class="method-btn" id="method-pop" onclick="executeMethod('pop')"><span class="method-icon">⇥</span><span class="method-name">pop()</span><span class="method-caption">Quita el último</span></button>
+   </div></div>
+   <div class="tool-panel insert-panel"><div class="panel-top"><div class="panel-title">02 / INSERTAR UN DATO</div><span class="panel-sub">Elige un símbolo</span></div>
+     <div class="item-row"><span class="item-row-label">DATO</span><div class="palette" id="item-palette"><button class="item-btn selected" data-item="💾" aria-label="Seleccionar disquete" onclick="selectItem('💾')">💾</button><button class="item-btn" data-item="🕹️" aria-label="Seleccionar joystick" onclick="selectItem('🕹️')">🕹️</button><button class="item-btn" data-item="🔋" aria-label="Seleccionar batería" onclick="selectItem('🔋')">🔋</button><button class="item-btn" data-item="💿" aria-label="Seleccionar disco" onclick="selectItem('💿')">💿</button></div></div>
+     <div class="insert-actions"><button class="insert-btn" id="method-unshift" onclick="executeMethod('unshift',selectedItem)">↤ unshift(x)<small>Al principio</small></button><button class="insert-btn" id="method-push" onclick="executeMethod('push',selectedItem)">push(x) ↦<small>Al final</small></button></div>
+     <div class="preview" id="preview-code">// Seleccionado: <span class="typed">💾</span></div>
+   </div>
+ </section>
+ <div class="bottom-bar"><div class="action-status" id="action-status" role="status"><strong>✦ Preparado.</strong> Elige un método para empezar.</div><div class="actions"><button class="minor-btn" onclick="restartAttempt()" id="retry-btn">↶ Reintentar</button><button class="minor-btn primary" onclick="newPuzzle()" id="new-btn">⟳ Nuevo reto</button></div></div>
+</div>
+<div class="overlay" id="instructions-screen"><div class="intro">
+ <div class="intro-art"><div class="intro-label">✦ PROTOCOLO RETRO / 1986</div><div class="illustration"><div class="ill-window"><div class="ill-top"><i></i><i></i><i></i></div><div class="ill-array"><b>💾</b><b>🕹️</b><b>💿</b></div><div class="ill-arrow">[ 01, 02, 03 ]</div></div></div><div class="ill-spark a">✦</div><div class="ill-spark b">✧</div></div>
+ <div class="intro-info"><div class="intro-kicker">// SISTEMA EDUCATIVO INICIADO</div><h1 class="intro-title">VECTOR <span>DRIVE</span></h1><p class="intro-sub">Un desafío de lógica y arrays con estética synthwave. Manipula los datos con métodos reales de JavaScript.</p>
+  <div class="instruction-step"><span class="num">01</span><div><strong>Compara las dos secuencias.</strong> La superior es el objetivo; transforma la inferior.</div></div>
+  <div class="instruction-step"><span class="num">02</span><div><strong>Quita, añade o invierte.</strong> Usa <code>shift()</code>, <code>pop()</code>, <code>reverse()</code>, <code>push(x)</code> y <code>unshift(x)</code>.</div></div>
+  <div class="instruction-step"><span class="num">03</span><div><strong>Piensa antes de actuar.</strong> Dispones del número exacto de ciclos de la solución óptima.</div></div>
+  <button class="start-btn" onclick="startGame()">▶ INICIAR CONEXIÓN</button>
+ </div>
+</div></div>
+<div class="overlay result-overlay hidden" id="modal" role="dialog" aria-modal="true" aria-labelledby="m-title"><div class="result-card" id="result-card"><span class="result-symbol" id="m-symbol">✦</span><h2 id="m-title">¡Acceso concedido!</h2><p id="m-msg"></p><button class="start-btn" id="m-btn" onclick="closeModal()">CONTINUAR →</button></div></div>
+<div class="confetti" id="confetti" aria-hidden="true"></div>
+<audio id="bgm" loop><source src="../assets/musicaFondo/cancion1.mp3" type="audio/mpeg"></audio>
+<script>
+'use strict';
+const ITEMS=['💾','🕹️','🔋','💿'];
+let currentLevel=0,movesLeft=3,isAnimating=false,targetArray=[],currentArray=[],currentLevelDef=null,selectedItem='💾';
+let modalCallback=null,animationToken=0,audioCtx=null,isMuted=true;
+const $=id=>document.getElementById(id);
+const bgm=$('bgm');
+$('soundToggle').addEventListener('click',()=>{
+  isMuted=!isMuted;
+  $('soundToggle').textContent=isMuted?'🔇':'🔊';
+  $('soundToggle').setAttribute('aria-pressed',String(!isMuted));
+  if(isMuted)bgm.pause();else{bgm.volume=.18;bgm.play().catch(()=>{});tone(680,.08)}
+});
+function tone(freq,duration=.12,type='sine',vol=.045,delay=0){
+  if(isMuted)return;
+  try{const C=window.AudioContext||window.webkitAudioContext;if(!C)return;audioCtx??=new C();if(audioCtx.state==='suspended')audioCtx.resume();const t=audioCtx.currentTime+delay,o=audioCtx.createOscillator(),g=audioCtx.createGain();o.type=type;o.frequency.setValueAtTime(freq,t);g.gain.setValueAtTime(vol,t);g.gain.exponentialRampToValueAtTime(.001,t+duration);o.connect(g);g.connect(audioCtx.destination);o.start(t);o.stop(t+duration+.01)}catch(e){}
+}
+function sfxClick(){tone(700,.08)}function sfxAdd(){tone(710,.1);tone(1020,.14,'sine',.03,.11)}function sfxRemove(){tone(430,.1,'triangle');tone(240,.16,'triangle',.03,.10)}function sfxReverse(){tone(420,.12,'triangle');tone(700,.13,'triangle',.035,.12)}function sfxError(){tone(220,.21,'sawtooth',.04);tone(145,.22,'sawtooth',.02,.13)}function sfxWin(){[523,659,784,1046].forEach((n,i)=>tone(n,.24,'sine',.045,i*.12))}
+function rand(n){return Math.floor(Math.random()*n)}
+function shuffle(a){const b=[...a];for(let i=b.length-1;i>0;i--){const j=rand(i+1);[b[i],b[j]]=[b[j],b[i]]}return b}
+// BFS: conserva el cálculo real del mínimo de operaciones con los cinco métodos.
+function getOptimalMoves(startArr,targetArr,maxDepth=5){
+  const key=a=>a.join('|'), target=key(targetArr),seen=new Set([key(startArr)]),q=[{a:startArr,d:0}];
+  for(let head=0;head<q.length;head++){
+    const {a,d}=q[head];if(key(a)===target)return d;
+    if(d>=maxDepth||Math.abs(a.length-targetArr.length)>maxDepth-d)continue;
+    const next=[];
+    if(a.length){next.push(a.slice(0,-1),a.slice(1))}
+    if(a.length>1)next.push([...a].reverse());
+    if(a.length<10)for(const v of ITEMS)next.push([...a,v],[v,...a]);
+    for(const b of next){const k=key(b);if(!seen.has(k)){seen.add(k);q.push({a:b,d:d+1})}}
+  }
+  return -1;
+}
+// Niveles generados de forma segura: diferentes longitudes, símbolos y rutas;
+// se comprueba que la cantidad mostrada sea la distancia óptima exacta.
+function generateStrategicLevel(index){
+  // Estructuras de desafío construidas para tener exactamente 3, 4 o 5 operaciones mínimas.
+  // Las fichas X ausentes del objetivo requieren eliminaciones; los datos restantes,
+  // inserciones. En el caso inverso, es obligatorio invertir después de quitar X.
+  const required=Math.min(3+Math.floor(index/2),5),length=Math.min(3+Math.floor(index/4),5);
+  const [A,B,C,X]=shuffle(ITEMS),target=Array.from({length},(_,i)=>[A,B,C][i%3]);
+  const reverseMode=(index%4===1||index%4===3)?true:(index>4&&Math.random()<.25);
+  let start;
+  if(reverseMode){start=[...target].reverse();start.push(...Array(required-1).fill(X));}
+  else if(required===3)start=[X,...target.slice(0,-2)];
+  else if(required===4)start=[X,X,...target.slice(0,-2)];
+  else start=[X,X,...target.slice(0,-2),X];
+  if(!reverseMode && index%3===2){start.reverse();target.reverse();}
+  return{start,target,moves:required,hint:`El analizador encontró una solución óptima de ${required} movimientos. Piensa qué datos conservar, eliminar o invertir.`};
+}
 
-    <audio id="bgm" loop><source src="../assets/musicaFondo/cancion1.mp3" type="audio/mpeg"></audio>
-    
-    <div class="decorations">
-        <div class="retro-sun"><div class="sun-lines"></div></div>
-        <div class="synth-grid"></div>
-        <div class="scanlines"></div>
-    </div>
-    
-    <button id="soundToggle" class="sound-toggle" aria-label="Activar sonido">🔇</button>
-
-    <!-- INSTRUCCIONES -->
-    <div id="instructions-screen">
-        <div class="instructions-card">
-            <h1>VECTOR DRIVE</h1>
-            <div class="instruction-step">
-                <span class="instruction-icon">📼</span>
-                <span class="instruction-text"><b>LA RED:</b> Tienes una secuencia de datos. Debes manipularla hasta que sea exactamente igual a la "Encriptación Objetivo".</span>
-            </div>
-            <div class="instruction-step">
-                <span class="instruction-icon">💻</span>
-                <span class="instruction-text"><b>MÉTODOS DE ARRAY:</b> Usa los comandos literales de JavaScript para mutar tu secuencia.<br>
-                <code>pop()</code>: Borra el ÚLTIMO.<br>
-                <code>shift()</code>: Borra el PRIMERO.<br>
-                <code>push(x)</code>: Añade al FINAL.<br>
-                <code>unshift(x)</code>: Añade al INICIO.
-                </span>
-            </div>
-            <div class="instruction-step">
-                <span class="instruction-icon">🧠</span>
-                <span class="instruction-text"><b>ESTRATEGIA TOTAL:</b> Desde el Sector 1 <b>todos los métodos están desbloqueados</b>. El sistema analiza el puzzle y te dará <b>EXACTAMENTE</b> los ciclos (movimientos) mínimos necesarios. Tendrás que combinar añadir, eliminar e invertir perfectamente.</span>
-            </div>
-            <button class="start-btn" onclick="startGame()">INICIAR CONEXIÓN</button>
-        </div>
-    </div>
-
-    <!-- JUEGO -->
-    <div class="game-header">
-        <button class="back-menu-btn" onclick="loadLevel(currentLevel)">[ REINICIAR SECTOR ]</button>
-        <div style="display:flex;">
-            <div class="hud-box">SECTOR: <span id="level-display">1</span></div>
-            <div class="hud-box hud-moves">CICLOS CPU: <span id="moves-display">5</span></div>
-        </div>
-    </div>
-
-    <div class="main-layout">
-        
-        <!-- SISTEMA DE ASISTENCIA -->
-        <div class="level-hint-box" id="level-hint-box">
-            <span>ℹ️</span> <span id="level-hint-text">Cargando análisis táctico...</span>
-        </div>
-
-        <!-- TARGET ARRAY -->
-        <div class="array-container" style="border-color: var(--neon-magenta); box-shadow: 0 10px 30px rgba(0,0,0,0.8), inset 0 0 20px rgba(255,0,255,0.1);">
-            <div class="array-header target-header">ENCRIPTACIÓN OBJETIVO (Target Array)</div>
-            <div class="array-track" id="target-track"></div>
-        </div>
-
-        <!-- CURRENT ARRAY -->
-        <div class="array-container">
-            <div class="array-header">TU CARGA DE DATOS (Current Array)</div>
-            <div class="array-track" id="current-track"></div>
-        </div>
-
-        <!-- CONSOLA DE MÉTODOS -->
-        <div class="console-panel">
-            <div class="console-title">>_ MÉTODOS DE MUTACIÓN DISPONIBLES</div>
-            
-            <div class="btn-row">
-                <!-- SHIFT -->
-                <div class="method-group">
-                    <button class="method-btn btn-shift" onclick="executeMethod('shift')">
-                        <span class="method-name">array.shift()</span>
-                        <span class="method-desc">Elimina el 1er elemento</span>
-                    </button>
-                </div>
-                
-                <!-- REVERSE -->
-                <div class="method-group">
-                    <button class="method-btn btn-rev" onclick="executeMethod('reverse')">
-                        <span class="method-name">array.reverse()</span>
-                        <span class="method-desc">Invierte todo el orden</span>
-                    </button>
-                </div>
-
-                <!-- POP -->
-                <div class="method-group">
-                    <button class="method-btn btn-pop" onclick="executeMethod('pop')">
-                        <span class="method-name">array.pop()</span>
-                        <span class="method-desc">Elimina el último elemento</span>
-                    </button>
-                </div>
-            </div>
-
-            <div class="btn-row">
-                <!-- UNSHIFT -->
-                <div class="method-group">
-                    <div class="method-btn btn-unshift" style="cursor: default;">
-                        <span class="method-name">array.unshift(x)</span>
-                        <span class="method-desc">Añade "x" al INICIO</span>
-                    </div>
-                    <div class="item-selector">
-                        <span class="item-selector-title">Haz clic para inyectar:</span>
-                        <div class="item-palette">
-                            <button class="item-btn" onclick="executeMethod('unshift', '💾')">💾</button>
-                            <button class="item-btn" onclick="executeMethod('unshift', '🕹️')">🕹️</button>
-                            <button class="item-btn" onclick="executeMethod('unshift', '🔋')">🔋</button>
-                            <button class="item-btn" onclick="executeMethod('unshift', '💿')">💿</button>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- PUSH -->
-                <div class="method-group">
-                    <div class="method-btn btn-push" style="cursor: default;">
-                        <span class="method-name">array.push(x)</span>
-                        <span class="method-desc">Añade "x" al FINAL</span>
-                    </div>
-                    <div class="item-selector">
-                        <span class="item-selector-title">Haz clic para inyectar:</span>
-                        <div class="item-palette">
-                            <button class="item-btn" onclick="executeMethod('push', '💾')">💾</button>
-                            <button class="item-btn" onclick="executeMethod('push', '🕹️')">🕹️</button>
-                            <button class="item-btn" onclick="executeMethod('push', '🔋')">🔋</button>
-                            <button class="item-btn" onclick="executeMethod('push', '💿')">💿</button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- MODAL -->
-    <div class="modal-overlay" id="modal">
-        <div class="modal-box">
-            <h2 class="modal-title" id="m-title">Título</h2>
-            <p class="modal-msg" id="m-msg">Mensaje</p>
-            <button class="modal-btn" id="m-btn" onclick="closeModal()">CONTINUAR</button>
-        </div>
-    </div>
-
-    <script>
-        const AudioContext = window.AudioContext || window.webkitAudioContext;
-        let audioCtx; let isMuted = true;
-        const bgAudio = document.getElementById('bgm');
-        const soundToggle = document.getElementById('soundToggle');
-
-        soundToggle.addEventListener('click', () => {
-            if (!audioCtx) audioCtx = new AudioContext();
-            if (audioCtx.state === 'suspended') audioCtx.resume();
-            isMuted = !isMuted;
-            if(isMuted) { bgAudio.pause(); soundToggle.innerText = '🔇'; } 
-            else { bgAudio.volume = 0.25; bgAudio.play().catch(e=>e); soundToggle.innerText = '🔊'; }
-        });
-
-        function playTone(freq, type, duration, vol = 0.1) {
-            if (!audioCtx || isMuted) return;
-            const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain();
-            osc.type = type; osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
-            gain.gain.setValueAtTime(vol, audioCtx.currentTime); gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + duration);
-            osc.connect(gain); gain.connect(audioCtx.destination); osc.start(); osc.stop(audioCtx.currentTime + duration);
-        }
-
-        function sfxClick() { playTone(600, 'square', 0.05, 0.05); }
-        function sfxPush() { playTone(800, 'sine', 0.1, 0.1); setTimeout(()=>playTone(1200, 'sine', 0.15, 0.1), 100); }
-        function sfxPop() { playTone(400, 'sawtooth', 0.1, 0.1); setTimeout(()=>playTone(200, 'sawtooth', 0.15, 0.1), 100); }
-        function sfxReverse() { playTone(500, 'triangle', 0.1, 0.1); setTimeout(()=>playTone(600, 'triangle', 0.1, 0.1), 100); setTimeout(()=>playTone(500, 'triangle', 0.1, 0.1), 200); }
-        function sfxError() { playTone(150, 'sawtooth', 0.3, 0.2); setTimeout(()=>playTone(100, 'sawtooth', 0.4, 0.2), 100); }
-        function sfxWin() { [523.25, 659.25, 783.99, 1046.50].forEach((f, i) => setTimeout(() => playTone(f, 'square', 0.15, 0.1), i * 150)); }
-
-        // DATOS DEL JUEGO
-        let currentLevel = 0;
-        let movesLeft = 0;
-        let isAnimating = false;
-        let targetArray = [];
-        let currentArray = [];
-        let currentLevelDef = null;
-
-        // MOTOR DE BÚSQUEDA BFS (Para calcular la ruta óptima matemáticamente)
-        function getOptimalMoves(startArr, targetArr) {
-            let queue = [{arr: startArr, moves: 0}];
-            let visited = new Set();
-            visited.add(JSON.stringify(startArr));
-            let targetStr = JSON.stringify(targetArr);
-            const items = ['💾', '🕹️', '🔋', '💿'];
-
-            while(queue.length > 0) {
-                let curr = queue.shift();
-                if (JSON.stringify(curr.arr) === targetStr) return curr.moves;
-                if (curr.moves >= 5) continue; // Límite de profundidad (max 5 movimientos por puzzle)
-
-                // Ramificaciones
-                // 1. pop()
-                if (curr.arr.length > 0) {
-                    let next = [...curr.arr]; next.pop();
-                    let str = JSON.stringify(next);
-                    if(!visited.has(str)) { visited.add(str); queue.push({arr: next, moves: curr.moves+1}); }
-                }
-                // 2. shift()
-                if (curr.arr.length > 0) {
-                    let next = [...curr.arr]; next.shift();
-                    let str = JSON.stringify(next);
-                    if(!visited.has(str)) { visited.add(str); queue.push({arr: next, moves: curr.moves+1}); }
-                }
-                // 3. reverse()
-                if (curr.arr.length > 1) {
-                    let next = [...curr.arr].reverse();
-                    let str = JSON.stringify(next);
-                    if(!visited.has(str)) { visited.add(str); queue.push({arr: next, moves: curr.moves+1}); }
-                }
-                // 4. push() / unshift()
-                if (curr.arr.length < 6) {
-                    for(let item of items) {
-                        let nextP = [...curr.arr]; nextP.push(item);
-                        let strP = JSON.stringify(nextP);
-                        if(!visited.has(strP)) { visited.add(strP); queue.push({arr: nextP, moves: curr.moves+1}); }
-
-                        let nextU = [...curr.arr]; nextU.unshift(item);
-                        let strU = JSON.stringify(nextU);
-                        if(!visited.has(strU)) { visited.add(strU); queue.push({arr: nextU, moves: curr.moves+1}); }
-                    }
-                }
-            }
-            return -1; // Sin solución en <= 5 movimientos
-        }
-
-        function generateStrategicLevel(levelIndex) {
-            const items = ['💾', '🕹️', '🔋', '💿'];
-            let size = 3 + Math.floor(levelIndex / 4);
-            if(size > 5) size = 5;
-
-            let tgt = [];
-            let str = [];
-            let minMoves = -1;
-            let attempts = 0;
-            
-            // La dificultad aumenta gradualmente: 3 movimientos en nivel 1, hasta 5 movimientos
-            let targetMoves = Math.min(3 + Math.floor(levelIndex / 2), 5); 
-
-            // Generador de laberinto lógico: Busca un puzzle que tome EXACTAMENTE targetMoves para resolverse
-            while((minMoves < targetMoves) && attempts < 150) {
-                tgt = [];
-                for(let i=0; i<size; i++) tgt.push(items[Math.floor(Math.random()*items.length)]);
-                
-                str = [...tgt];
-                let scrambles = targetMoves + 1;
-                
-                for(let i=0; i<scrambles; i++) {
-                    let op = Math.floor(Math.random() * 5);
-                    if (op === 0 && str.length > 1) str.pop();
-                    else if (op === 1 && str.length > 1) str.shift();
-                    else if (op === 2) str.push(items[Math.floor(Math.random()*items.length)]);
-                    else if (op === 3) str.unshift(items[Math.floor(Math.random()*items.length)]);
-                    else if (op === 4) str.reverse();
-                }
-                
-                minMoves = getOptimalMoves(str, tgt);
-                attempts++;
-            }
-
-            // Fallback en caso de mala suerte en generación aleatoria
-            if (minMoves === -1 || minMoves === 0) {
-                return generateStrategicLevel(levelIndex);
-            }
-
-            let hintTxt = levelIndex === 0 
-                ? `PISTA DE INICIO: El motor de análisis indica que la solución óptima requiere EXACTAMENTE ${minMoves} ciclos. Combina eliminar e inyectar.`
-                : `ANÁLISIS COMPLETADO: Este firewall requiere la combinación perfecta de ${minMoves} ciclos. Usa ingeniería inversa.`;
-
-            return {
-                target: tgt,
-                start: str,
-                moves: minMoves,
-                hint: hintTxt
-            };
-        }
-
-        function startGame() {
-            if (!audioCtx && !isMuted) { audioCtx = new AudioContext(); bgAudio.play().catch(e=>e); }
-            sfxClick();
-            document.getElementById('instructions-screen').style.display = 'none';
-            loadLevel(0);
-        }
-
-        function loadLevel(index) {
-            currentLevel = index;
-            document.getElementById('level-display').innerText = currentLevel + 1;
-            
-            currentLevelDef = generateStrategicLevel(index);
-
-            targetArray = [...currentLevelDef.target];
-            currentArray = [...currentLevelDef.start];
-            movesLeft = currentLevelDef.moves;
-            
-            document.getElementById('level-hint-text').innerText = currentLevelDef.hint;
-
-            updateHUD();
-            renderTarget();
-            renderCurrent(null); 
-        }
-
-        function updateHUD() {
-            let mDisplay = document.getElementById('moves-display');
-            mDisplay.innerText = movesLeft;
-            if (movesLeft <= 1) mDisplay.style.color = "var(--neon-red)";
-            else mDisplay.style.color = "var(--neon-yellow)";
-        }
-
-        function renderTarget() {
-            let track = document.getElementById('target-track');
-            track.innerHTML = '';
-            targetArray.forEach(item => {
-                let block = document.createElement('div');
-                block.className = 'data-block';
-                block.innerText = item;
-                track.appendChild(block);
-            });
-        }
-
-        function renderCurrent(animType) {
-            let track = document.getElementById('current-track');
-            track.innerHTML = '';
-            
-            currentArray.forEach((item, idx) => {
-                let block = document.createElement('div');
-                block.className = 'data-block';
-                block.innerText = item;
-                
-                if (animType === 'push' && idx === currentArray.length - 1) block.classList.add('anim-push');
-                if (animType === 'unshift' && idx === 0) block.classList.add('anim-unshift');
-                if (animType === 'reverse') block.classList.add('anim-push'); 
-                
-                track.appendChild(block);
-            });
-        }
-
-        function renderRemoval(animType) {
-            let track = document.getElementById('current-track');
-            if (track.children.length === 0) return;
-            
-            let blockToRemove;
-            if (animType === 'pop') {
-                blockToRemove = track.lastElementChild;
-                blockToRemove.classList.add('anim-pop');
-            } else if (animType === 'shift') {
-                blockToRemove = track.firstElementChild;
-                blockToRemove.classList.add('anim-shift');
-            }
-
-            setTimeout(() => {
-                renderCurrent(null);
-                finalizeTurn();
-            }, 350);
-        }
-
-        function executeMethod(method, val = null) {
-            if (isAnimating || movesLeft <= 0) return;
-            
-            isAnimating = true;
-            movesLeft--;
-            updateHUD();
-
-            if (method === 'pop') {
-                if (currentArray.length > 0) {
-                    sfxPop();
-                    currentArray.pop();
-                    renderRemoval('pop');
-                    return; 
-                } else { sfxError(); }
-            } 
-            else if (method === 'shift') {
-                if (currentArray.length > 0) {
-                    sfxPop();
-                    currentArray.shift();
-                    renderRemoval('shift');
-                    return;
-                } else { sfxError(); }
-            }
-            else if (method === 'push') {
-                if (currentArray.length < 10) {
-                    sfxPush();
-                    currentArray.push(val);
-                    renderCurrent('push');
-                } else sfxError();
-            }
-            else if (method === 'unshift') {
-                if (currentArray.length < 10) {
-                    sfxPush();
-                    currentArray.unshift(val);
-                    renderCurrent('unshift');
-                } else sfxError();
-            }
-            else if (method === 'reverse') {
-                sfxReverse();
-                currentArray.reverse();
-                renderCurrent('reverse');
-            }
-
-            setTimeout(finalizeTurn, 400); 
-        }
-
-        function finalizeTurn() {
-            isAnimating = false;
-            checkWinState();
-        }
-
-        function checkWinState() {
-            let targetStr = JSON.stringify(targetArray);
-            let currStr = JSON.stringify(currentArray);
-
-            if (targetStr === currStr) {
-                // WIN
-                sfxWin();
-                document.getElementById('m-title').style.color = "var(--neon-cyan)";
-                document.getElementById('m-title').style.textShadow = "0 0 15px var(--neon-cyan)";
-                showModal("¡ACCESO CONCEDIDO! 🔓", "Secuencia de datos sincronizada perfectamente.\nAvanzando al siguiente sector...", () => {
-                    loadLevel(currentLevel + 1);
-                });
-            } else if (movesLeft <= 0) {
-                // LOSE
-                sfxError();
-                document.getElementById('m-title').style.color = "var(--neon-magenta)";
-                document.getElementById('m-title').style.textShadow = "0 0 15px var(--neon-magenta)";
-                showModal("CONEXIÓN PERDIDA ⚠️", "Te has quedado sin Ciclos CPU antes de igualar la secuencia.\nReiniciando el sector actual...", () => {
-                    // Restaurar el array a como estaba al inicio de este nivel
-                    currentArray = [...currentLevelDef.start];
-                    movesLeft = currentLevelDef.moves;
-                    updateHUD();
-                    renderCurrent(null);
-                });
-            }
-        }
-
-        let modalCallback = null;
-        function showModal(title, msg, callback = null) { 
-            document.getElementById('m-title').innerText = title; 
-            document.getElementById('m-msg').innerText = msg; 
-            document.getElementById('modal').classList.add('active'); 
-            modalCallback = callback; 
-        }
-        function closeModal() { 
-            sfxClick(); 
-            document.getElementById('modal').classList.remove('active'); 
-            if(modalCallback) { modalCallback(); modalCallback = null; } 
-        }
-
-    </script>
+function startGame(){sfxClick();$('instructions-screen').classList.add('hidden');loadLevel(0)}
+function loadLevel(index,keep=false){
+  ++animationToken;isAnimating=false;currentLevel=index;$('confetti').replaceChildren();
+  if(!keep||!currentLevelDef)currentLevelDef=generateStrategicLevel(index);
+  targetArray=[...currentLevelDef.target];currentArray=[...currentLevelDef.start];movesLeft=currentLevelDef.moves;
+  $('level-display').textContent=String(index+1).padStart(2,'0');
+  renderTarget();renderCurrent();updateHUD();updateControls();setStatus('✦ Preparado.','Elige un método para empezar.');
+}
+function restartAttempt(){if(isAnimating)return;sfxClick();loadLevel(currentLevel,true)}
+function newPuzzle(){if(isAnimating)return;sfxClick();loadLevel(currentLevel,false)}
+function updateHUD(){
+  $('moves-display').textContent=movesLeft;
+  $('cycles-stat').classList.toggle('warning',movesLeft<=1);
+  const hits=currentArray.reduce((n,v,i)=>n+Number(targetArray[i]===v),0);
+  $('sync-count').textContent=`${hits} / ${targetArray.length}`;
+  $('sync-fill').style.width=`${targetArray.length?hits/targetArray.length*100:0}%`;
+}
+function createBlock(item,index,matching=false){
+  const block=document.createElement('div');block.className='data-block'+(matching?' same':'');
+  const em=document.createElement('span');em.className='emoji';em.textContent=item;
+  const idx=document.createElement('span');idx.className='idx';idx.textContent='['+index+']';block.append(em,idx);return block;
+}
+function renderTarget(){const t=$('target-track');t.replaceChildren(...targetArray.map((x,i)=>createBlock(x,i)))}
+function renderCurrent(){const t=$('current-track');if(!currentArray.length){t.innerHTML='<span class="empty-array">[ ] · Array vacío</span>';return;}t.replaceChildren(...currentArray.map((x,i)=>createBlock(x,i,x===targetArray[i])))}
+function animateMutation(method,oldArr){
+ const t=$('current-track'),oldRects=[...t.querySelectorAll('.data-block')].map(e=>e.getBoundingClientRect());
+ const doomed=method==='pop'?t.querySelector('.data-block:last-child'):method==='shift'?t.querySelector('.data-block:first-child'):null;
+ if(doomed){const rect=doomed.getBoundingClientRect(),clone=doomed.cloneNode(true);clone.style.cssText=`position:fixed;left:${rect.left}px;top:${rect.top}px;width:${rect.width}px;height:${rect.height}px;margin:0;pointer-events:none;z-index:80`;document.body.appendChild(clone);clone.animate([{opacity:1,transform:'translateY(0) scale(1)'},{opacity:0,transform:'translateY(-42px) scale(.4) rotate(15deg)'}],{duration:365,easing:'ease-in',fill:'forwards'}).onfinish=()=>clone.remove();setTimeout(()=>clone.remove(),500)}
+ renderCurrent();const tiles=[...t.querySelectorAll('.data-block')];
+ tiles.forEach((el,i)=>{
+   let oldIdx=-1;
+   if(method==='reverse')oldIdx=oldArr.length-1-i;
+   else if(method==='shift')oldIdx=i+1;
+   else if(method==='unshift')oldIdx=i-1;
+   else oldIdx=i;
+   if(oldIdx>=0&&oldIdx<oldRects.length){const r=el.getBoundingClientRect(),o=oldRects[oldIdx],dx=o.left-r.left,dy=o.top-r.top;
+     el.animate([{transform:`translate(${dx}px,${dy}px)`,opacity:.85},{transform:'translate(0,0)',opacity:1}],{duration:440,easing:'cubic-bezier(.18,.9,.32,1)'})
+   }else el.animate([{opacity:0,transform:'translateY(-17px) scale(.55)'},{opacity:1,transform:'translateY(0) scale(1)'}],{duration:400,easing:'cubic-bezier(.2,1.3,.4,1)'})
+ });
+}
+function selectItem(item){if(isAnimating)return;selectedItem=item;sfxClick();document.querySelectorAll('.item-btn').forEach(b=>{b.classList.toggle('selected',b.dataset.item===item);b.setAttribute('aria-pressed',String(b.dataset.item===item))});$('preview-code').innerHTML=`// <span class="typed">array.push("${item}")</span> · <span class="typed">array.unshift("${item}")</span>`}
+function updateControls(){
+ const full=currentArray.length>=10,empty=currentArray.length===0;
+ $('method-shift').disabled=isAnimating||movesLeft===0||empty;
+ $('method-pop').disabled=isAnimating||movesLeft===0||empty;
+ $('method-reverse').disabled=isAnimating||movesLeft===0||currentArray.length<2;
+ $('method-push').disabled=isAnimating||movesLeft===0||full;
+ $('method-unshift').disabled=isAnimating||movesLeft===0||full;
+ document.querySelectorAll('.item-btn').forEach(b=>b.disabled=isAnimating||movesLeft===0);
+ $('retry-btn').disabled=isAnimating;$('new-btn').disabled=isAnimating;
+}
+function setStatus(strong,msg){$('action-status').innerHTML=`<strong>${strong}</strong> ${msg}`}
+function executeMethod(method,val=null){
+ if(isAnimating||movesLeft<=0)return;
+ if((method==='pop'||method==='shift')&&!currentArray.length)return;
+ if(method==='reverse'&&currentArray.length<2)return;
+ if((method==='push'||method==='unshift')&&currentArray.length>=10)return;
+ const old=[...currentArray];
+ if(method==='pop'){currentArray.pop();sfxRemove()}
+ else if(method==='shift'){currentArray.shift();sfxRemove()}
+ else if(method==='reverse'){currentArray.reverse();sfxReverse()}
+ else if(method==='push'){currentArray.push(val);sfxAdd()}
+ else if(method==='unshift'){currentArray.unshift(val);sfxAdd()}
+ else return;
+ isAnimating=true;const token=++animationToken;movesLeft--;updateHUD();updateControls();
+ animateMutation(method,old);
+ const label=val?`${method}(${val})`:`${method}()`;
+ setStatus('▶ '+label,`Aplicado. Quedan ${movesLeft} ciclos.`);
+ setTimeout(()=>{if(token!==animationToken)return;isAnimating=false;updateHUD();updateControls();checkWinState()},465);
+}
+function showModal(title,msg,success,callback){
+ modalCallback=callback;$('m-title').textContent=title;$('m-msg').textContent=msg;$('m-symbol').textContent=success?'🏆':'⚠️';
+ $('m-btn').textContent=success?'SIGUIENTE SECTOR →':'REINTENTAR ↺';$('result-card').classList.toggle('failed',!success);$('modal').classList.remove('hidden');
+}
+function closeModal(){sfxClick();$('modal').classList.add('hidden');const callback=modalCallback;modalCallback=null;if(callback)callback()}
+function checkWinState(){
+ const won=JSON.stringify(currentArray)===JSON.stringify(targetArray);
+ if(won){sfxWin();setStatus('✓ Sincronización completa.','Secuencia objetivo alcanzada.');confetti();showModal('¡ACCESO CONCEDIDO!','¡Tu array coincide exactamente con el objetivo!\nHas completado este sector.',true,()=>loadLevel(currentLevel+1));}
+ else if(movesLeft<=0){sfxError();setStatus('⚠ Sin ciclos.','El array aún no coincide con el objetivo.');showModal('CONEXIÓN PERDIDA','Agotaste tus ciclos antes de conseguir la secuencia.\nPrueba otra estrategia con los mismos datos.',false,()=>loadLevel(currentLevel,true));}
+}
+function confetti(){const host=$('confetti');host.innerHTML='';const colors=['#62e7ef','#ff76bc','#ffd474','#aa8cf9','#9cf5c9'];for(let i=0;i<24;i++){const e=document.createElement('i');e.style.setProperty('--left',Math.random()*100+'%');e.style.setProperty('--duration',1.2+Math.random()*.75+'s');e.style.setProperty('--delay',Math.random()*.6+'s');e.style.setProperty('--drift',(Math.random()-.5)*160+'px');e.style.background=colors[i%colors.length];host.appendChild(e)}setTimeout(()=>host.replaceChildren(),2300)}
+selectItem('💾');loadLevel(0);
+</script>
 </body>
 </html>

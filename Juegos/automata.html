@@ -1,574 +1,332 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Autómata: Arena de IA 🤖</title>
-    <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Rajdhani:wght@500;700;800&display=swap" rel="stylesheet">
-    
-    <style>
-        :root { 
-            --bg-color: #020617;
-            --panel-bg: rgba(15, 23, 42, 0.85);
-            --panel-border: #1e293b;
-            --neon-blue: #0ea5e9;
-            --neon-green: #10b981;
-            --neon-red: #ef4444;
-            --neon-amber: #f59e0b;
-            --grid-line: #1e293b;
-            --cell-bg: #0b1120;
-        }
-
-        body, html { 
-            font-family: 'Rajdhani', sans-serif; 
-            display: flex; flex-direction: column; align-items: center; justify-content: flex-start;
-            margin: 0; padding: 0; width: 100vw; height: 100vh; 
-            color: #f8fafc; background-color: var(--bg-color); 
-            overflow: hidden; box-sizing: border-box; user-select: none;
-        }
-
-        /* EFECTOS DE FONDO SCI-FI */
-        .decorations { position: fixed; inset: 0; z-index: -1; pointer-events: none; background: radial-gradient(circle at 50% 0%, #0f172a 0%, #020617 100%); overflow: hidden;}
-        .bg-grid { position: absolute; inset: -50%; background-image: linear-gradient(rgba(14, 165, 233, 0.05) 1px, transparent 1px), linear-gradient(90deg, rgba(14, 165, 233, 0.05) 1px, transparent 1px); background-size: 50px 50px; transform: perspective(1000px) rotateX(60deg) translateY(-100px); animation: gridScroll 20s linear infinite; }
-        @keyframes gridScroll { from { transform: perspective(1000px) rotateX(60deg) translateY(0); } to { transform: perspective(1000px) rotateX(60deg) translateY(50px); } }
-        .scanlines { position: fixed; inset: 0; z-index: 999; pointer-events: none; background: linear-gradient(rgba(0, 0, 0, 0) 50%, rgba(0, 0, 0, 0.2) 50%); background-size: 100% 4px; }
-
-        .sound-toggle { position: absolute; top: 15px; right: 15px; background: rgba(15,23,42,0.8); border: 2px solid var(--neon-blue); border-radius: 8px; width: 45px; height: 45px; font-size: 20px; display: flex; justify-content: center; align-items: center; cursor: pointer; z-index: 1000; box-shadow: 0 0 15px rgba(14,165,233,0.3); transition: all 0.2s; color: var(--neon-blue); backdrop-filter: blur(4px);}
-        .sound-toggle:active { transform: scale(0.9); }
-
-        /* PANTALLA DE INSTRUCCIONES */
-        #instructions-screen { position: absolute; inset: 0; z-index: 600; display: flex; flex-direction: column; justify-content: center; align-items: center; background: rgba(2,6,23,0.85); backdrop-filter: blur(8px); }
-        .instructions-card { background: var(--panel-bg); padding: 40px; border-radius: 12px; border: 1px solid var(--neon-blue); max-width: 90%; width: 600px; display: flex; flex-direction: column; gap: 20px; box-shadow: 0 0 50px rgba(14,165,233,0.15), inset 0 0 20px rgba(14,165,233,0.05); }
-        .instructions-card h1 { font-family: 'Share Tech Mono', monospace; font-size: 36px; color: var(--neon-blue); margin: 0; text-align: center; text-shadow: 0 0 15px rgba(14,165,233,0.5);}
-        .instruction-step { display: flex; gap: 15px; align-items: flex-start; font-size: 18px; background: rgba(255,255,255,0.03); padding: 15px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.05);}
-        .instruction-icon { font-size: 28px; flex-shrink: 0; filter: drop-shadow(0 0 5px rgba(255,255,255,0.5));}
-        .instruction-text b { color: var(--neon-amber); }
-        .start-btn { background: linear-gradient(135deg, #0ea5e9, #0284c7); border: none; padding: 15px 40px; font-size: 22px; color: #fff; border-radius: 6px; text-transform: uppercase; font-weight: bold; font-family: 'Share Tech Mono', monospace; cursor:pointer; transition: all 0.2s; align-self: center; box-shadow: 0 0 20px rgba(14,165,233,0.4); letter-spacing: 2px;}
-        .start-btn:hover { filter: brightness(1.2); transform: translateY(-2px); box-shadow: 0 5px 25px rgba(14,165,233,0.6);}
-        .start-btn:active { transform: scale(0.95); }
-
-        /* HEADER */
-        .game-header { display: flex; justify-content: space-between; align-items: center; width: 100%; max-width: 1200px; padding: 15px 2vw; z-index: 10; box-sizing: border-box;}
-        .back-menu-btn { background: rgba(14,165,233,0.1); border: 1px solid var(--neon-blue); padding: 8px 15px; border-radius: 6px; font-size: 14px; color: var(--neon-blue); cursor: pointer; transition: all 0.2s; font-family: 'Share Tech Mono', monospace; text-transform: uppercase; font-weight: bold;}
-        .back-menu-btn:hover { background: var(--neon-blue); color: #000; }
-        .hud-box { background: var(--panel-bg); padding: 8px 20px; border-radius: 6px; border: 1px solid var(--neon-green); font-size: 20px; color: #fff; box-shadow: 0 0 15px rgba(16,185,129,0.2); font-family: 'Share Tech Mono', monospace; backdrop-filter: blur(4px);}
-        .hud-box span { color: var(--neon-green); font-weight: bold; font-size: 24px;}
-
-        .main-layout { display: flex; flex-direction: row; gap: 25px; width: 100%; max-width: 1200px; flex: 1; padding: 0 2vw 2vh 2vw; box-sizing: border-box; overflow: hidden; align-items: stretch;}
-        @media (max-width: 900px) { .main-layout { flex-direction: column; } }
-
-        /* =========================================================
-           TABLERO (ARENA VISUAL)
-           ========================================================= */
-        .board-container { flex: 1.2; display: flex; justify-content: center; align-items: center; background: var(--panel-bg); border: 1px solid var(--panel-border); border-radius: 12px; padding: 20px; position: relative; box-shadow: inset 0 0 60px rgba(0,0,0,0.8), 0 10px 30px rgba(0,0,0,0.5); backdrop-filter: blur(8px);}
-        
-        .grid-board { display: grid; background: var(--grid-line); border: 4px solid var(--grid-line); gap: 2px; border-radius: 8px; overflow: hidden;}
-        
-        .cell { width: clamp(25px, 4vw, 50px); height: clamp(25px, 4vw, 50px); background: var(--cell-bg); display: flex; justify-content: center; align-items: center; position: relative; transition: background 0.3s;}
-        
-        /* Muro */
-        .cell.wall { background: #334155; }
-        .cell.wall::after { content: ''; position: absolute; inset: 2px; border: 2px solid #475569; background: repeating-linear-gradient(45deg, #1e293b, #1e293b 5px, #334155 5px, #334155 10px); opacity: 0.8;}
-        
-        /* Meta (Batería / Núcleo) */
-        .cell.target { background: rgba(16,185,129,0.05); }
-        .cell.target::before { content: ''; position: absolute; width: 60%; height: 60%; background: var(--neon-green); clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%); box-shadow: 0 0 20px var(--neon-green); animation: pulseCore 1.5s infinite alternate; z-index: 2;}
-        .cell.target::after { content: ''; position: absolute; inset: 0; box-shadow: inset 0 0 15px rgba(16,185,129,0.3); border: 1px solid rgba(16,185,129,0.5);}
-
-        /* Enemigo (Virus) */
-        .cell.enemy { background: rgba(239,68,68,0.05); }
-        .cell.enemy::before { content: ''; position: absolute; width: 60%; height: 60%; background: radial-gradient(circle, #fff 10%, var(--neon-red) 50%, #7f1d1d 100%); border-radius: 50%; box-shadow: 0 0 15px var(--neon-red); animation: pulseEnemy 0.8s infinite alternate; z-index: 2;}
-
-        /* Autómata (Dron) */
-        .bot { position: absolute; transition: all 0.2s linear; z-index: 10; display: flex; justify-content: center; align-items: center; pointer-events: none;}
-        .bot-body { width: 70%; height: 70%; background: var(--neon-blue); clip-path: polygon(50% 0%, 100% 100%, 50% 80%, 0% 100%); box-shadow: 0 0 20px var(--neon-blue); position: relative; filter: drop-shadow(0 0 8px rgba(14,165,233,0.8));}
-        .bot-body::after { content: ''; position: absolute; top: 30%; left: 50%; transform: translate(-50%, -50%); width: 30%; height: 30%; background: #fff; border-radius: 50%; box-shadow: 0 0 10px #fff;}
-
-        /* Láser */
-        .laser-beam { position: absolute; background: #fff; z-index: 15; box-shadow: 0 0 10px #fff, 0 0 20px var(--neon-red), 0 0 30px var(--neon-red); transition: all 0.1s; opacity: 0; pointer-events: none; border-radius: 2px;}
-
-        @keyframes pulseCore { 0% { transform: scale(0.8); opacity: 0.8; filter: drop-shadow(0 0 5px var(--neon-green));} 100% { transform: scale(1.1); opacity: 1; filter: drop-shadow(0 0 20px var(--neon-green));} }
-        @keyframes pulseEnemy { 0% { transform: scale(0.9); filter: hue-rotate(-10deg); } 100% { transform: scale(1.1); filter: hue-rotate(10deg); } }
-        
-        @keyframes explode { 0% { transform: scale(0.5); opacity: 1; filter: brightness(2); background: #fff;} 50% { transform: scale(2); opacity: 0.8; filter: brightness(1.5); background: var(--neon-amber);} 100% { transform: scale(2.5); opacity: 0; filter: brightness(0); background: var(--neon-red);} }
-        .exploding::before { animation: explode 0.4s forwards !important; border-radius: 50%; clip-path: none;}
-
-        /* =========================================================
-           EDITOR DE REGLAS (DERECHA)
-           ========================================================= */
-        .ai-panel { flex: 1; display: flex; flex-direction: column; background: var(--panel-bg); border: 1px solid var(--panel-border); border-radius: 12px; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.5); backdrop-filter: blur(8px);}
-        
-        .ai-header { background: rgba(15,23,42,0.9); padding: 15px; text-align: center; border-bottom: 1px solid var(--panel-border); color: #fff; font-family: 'Share Tech Mono', monospace; display: flex; flex-direction: column; gap: 5px;}
-        .ai-header-title { font-size: 20px; font-weight: bold; color: var(--neon-blue); display: flex; align-items: center; justify-content: center; gap: 10px;}
-        .ai-subtitle { font-size: 13px; color: #94a3b8; font-family: 'Rajdhani', sans-serif;}
-
-        .rules-container { flex: 1; padding: 20px; display: flex; flex-direction: column; gap: 12px; overflow-y: auto;}
-        
-        .rule-row { background: rgba(30,41,59,0.5); border: 1px solid #334155; border-radius: 8px; padding: 12px; display: flex; flex-direction: column; gap: 10px; transition: all 0.2s;}
-        .rule-row.active { background: rgba(16,185,129,0.1); border-color: var(--neon-green); box-shadow: 0 0 20px rgba(16,185,129,0.2), inset 0 0 10px rgba(16,185,129,0.1); transform: translateX(5px); z-index: 5;}
-        .rule-row.error { background: rgba(239,68,68,0.1); border-color: var(--neon-red); box-shadow: 0 0 20px rgba(239,68,68,0.2);}
-
-        .rule-header { display: flex; justify-content: space-between; align-items: center; font-size: 13px; color: #94a3b8; font-weight: bold; font-family: 'Share Tech Mono', monospace;}
-        .rule-num { background: #0f172a; padding: 4px 10px; border-radius: 4px; color: var(--neon-blue); border: 1px solid #1e293b;}
-        .rule-logic { display: flex; align-items: center; gap: 10px; flex-wrap: wrap;}
-        
-        select { background: #0f172a; color: #f8fafc; border: 1px solid #334155; padding: 10px; font-family: 'Rajdhani', sans-serif; font-weight: bold; font-size: 16px; border-radius: 6px; cursor: pointer; outline: none; flex: 1; min-width: 140px; transition: border-color 0.2s;}
-        select:focus { border-color: var(--neon-blue); box-shadow: 0 0 10px rgba(14,165,233,0.3); }
-        select.action-sel { border-color: rgba(245,158,11,0.5); color: var(--neon-amber); }
-        select.action-sel:focus { border-color: var(--neon-amber); box-shadow: 0 0 10px rgba(245,158,11,0.3); }
-
-        .controls { display: flex; padding: 20px; gap: 15px; background: rgba(15,23,42,0.9); border-top: 1px solid var(--panel-border); }
-        .run-btn { flex: 2; background: linear-gradient(135deg, #10b981, #059669); border: none; color: #fff; font-weight: bold; padding: 15px; border-radius: 6px; font-family: 'Share Tech Mono', monospace; font-size: 18px; cursor: pointer; transition: all 0.2s; box-shadow: 0 5px 15px rgba(16,185,129,0.3); text-shadow: 0 2px 4px rgba(0,0,0,0.5);}
-        .run-btn:hover { filter: brightness(1.1); transform: translateY(-2px); }
-        .run-btn:active { transform: translateY(0); }
-        .run-btn.stop { background: linear-gradient(135deg, #ef4444, #dc2626); box-shadow: 0 5px 15px rgba(239,68,68,0.3); }
-        
-        .step-btn { flex: 1; background: transparent; border: 2px solid var(--neon-amber); color: var(--neon-amber); border-radius: 6px; cursor: pointer; font-family: 'Share Tech Mono', monospace; font-size: 14px; font-weight: bold; display: flex; justify-content: center; align-items: center; transition: all 0.2s;}
-        .step-btn:hover { background: rgba(245,158,11,0.1); }
-        .step-btn:disabled { opacity: 0.3; cursor: not-allowed; border-color: #64748b; color: #64748b;}
-
-        /* MODAL */
-        .modal-overlay { position: fixed; inset: 0; background: rgba(2,6,23,0.85); display: flex; justify-content: center; align-items: center; z-index: 1000; visibility: hidden; opacity: 0; transition: all 0.3s; backdrop-filter: blur(8px);}
-        .modal-overlay.active { visibility: visible; opacity: 1; }
-        .modal-box { background: var(--panel-bg); padding: 40px; border-radius: 12px; text-align: center; max-width: 85%; width: 450px; transform: scale(0.9); transition: transform 0.3s; border: 1px solid var(--neon-blue); box-shadow: 0 0 50px rgba(14,165,233,0.2), inset 0 0 20px rgba(14,165,233,0.05);}
-        .modal-overlay.active .modal-box { transform: scale(1); }
-        .modal-title { font-family: 'Share Tech Mono', monospace; font-size: 30px; margin-top: 0; margin-bottom: 15px; color: var(--neon-blue); text-shadow: 0 0 15px rgba(14,165,233,0.5);}
-        .modal-msg { font-size: 18px; margin-bottom: 30px; color: #e2e8f0; white-space: pre-line; line-height: 1.5; }
-        .modal-btn { background: transparent; border: 2px solid var(--neon-blue); color: var(--neon-blue); padding: 12px 30px; font-size: 16px; border-radius: 6px; text-transform: uppercase; font-weight: bold; cursor:pointer; font-family: 'Share Tech Mono', monospace; transition: all 0.2s;}
-        .modal-btn:hover { background: var(--neon-blue); color: #000; box-shadow: 0 0 15px rgba(14,165,233,0.5);}
-
-        @keyframes damageShake { 0%, 100% { transform: translateX(0); } 20%, 60% { transform: translateX(-10px); } 40%, 80% { transform: translateX(10px); } }
-        .shake { animation: damageShake 0.4s both; }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#080f24">
+<title>Autómata · Arena de IA | Edición NEXUS</title>
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700;800&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+<style>
+:root{
+ --bg:#080f24;--panel:#101e34;--panel-hi:#15283f;--border:#31526e;
+ --cyan:#55ddf5;--blue:#39a9e6;--green:#5be5ad;--amber:#ffcb67;--red:#ff7788;
+ --ink:#f1faff;--muted:#8daabd;--glow:0 0 26px rgba(71,196,232,.13);
+ --outer:clamp(7px,1.3vw,18px);--gap:clamp(7px,1.2vw,15px);
+}
+*{box-sizing:border-box}
+html,body{width:100%;height:100%;margin:0;overflow:hidden}
+body{font-family:Rajdhani,system-ui,sans-serif;color:var(--ink);background:var(--bg);user-select:none;-webkit-tap-highlight-color:transparent}
+button,select{font:inherit}button{cursor:pointer}button:focus-visible,select:focus-visible{outline:2px solid var(--amber);outline-offset:2px}
+button:disabled{opacity:.45;cursor:not-allowed}
+.backdrop{position:fixed;inset:0;z-index:-1;pointer-events:none;overflow:hidden;background:radial-gradient(ellipse at 14% 9%,#16466594,transparent 42%),radial-gradient(ellipse at 87% 92%,#2b235c7a,transparent 44%),linear-gradient(145deg,#080f24 18%,#091b2a 80%,#100e26)}
+.backdrop::before{content:"";position:absolute;inset:0;background-image:linear-gradient(rgba(81,185,229,.055) 1px,transparent 1px),linear-gradient(90deg,rgba(81,185,229,.055) 1px,transparent 1px);background-size:36px 36px;mask-image:linear-gradient(to bottom,transparent,black 42%,black 95%)}
+.backdrop::after{content:"";position:absolute;inset:0;background:radial-gradient(circle at 50% 50%,transparent 40%,#06101c9e 100%)}
+.orb{position:absolute;border-radius:50%;filter:blur(18px);opacity:.19;animation:orbFloat 13s ease-in-out infinite alternate}.orb-a{width:290px;height:290px;background:#21d4fd;left:-100px;top:-70px}.orb-b{width:310px;height:310px;background:#854cff;right:-80px;bottom:-120px;animation-delay:-5s}
+@keyframes orbFloat{to{transform:translate(30px,26px)}}
+.app{height:100dvh;width:min(1490px,100%);margin:auto;display:grid;grid-template-rows:clamp(56px,9vh,78px) minmax(0,1fr);padding:var(--outer);gap:var(--gap);overflow:hidden}
+.topbar{display:flex;align-items:center;justify-content:space-between;gap:12px;min-width:0;background:linear-gradient(100deg,#13283eec,#121d33f4);border:1px solid #3d6781;border-radius:16px;padding:6px clamp(10px,1.7vw,20px);box-shadow:inset 0 1px 0 #ffffff16,0 8px 25px #010a1690}
+.brand{display:flex;align-items:center;gap:12px;min-width:0}
+.brand-mark{position:relative;width:43px;height:43px;display:grid;place-items:center;flex-shrink:0;border-radius:13px;background:linear-gradient(145deg,#1a526e,#174266);border:1px solid #489fbc;box-shadow:inset 0 2px 10px #4cdaff34,0 0 16px #42c8ff2b}
+.brand-mark svg{width:28px;height:28px;filter:drop-shadow(0 0 5px #7bf3ff80)}
+.brand-name{min-width:0;display:flex;flex-direction:column;line-height:1}.brand-name strong{font:800 clamp(17px,2.2vw,27px) Rajdhani,sans-serif;letter-spacing:1.8px;white-space:nowrap}.brand-name strong span{color:var(--cyan)}.brand-name small{font:12px 'Share Tech Mono',monospace;color:#8fb3c6;letter-spacing:.6px;margin-top:4px;white-space:nowrap}
+.top-actions{display:flex;align-items:center;gap:8px;min-width:0}
+.status-pill,.icon-btn,.top-btn{border:1px solid #3a6279;border-radius:11px;background:#0c1d31e8;color:#c3e9f5;box-shadow:inset 0 1px #ffffff0d;display:inline-flex;justify-content:center;align-items:center;gap:8px}
+.status-pill{padding:8px 12px;white-space:nowrap;font-size:13px;color:#b8cede;font-family:'Share Tech Mono',monospace}.status-pill b{font-size:17px;color:var(--green)}
+.top-btn{font-size:13px;padding:10px 12px;font-family:'Share Tech Mono',monospace;white-space:nowrap;transition:.18s}
+.top-btn:hover,.icon-btn:hover{background:#1a3650;border-color:var(--cyan)}
+.icon-btn{width:39px;height:39px;font-size:20px;flex-shrink:0}
+.game-layout{display:grid;grid-template-columns:minmax(0,1.07fr) minmax(0,.93fr);gap:var(--gap);min-height:0}
+.arena-panel,.rules-panel{position:relative;min-height:0;min-width:0;display:flex;flex-direction:column;gap:8px;padding:clamp(10px,1.3vw,18px);border:1px solid #355d7a;border-radius:18px;background:linear-gradient(160deg,rgba(19,42,65,.95),rgba(11,24,43,.97));box-shadow:var(--glow),inset 0 1px 0 #ffffff15;overflow:hidden}
+.arena-panel::before,.rules-panel::before{content:'';position:absolute;width:100px;height:2px;top:0;left:24px;background:linear-gradient(90deg,transparent,var(--cyan),transparent);box-shadow:0 0 18px #55ddf5}
+.panel-top{flex-shrink:0;display:flex;align-items:center;justify-content:space-between;gap:8px;min-height:33px}
+.panel-label{font:15px 'Share Tech Mono',monospace;color:var(--cyan);letter-spacing:1px;display:flex;align-items:center;gap:7px;white-space:nowrap}
+.panel-label .signal{width:7px;height:7px;border-radius:50%;background:var(--green);box-shadow:0 0 10px var(--green);animation:signalPulse 1.5s infinite alternate}
+@keyframes signalPulse{to{opacity:.45}}
+.panel-meta{font:12px 'Share Tech Mono',monospace;color:var(--muted);white-space:nowrap}
+.board-stage{position:relative;flex:1;min-height:0;display:flex;align-items:center;justify-content:center;overflow:hidden;border:1px solid #294b66;border-radius:13px;background:radial-gradient(circle at center,#13395863,transparent 72%),linear-gradient(150deg,#091a2e,#061321);box-shadow:inset 0 0 42px #010712d4}
+.board-stage::before,.board-stage::after{content:'';pointer-events:none;position:absolute;width:26px;height:26px;border:2px solid var(--cyan);opacity:.55;z-index:2}
+.board-stage::before{top:11px;left:11px;border-right:none;border-bottom:none}.board-stage::after{right:11px;bottom:11px;border-left:none;border-top:none}
+.grid-board{position:relative;flex:none;display:grid;grid-template-columns:repeat(10,1fr);grid-template-rows:repeat(10,1fr);width:min(calc(100% - 18px),calc(100dvh - 186px));max-height:calc(100% - 16px);aspect-ratio:1;gap:2px;padding:3px;border:1px solid #347497;border-radius:10px;background:#1c4661;box-shadow:0 0 0 5px #2e9bc612,0 15px 36px #000a,0 0 30px #20b9ec23;overflow:hidden}
+.cell{position:relative;min-width:0;min-height:0;background:linear-gradient(140deg,#152f44,#102336);border-radius:2px;display:grid;place-items:center;box-shadow:inset 0 1px 0 #ffffff0b;overflow:hidden}
+.cell::after{content:'';position:absolute;inset:14%;border:1px solid #87d7ed0b;border-radius:2px;pointer-events:none}
+.cell.wall{background:linear-gradient(135deg,#31495f,#1c3046 60%,#243c53);box-shadow:inset 0 0 0 1px #7aa3bd36,inset 0 -4px 0 #020d1a52}
+.cell.wall::before{content:'';position:absolute;inset:17%;background:repeating-linear-gradient(135deg,transparent 0 4px,#91b7c91b 4px 6px);border:1px solid #adc6d533;border-radius:1px}
+.cell.target{background:#0b443a7d;box-shadow:inset 0 0 14px #3df1ad3d}
+.cell.target::before{content:'';width:53%;aspect-ratio:1;background:#a1ffe2;clip-path:polygon(50% 0,100% 50%,50% 100%,0 50%);box-shadow:0 0 10px #54f8b7;filter:drop-shadow(0 0 6px #42ffbd);animation:corePulse 1.4s ease-in-out infinite alternate}
+.cell.enemy{background:#4a182e82;box-shadow:inset 0 0 16px #ff455f2b}
+.cell.enemy::before{content:'';width:54%;aspect-ratio:1;border-radius:50%;background:radial-gradient(circle at 39% 33%,#fff3da 0 8%,#ff7b90 18%,#ec345e 52%,#842037 80%);box-shadow:0 0 10px #ff536e;animation:enemyPulse .9s ease-in-out infinite alternate}
+@keyframes corePulse{to{transform:scale(1.18) rotate(15deg);filter:drop-shadow(0 0 12px #2af6ba)}}@keyframes enemyPulse{to{transform:scale(.83);filter:brightness(1.28)}}
+.cell.blast::before{animation:blast .42s ease-out forwards!important;clip-path:none;border-radius:50%;background:#ffdaaa}
+@keyframes blast{from{transform:scale(.2);opacity:1}to{transform:scale(2.3);opacity:0}}
+.bot{position:absolute;z-index:5;pointer-events:none;display:grid;place-items:center;transition:left .24s cubic-bezier(.2,.7,.2,1),top .24s cubic-bezier(.2,.7,.2,1);filter:drop-shadow(0 2px 6px #0009)}
+.bot-rotate{width:86%;height:86%;display:grid;place-items:center;transition:transform .23s ease;filter:drop-shadow(0 0 8px #48e2ff)}
+.bot-rotate svg{width:100%;height:100%;animation:botHover 1.8s ease-in-out infinite alternate}
+@keyframes botHover{to{transform:translateY(-2px)}}
+.laser-beam{position:absolute;z-index:7;opacity:0;pointer-events:none;border-radius:9px;background:#ffdfdd;box-shadow:0 0 8px #ffebd6,0 0 16px #ff5d7a,0 0 23px #ff456d;transition:opacity .12s}
+.arena-footer{min-height:32px;display:flex;align-items:center;justify-content:space-between;gap:8px;flex-shrink:0;font:12px 'Share Tech Mono',monospace;color:#a5c4d3}
+.sensor-readout{display:flex;align-items:center;gap:7px;white-space:nowrap;min-width:0;overflow:hidden;text-overflow:ellipsis}.sensor-dot{display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--green);box-shadow:0 0 7px var(--green)}
+.step-counter{color:var(--amber);white-space:nowrap}
+.rules-panel{gap:9px}
+.rules-guide{display:flex;justify-content:space-between;gap:6px;padding:0 5px;flex-shrink:0;font:11px 'Share Tech Mono',monospace;color:#879eaf}
+.rules-list{display:grid;grid-template-rows:repeat(4,minmax(0,1fr));gap:9px;flex:1;min-height:0}
+.rule-row{display:grid;grid-template-columns:44px minmax(0,1fr) 13px minmax(0,1fr);gap:8px;align-items:center;min-width:0;min-height:0;padding:8px;border:1px solid #38546c;border-radius:12px;background:linear-gradient(100deg,#182b40e8,#13263ae8);box-shadow:inset 0 1px 0 #ffffff07;transition:border-color .17s,background .17s,box-shadow .17s}
+.rule-row.active{border-color:var(--green);background:#164537a1;box-shadow:0 0 17px #32d5a239,inset 0 0 17px #46fba415}
+.rule-row.error{border-color:var(--red);background:#5f233a80;box-shadow:0 0 16px #ff647a33}
+.rule-num{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;color:#afcce0;font:16px 'Share Tech Mono',monospace}
+.rule-num span{font:9px 'Share Tech Mono',monospace;color:#7b9fb8}
+.rule-row.active .rule-num{color:var(--green)}
+.rule-row .arrow{color:var(--amber);font-size:20px;text-align:center}
+.rule-row select{width:100%;min-width:0;max-width:100%;border:1px solid #44637b;border-radius:8px;padding:10px 22px 10px 8px;background:#0d2135;color:#ebf8ff;font:600 clamp(12px,1.25vw,17px) Rajdhani,sans-serif;appearance:none;outline:none;background-image:url('data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="14" height="9"%3E%3Cpath d="m2 2 5 5 5-5" fill="none" stroke="%2387bed7" stroke-width="2"/%3E%3C/svg%3E');background-repeat:no-repeat;background-size:12px 8px;background-position:right 6px center;cursor:pointer;text-overflow:ellipsis;min-height:39px}
+.rule-row select:focus{border-color:var(--cyan);box-shadow:0 0 0 2px #43ccef2d}
+.rule-row .action-sel{border-color:#725e4b;background-color:#242637;color:#ffdbac}
+.rule-row .action-sel:focus{border-color:var(--amber)}
+.rule-status{display:flex;align-items:center;gap:8px;flex-shrink:0;min-height:27px;border:1px solid #2d4f65;background:#0b1d2f;border-radius:9px;padding:5px 10px;color:#95bad0;font:11px 'Share Tech Mono',monospace;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rule-status::before{content:'●';color:var(--green);font-size:10px}.rule-status.warning::before{color:var(--red)}
+.controls{display:flex;gap:10px;flex-shrink:0;min-height:49px}
+.ctrl-btn{border-radius:10px;padding:9px 12px;font:16px Rajdhani,sans-serif;font-weight:800;letter-spacing:.7px;min-width:0;transition:filter .15s,transform .15s;background:linear-gradient(150deg,#234359,#172e45);border:1px solid #568199;color:#a9e6ff}
+.ctrl-btn:hover:not(:disabled){filter:brightness(1.16);transform:translateY(-1px)}
+.step-btn{flex:.95;border-color:#b18c56;color:var(--amber)}
+.run-btn{flex:1.45;background:linear-gradient(110deg,#4cddaa,#21b58c);color:#082a30;border:1px solid #86ffcd;box-shadow:0 4px 18px #1fae842a}
+.run-btn.stop{color:#fff;background:linear-gradient(110deg,#e65d78,#c13b5d);border-color:#ff91a7;box-shadow:0 4px 18px #d7416f36}
+.restart-btn{padding:9px 12px;border-color:#426681}
+.modal-overlay{position:fixed;inset:0;z-index:50;display:grid;place-items:center;padding:14px;background:#020c1ecb;backdrop-filter:blur(9px);opacity:0;visibility:hidden;transition:.25s}
+.modal-overlay.active{opacity:1;visibility:visible}
+.modal-box{width:min(440px,94vw);max-height:92dvh;overflow:hidden;text-align:center;border:1px solid #50add1;border-radius:23px;background:linear-gradient(155deg,#19354a,#101d32);padding:28px;box-shadow:0 28px 90px #020914dd,0 0 35px #47ceff2b;transform:translateY(17px) scale(.95);transition:transform .25s}
+.modal-overlay.active .modal-box{transform:translateY(0) scale(1)}
+.modal-icon{font-size:53px;display:block;margin-bottom:7px;filter:drop-shadow(0 0 12px #54eaff67)}
+.modal-title{font:800 30px Rajdhani,sans-serif;color:var(--cyan);margin:0 0 8px}.modal-msg{font-size:18px;line-height:1.3;color:#b7ccdb;white-space:pre-line;margin:0 0 21px}
+.modal-btn{background:linear-gradient(100deg,#4ed5f3,#2ca8e0);color:#072d42;border:0;border-radius:11px;padding:11px 25px;font:800 17px Rajdhani,sans-serif;box-shadow:0 5px 0 #1c6f91}
+.intro{position:fixed;inset:0;z-index:35;background:#051123c9;backdrop-filter:blur(10px);display:grid;place-items:center;padding:12px;overflow:hidden}
+.intro.hidden{display:none}
+.intro-card{width:min(900px,96vw);max-height:calc(100dvh - 24px);display:grid;grid-template-columns:.86fr 1.14fr;overflow:hidden;border:1px solid #5085a8;border-radius:24px;background:#0d2339;box-shadow:0 23px 75px #000b,0 0 50px #1c9acc24}
+.intro-art{position:relative;min-height:420px;display:grid;place-items:center;background:radial-gradient(circle at center,#23587e,#0c263f 54%,#0b2038);overflow:hidden}
+.intro-art::before{content:'';position:absolute;inset:0;background:linear-gradient(transparent 95%,#60c5ff24 96%),linear-gradient(90deg,transparent 95%,#60c5ff24 96%);background-size:29px 29px;transform:perspective(400px) rotateX(11deg)}
+.intro-ring{position:absolute;width:82%;aspect-ratio:1;border:1px solid #2fd4ed46;border-radius:50%;box-shadow:0 0 0 35px #26baf00b,0 0 0 70px #26baf008;animation:ringSpin 22s linear infinite}
+.intro-ring::before,.intro-ring::after{content:'';position:absolute;inset:14%;border:2px dashed #55dcf36e;border-radius:50%}.intro-ring::after{inset:32%;border-style:solid;border-color:#e7fca83b}
+@keyframes ringSpin{to{transform:rotate(360deg)}}
+.intro-robot{position:relative;width:57%;max-width:225px;filter:drop-shadow(0 0 35px #43d6ff82);animation:botHover 2.5s ease-in-out infinite alternate}
+.intro-art-label{position:absolute;bottom:24px;left:0;right:0;text-align:center;font:12px 'Share Tech Mono',monospace;letter-spacing:3px;color:#7ddbf0}
+.intro-content{padding:clamp(18px,3vw,38px);display:flex;flex-direction:column;justify-content:center;gap:15px;min-height:0}
+.intro-kicker{font:12px 'Share Tech Mono',monospace;letter-spacing:2.3px;color:var(--green)}
+.intro-title{font:800 clamp(35px,4.3vw,58px) Rajdhani,sans-serif;line-height:.92;margin:0;letter-spacing:.4px}.intro-title span{color:var(--cyan)}
+.intro-description{color:#afc5d5;font-size:17px;line-height:1.2;margin:0}
+.intro-steps{display:grid;gap:9px}
+.intro-step{display:flex;align-items:center;gap:12px;padding:9px 12px;border:1px solid #385671;border-radius:12px;background:#1530478a}
+.intro-step .number{width:30px;height:30px;border-radius:10px;flex-shrink:0;display:grid;place-items:center;color:var(--cyan);font:16px 'Share Tech Mono',monospace;background:#1a4963;border:1px solid #427895}
+.intro-step strong{display:block;font-size:17px;color:#e6faff}.intro-step small{display:block;font-size:14px;color:#a8c0d1;line-height:1.13}
+.intro-start{border:0;border-radius:12px;background:linear-gradient(100deg,#67ddf1,#2bb5e4);color:#082d44;font:800 20px Rajdhani,sans-serif;padding:12px 18px;box-shadow:0 5px 0 #1a668f;transition:transform .15s}
+.intro-start:active{transform:translateY(4px);box-shadow:0 1px 0 #1a668f}
+/* Tablet and portrait phone: board above rules, all visible on the same screen */
+@media(max-width:760px) and (orientation:portrait){
+ :root{--outer:7px;--gap:7px}
+ .app{grid-template-rows:clamp(44px,7.1dvh,58px)}
+ .topbar{border-radius:12px;padding:3px 7px}
+ .brand{gap:6px}.brand-mark{width:32px;height:32px;border-radius:9px}.brand-mark svg{width:22px;height:22px}
+ .brand-name strong{font-size:16px;letter-spacing:.2px}.brand-name small{font-size:9px;letter-spacing:0}
+ .top-actions{gap:5px}.status-pill{font-size:10px;padding:5px 6px;gap:4px}.status-pill b{font-size:13px}
+ .top-btn{padding:7px 8px;font-size:11px}.icon-btn{width:32px;height:32px;font-size:16px;border-radius:8px}
+ .game-layout{grid-template-columns:minmax(0,1fr);grid-template-rows:minmax(0,.90fr) minmax(0,1.10fr)}
+ .arena-panel,.rules-panel{border-radius:13px;padding:7px;gap:4px}
+ .panel-top{min-height:22px}.panel-label{font-size:11px}.panel-meta{font-size:9px}
+ .board-stage{border-radius:9px}
+ .grid-board{width:min(calc(100% - 12px),calc(100dvh - 360px));max-height:calc(100% - 8px);gap:1px;padding:2px;border-radius:6px}
+ .arena-footer{font-size:10px;min-height:18px}
+ .rules-panel{gap:5px}.rules-list{gap:5px}.rules-guide{font-size:9px;padding:0 3px}
+ .rule-row{grid-template-columns:27px minmax(0,1fr) 8px minmax(0,1fr);gap:4px;padding:4px;border-radius:8px}
+ .rule-num{font-size:12px}.rule-num span{font-size:7px}.rule-row .arrow{font-size:13px}
+ .rule-row select{font-size:clamp(10px,2.7vw,14px);padding:5px 15px 5px 5px;min-height:27px;background-size:8px 5px;background-position:right 3px center;border-radius:6px}
+ .rule-status{font-size:9px;min-height:19px;padding:3px 7px}
+ .controls{min-height:37px;gap:5px}.ctrl-btn{font-size:13px;padding:5px 7px;border-radius:7px}
+ .intro-card{grid-template-columns:1fr;width:min(430px,94vw)}
+ .intro-art{min-height:130px;height:23dvh;max-height:210px}.intro-robot{width:110px}.intro-ring{width:150px}.intro-art-label{bottom:8px;font-size:9px}
+ .intro-content{padding:15px;gap:9px}.intro-kicker{font-size:9px}.intro-title{font-size:35px}
+ .intro-description{font-size:14px}.intro-steps{gap:5px}.intro-step{padding:6px 8px}.intro-step strong{font-size:14px}.intro-step small{font-size:12px}.intro-step .number{width:25px;height:25px;font-size:13px}.intro-start{font-size:17px;padding:9px}
+}
+@media(max-width:440px) and (orientation:portrait){
+ .brand-name strong{font-size:clamp(12px,3.8vw,15px);letter-spacing:-.2px}
+ .brand-name small{display:none}
+ .top-btn{font-size:0;padding:6px 7px;min-width:30px}
+ .top-btn .btn-symbol{font-size:17px}
+}
+@media(max-width:380px) and (orientation:portrait){
+ .brand-name small{display:none}.top-btn{font-size:0;gap:0;min-width:29px}.top-btn .btn-symbol{font-size:17px}.status-pill{padding:4px 5px}
+ .game-layout{grid-template-rows:minmax(0,.84fr) minmax(0,1.16fr)}
+ .rule-row select{font-size:10px;padding-right:12px}.rule-row{grid-template-columns:23px minmax(0,1fr) 7px minmax(0,1fr);gap:3px;padding:3px}
+ .rule-num span{display:none}.rule-row .arrow{font-size:11px}
+ .ctrl-btn{font-size:12px}.panel-meta{font-size:8px}
+}
+@media(max-height:660px) and (max-width:760px) and (orientation:portrait){
+ .app{grid-template-rows:43px}.panel-top{min-height:19px}.arena-footer{min-height:15px}.rules-guide{display:none}
+ .rule-status{min-height:18px}.controls{min-height:32px}
+ .intro-art{height:16dvh;min-height:75px}.intro-robot{width:76px}.intro-ring{width:115px}.intro-art-label{display:none}
+ .intro-content{padding:12px;gap:7px}.intro-title{font-size:30px}.intro-description{font-size:13px}
+ .intro-step{padding:5px 7px}.intro-step strong{font-size:13px}.intro-step small{font-size:11px}
+}
+@media(max-height:480px) and (min-width:761px){
+ :root{--outer:5px;--gap:5px}
+ .app{grid-template-rows:43px}.arena-panel,.rules-panel{padding:6px;gap:3px}
+ .panel-top{min-height:18px}.panel-label{font-size:11px}.panel-meta{font-size:9px}
+ .grid-board{width:min(calc(100% - 12px),calc(100dvh - 100px));max-height:calc(100% - 6px);gap:1px;padding:2px}
+ .arena-footer{min-height:18px;font-size:10px}.rules-guide{display:none}.rules-list{gap:3px}
+ .rule-row{padding:3px;gap:4px;grid-template-columns:31px minmax(0,1fr) 8px minmax(0,1fr)}
+ .rule-num{font-size:12px}.rule-num span{display:none}.rule-row select{min-height:25px;padding:4px 15px 4px 5px;font-size:11px}
+ .rules-panel{gap:3px}.rule-status{min-height:17px;font-size:9px;padding:2px 7px}.controls{min-height:32px}.ctrl-btn{padding:4px;font-size:12px}
+ .intro-card{grid-template-columns:.55fr 1.45fr}.intro-art{min-height:0}.intro-content{padding:13px;gap:7px}.intro-title{font-size:30px}.intro-description{font-size:13px}.intro-step{padding:5px}.intro-step small{font-size:11px}.intro-step strong{font-size:13px}.intro-start{padding:7px}
+}
+@media(min-width:761px) and (max-width:980px){.rule-row{grid-template-columns:29px minmax(0,1fr) 9px minmax(0,1fr);gap:4px;padding:5px}.rule-num span{display:none}.rule-row select{font-size:12px;padding-left:5px;padding-right:17px}}
+@media(max-height:480px) and (orientation:landscape){
+ :root{--outer:5px;--gap:5px}
+ .app{grid-template-rows:43px}
+ .topbar{padding:3px 9px;border-radius:10px}
+ .brand-mark{width:30px;height:30px}.brand-mark svg{width:21px;height:21px}
+ .brand-name strong{font-size:18px}.brand-name small{font-size:9px;margin-top:2px}
+ .status-pill{padding:5px 8px;font-size:11px}.status-pill b{font-size:14px}
+ .top-btn{padding:7px 8px;font-size:11px}.icon-btn{width:31px;height:31px;font-size:15px}
+ .arena-panel,.rules-panel{padding:6px;gap:3px;border-radius:11px}
+ .panel-top{min-height:20px}.panel-label{font-size:11px}.panel-meta{font-size:9px}
+ .rules-guide{display:none}.rules-list{gap:4px}
+ .rule-row{padding:3px;gap:4px;grid-template-columns:25px minmax(0,1fr) 8px minmax(0,1fr);border-radius:7px}
+ .rule-num{font-size:11px}.rule-num span{display:none}.rule-row .arrow{font-size:11px}
+ .rule-row select{min-height:25px;font-size:11px;padding:4px 12px 4px 5px;background-size:8px 5px;background-position:right 2px center}
+ .rule-status{min-height:17px;padding:2px 6px;font-size:9px;border-radius:5px}
+ .controls{min-height:34px;gap:5px}.ctrl-btn{white-space:nowrap;font-size:12px;min-height:32px;padding:4px 6px;border-radius:7px}
+ .arena-footer{min-height:18px;font-size:10px}.grid-board{gap:1px;padding:2px}
+ .intro-card{grid-template-columns:.55fr 1.45fr}.intro-art{min-height:0}.intro-content{padding:12px;gap:7px}
+ .intro-title{font-size:30px}.intro-description{font-size:13px}.intro-step{padding:5px}.intro-step small{font-size:11px}.intro-step strong{font-size:13px}.intro-start{padding:7px}
+}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important}}
+</style>
 </head>
 <body>
-
-    <audio id="bgm" loop><source src="../assets/musicaFondo/cancion1.mp3" type="audio/mpeg"></audio>
-    <div class="decorations"><div class="bg-grid"></div><div class="scanlines"></div></div>
-    <button id="soundToggle" class="sound-toggle" aria-label="Activar sonido">🔇</button>
-
-    <!-- INSTRUCCIONES -->
-    <div id="instructions-screen">
-        <div class="instructions-card">
-            <h1>CEREBRO AUTÓMATA</h1>
-            <div class="instruction-step">
-                <span class="instruction-icon">🛸</span>
-                <span class="instruction-text"><b>EL RETO:</b> No puedes mover al dron con un control. Tienes que <b>programar su núcleo lógico</b> antes de encenderlo.</span>
-            </div>
-            <div class="instruction-step">
-                <span class="instruction-icon">🧠</span>
-                <span class="instruction-text"><b>PRIORIDAD LÓGICA:</b> El dron lee las reglas de <b>ARRIBA hacia ABAJO</b>. Si la Regla 1 se cumple, la ejecuta e ignora el resto. ¡El orden de las instrucciones es la clave de la victoria!</span>
-            </div>
-            <div class="instruction-step">
-                <span class="instruction-icon">🎯</span>
-                <span class="instruction-text"><b>OBJETIVO:</b> Configura la IA para que navegue hasta la Batería (Núcleo Verde) destruyendo o esquivando los Virus (Núcleos Rojos). Los laberintos se generan de forma procedimental.</span>
-            </div>
-            <button class="start-btn" onclick="startGame()">SISTEMA EN LÍNEA</button>
-        </div>
-    </div>
-
-    <!-- JUEGO -->
-    <div class="game-header">
-        <button class="back-menu-btn" onclick="generateProceduralMap()">[ Siguiente Laberinto ]</button>
-        <div class="hud-box">SISTEMAS VULNERADOS: <span id="score-display">0</span></div>
-    </div>
-
-    <div class="main-layout">
-        <!-- TABLERO -->
-        <div class="board-container" id="board-container">
-            <div class="grid-board" id="board"></div>
-            <div class="laser-beam" id="laser"></div>
-        </div>
-
-        <!-- EDITOR DE IA -->
-        <div class="ai-panel">
-            <div class="ai-header">
-                <div class="ai-header-title">⚙️ PARÁMETROS DE IA</div>
-                <div class="ai-subtitle">Evaluación de Prioridad Descendente</div>
-            </div>
-            
-            <div class="rules-container" id="rules-container">
-                <!-- 4 Reglas -->
-                <script>
-                    for(let i=1; i<=4; i++) {
-                        document.write(`
-                            <div class="rule-row" id="rule-${i}">
-                                <div class="rule-header">
-                                    <span class="rule-num">REGLA ${i}</span>
-                                    <span>SI (Condición) ➞ ENTONCES</span>
-                                </div>
-                                <div class="rule-logic">
-                                    <select class="cond-sel" id="cond-${i}">
-                                        <option value="NONE">[ Condición... ]</option>
-                                        <option value="ENEMY_FRONT">Detecto Virus al frente</option>
-                                        <option value="WALL_FRONT">Detecto Muro al frente</option>
-                                        <option value="TARGET_FRONT">Detecto Batería al frente</option>
-                                        <option value="CLEAR_FRONT">Camino libre al frente</option>
-                                        <option value="ALWAYS">Siempre (Por defecto)</option>
-                                    </select>
-                                    <select class="action-sel" id="act-${i}">
-                                        <option value="NONE">[ Acción... ]</option>
-                                        <option value="MOVE">Avanzar 1 Sector</option>
-                                        <option value="TURN_L">Girar a la Izquierda</option>
-                                        <option value="TURN_R">Girar a la Derecha</option>
-                                        <option value="SHOOT">Disparar Láser</option>
-                                        <option value="IDLE">Entrar en Reposo</option>
-                                    </select>
-                                </div>
-                            </div>
-                        `);
-                    }
-                </script>
-            </div>
-
-            <div class="controls">
-                <button class="step-btn" id="step-btn" onclick="executeTick(true)">PASO A PASO</button>
-                <button class="run-btn" id="run-btn" onclick="toggleRun()">▶ EJECUTAR IA</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- MODAL -->
-    <div class="modal-overlay" id="modal">
-        <div class="modal-box">
-            <h2 class="modal-title" id="m-title">Título</h2>
-            <p class="modal-msg" id="m-msg">Mensaje</p>
-            <button class="modal-btn" id="m-btn" onclick="closeModal()">ACEPTAR</button>
-        </div>
-    </div>
-
-    <script>
-        const AudioContext = window.AudioContext || window.webkitAudioContext;
-        let audioCtx; let isMuted = true;
-        const bgAudio = document.getElementById('bgm');
-        const soundToggle = document.getElementById('soundToggle');
-
-        soundToggle.addEventListener('click', () => {
-            if (!audioCtx) audioCtx = new AudioContext();
-            if (audioCtx.state === 'suspended') audioCtx.resume();
-            isMuted = !isMuted;
-            if(isMuted) { bgAudio.pause(); soundToggle.innerText = '🔇'; } 
-            else { bgAudio.volume = 0.25; bgAudio.play().catch(e=>e); soundToggle.innerText = '🔊'; }
-        });
-
-        function playTone(freq, type, duration, vol = 0.1) {
-            if (!audioCtx || isMuted) return;
-            const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain();
-            osc.type = type; osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
-            gain.gain.setValueAtTime(vol, audioCtx.currentTime); gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + duration);
-            osc.connect(gain); gain.connect(audioCtx.destination); osc.start(); osc.stop(audioCtx.currentTime + duration);
-        }
-
-        function sfxClick() { playTone(800, 'square', 0.05, 0.05); }
-        function sfxMove() { playTone(300, 'sine', 0.1, 0.05); setTimeout(()=>playTone(350, 'sine', 0.1, 0.05), 50); }
-        function sfxTurn() { playTone(500, 'triangle', 0.1, 0.05); }
-        function sfxLaser() { playTone(1500, 'sawtooth', 0.1, 0.1); setTimeout(()=>playTone(800, 'sawtooth', 0.2, 0.1), 50); }
-        function sfxExplosion() { playTone(100, 'sawtooth', 0.3, 0.2); setTimeout(()=>playTone(80, 'sawtooth', 0.4, 0.2), 100); }
-        function sfxError() { playTone(200, 'square', 0.3, 0.2); setTimeout(()=>playTone(150, 'square', 0.3, 0.2), 150);}
-        function sfxWin() { [523.25, 659.25, 783.99, 1046.50].forEach((f, i) => setTimeout(() => playTone(f, 'square', 0.15, 0.1), i * 150)); }
-
-        // ESTADO DEL JUEGO
-        const GRID_SIZE = 10;
-        let map = []; // 0: vacio, 1: muro, 2: enemigo, 3: target
-        let bot = { x: 0, y: 0, dir: 1 }; // 0: N, 1: E, 2: S, 3: W
-        let botElement = null;
-        
-        let isRunning = false;
-        let runInterval = null;
-        let score = 0;
-        let executionSteps = 0;
-
-        document.querySelectorAll('select').forEach(sel => sel.addEventListener('change', sfxClick));
-
-        function startGame() {
-            if (!audioCtx && !isMuted) { audioCtx = new AudioContext(); bgAudio.play().catch(e=>e); }
-            sfxClick();
-            document.getElementById('instructions-screen').style.display = 'none';
-            generateProceduralMap();
-        }
-
-        // GENERADOR DE MAPAS PROCEDURALES
-        function generateProceduralMap() {
-            stopRun();
-            document.querySelectorAll('.rule-row').forEach(r => r.classList.remove('active', 'error'));
-            
-            map = Array(GRID_SIZE).fill().map(() => Array(GRID_SIZE).fill(1)); // Todo muro
-            
-            let cx = 1, cy = 1;
-            bot = { x: 1, y: 1, dir: 1 };
-            map[cy][cx] = 0;
-            
-            let path = [{x:cx, y:cy}];
-            let steps = Math.floor(Math.random() * 15) + 15;
-            
-            for(let i=0; i<steps; i++) {
-                let dirs = [{dx:0,dy:-1}, {dx:1,dy:0}, {dx:0,dy:1}, {dx:-1,dy:0}];
-                dirs = dirs.filter(d => {
-                    let nx = cx + d.dx*2; let ny = cy + d.dy*2;
-                    return nx > 0 && nx < GRID_SIZE-1 && ny > 0 && ny < GRID_SIZE-1;
-                });
-                if(dirs.length === 0) break;
-                
-                let chosen = dirs[Math.floor(Math.random() * dirs.length)];
-                cx += chosen.dx; cy += chosen.dy; map[cy][cx] = 0; path.push({x:cx, y:cy});
-                cx += chosen.dx; cy += chosen.dy; map[cy][cx] = 0; path.push({x:cx, y:cy});
-            }
-
-            // Target
-            let endNode = path[path.length-1];
-            map[endNode.y][endNode.x] = 3;
-
-            // Enemigos
-            let numEnemies = Math.floor(Math.random() * 3) + 1;
-            for(let i=0; i<numEnemies; i++) {
-                let p = path[Math.floor(Math.random() * (path.length-2)) + 1];
-                if(map[p.y][p.x] === 0 && (p.x !== bot.x || p.y !== bot.y)) {
-                    map[p.y][p.x] = 2;
-                }
-            }
-
-            renderMap();
-        }
-
-        function renderMap() {
-            let board = document.getElementById('board');
-            board.style.gridTemplateColumns = `repeat(${GRID_SIZE}, 1fr)`;
-            board.style.gridTemplateRows = `repeat(${GRID_SIZE}, 1fr)`;
-            board.innerHTML = '';
-
-            for(let y=0; y<GRID_SIZE; y++) {
-                for(let x=0; x<GRID_SIZE; x++) {
-                    let cell = document.createElement('div');
-                    cell.className = 'cell';
-                    cell.id = `cell-${x}-${y}`;
-                    
-                    if (map[y][x] === 1) cell.classList.add('wall');
-                    else if (map[y][x] === 2) cell.classList.add('enemy');
-                    else if (map[y][x] === 3) cell.classList.add('target');
-                    
-                    board.appendChild(cell);
-                }
-            }
-
-            if (!botElement) {
-                botElement = document.createElement('div');
-                botElement.className = 'bot';
-                document.getElementById('board-container').appendChild(botElement);
-            }
-            updateBotVisuals(true);
-        }
-
-        function updateBotVisuals(instant = false) {
-            if(!botElement) return;
-            let cell = document.getElementById(`cell-${bot.x}-${bot.y}`);
-            if(cell) {
-                let rect = cell.getBoundingClientRect();
-                let containerRect = document.getElementById('board-container').getBoundingClientRect();
-                
-                let left = rect.left - containerRect.left; 
-                let top = rect.top - containerRect.top;
-
-                botElement.style.transition = instant ? 'none' : 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)';
-                botElement.style.left = `${left}px`;
-                botElement.style.top = `${top}px`;
-                botElement.style.width = `${rect.width}px`;
-                botElement.style.height = `${rect.height}px`;
-                
-                let rot = bot.dir * 90;
-                botElement.innerHTML = `<div class="bot-body" style="transform: rotate(${rot}deg); transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);"></div>`;
-            }
-        }
-
-        // --- SISTEMA DE EVALUACIÓN DE IA ---
-        
-        function getCellInFront() {
-            let nx = bot.x; let ny = bot.y;
-            if (bot.dir === 0) ny--; else if (bot.dir === 1) nx++; else if (bot.dir === 2) ny++; else if (bot.dir === 3) nx--;
-            
-            if (nx < 0 || nx >= GRID_SIZE || ny < 0 || ny >= GRID_SIZE) return 1; // Pared
-            return map[ny][nx];
-        }
-
-        function evaluateCondition(cond) {
-            let front = getCellInFront();
-            switch(cond) {
-                case 'ENEMY_FRONT': return front === 2;
-                case 'WALL_FRONT': return front === 1;
-                case 'TARGET_FRONT': return front === 3;
-                case 'CLEAR_FRONT': return front === 0 || front === 3;
-                case 'ALWAYS': return true;
-                default: return false;
-            }
-        }
-
-        function executeTick(isManualStep = false) {
-            if (executionSteps > 150) {
-                stopRun();
-                sfxError();
-                showModal("BUCLE INFINITO ⚠️", "El dron ha ejecutado 150 pasos sin alcanzar el núcleo.\nRevisa tu lógica de prioridades.", null);
-                return;
-            }
-
-            document.querySelectorAll('.rule-row').forEach(r => r.classList.remove('active', 'error'));
-            
-            let ruleFired = -1;
-
-            // EVALUACIÓN TOP-DOWN
-            for(let i=1; i<=4; i++) {
-                let cond = document.getElementById(`cond-${i}`).value;
-                let act = document.getElementById(`act-${i}`).value;
-
-                if (cond !== 'NONE' && act !== 'NONE') {
-                    if (evaluateCondition(cond)) {
-                        ruleFired = i;
-                        performAction(act);
-                        break; 
-                    }
-                }
-            }
-
-            if (ruleFired !== -1) {
-                let rEl = document.getElementById(`rule-${ruleFired}`);
-                rEl.classList.add('active');
-                if(isManualStep) setTimeout(() => rEl.classList.remove('active'), 400);
-            } else {
-                sfxError();
-                stopRun();
-                showModal("SISTEMA DETENIDO ⚠️", "Ninguna de las reglas programadas se cumplió en este escenario.\nEl dron no sabe qué hacer.", null);
-                return;
-            }
-
-            executionSteps++;
-            checkGameState();
-        }
-
-        function performAction(act) {
-            if (act === 'MOVE') {
-                let nx = bot.x; let ny = bot.y;
-                if (bot.dir === 0) ny--; else if (bot.dir === 1) nx++; else if (bot.dir === 2) ny++; else if (bot.dir === 3) nx--;
-                
-                let front = getCellInFront();
-                if (front === 1 || front === 2) {
-                    sfxError();
-                    stopRun();
-                    document.getElementById('board-container').classList.add('shake');
-                    setTimeout(() => document.getElementById('board-container').classList.remove('shake'), 400);
-                    showModal("COLISIÓN CRÍTICA 💥", "El dron se estrelló contra un obstáculo.\nAsegúrate de evaluar lo que hay al frente antes de avanzar.", null);
-                } else {
-                    sfxMove();
-                    bot.x = nx; bot.y = ny;
-                    updateBotVisuals();
-                }
-            }
-            else if (act === 'TURN_L') { sfxTurn(); bot.dir = (bot.dir + 3) % 4; updateBotVisuals(); }
-            else if (act === 'TURN_R') { sfxTurn(); bot.dir = (bot.dir + 1) % 4; updateBotVisuals(); }
-            else if (act === 'SHOOT') {
-                sfxLaser();
-                
-                let laser = document.getElementById('laser');
-                let cell = document.getElementById(`cell-${bot.x}-${bot.y}`);
-                let rect = cell.getBoundingClientRect();
-                let contRect = document.getElementById('board-container').getBoundingClientRect();
-                
-                let lw = 6, lh = rect.height;
-                if(bot.dir === 1 || bot.dir === 3) { lw = rect.width; lh = 6; }
-                
-                laser.style.width = `${lw}px`; laser.style.height = `${lh}px`;
-                let lx = rect.left - contRect.left + rect.width/2 - lw/2;
-                let ly = rect.top - contRect.top + rect.height/2 - lh/2;
-                
-                if (bot.dir === 0) { ly -= rect.height; }
-                else if (bot.dir === 1) { lx += rect.width; }
-                else if (bot.dir === 2) { ly += rect.height; }
-                else if (bot.dir === 3) { lx -= rect.width; }
-
-                laser.style.left = `${lx}px`; laser.style.top = `${ly}px`;
-                laser.style.opacity = '1';
-                setTimeout(() => laser.style.opacity = '0', 200);
-
-                let front = getCellInFront();
-                if (front === 2) {
-                    let nx = bot.x; let ny = bot.y;
-                    if (bot.dir === 0) ny--; else if (bot.dir === 1) nx++; else if (bot.dir === 2) ny++; else if (bot.dir === 3) nx--;
-                    
-                    map[ny][nx] = 0; 
-                    let eCell = document.getElementById(`cell-${nx}-${ny}`);
-                    eCell.classList.remove('enemy');
-                    eCell.classList.add('exploding');
-                    sfxExplosion();
-                    setTimeout(()=> eCell.classList.remove('exploding'), 450);
-                }
-            }
-            else if (act === 'IDLE') {
-                // Wait
-            }
-        }
-
-        function checkGameState() {
-            if (map[bot.y][bot.x] === 3) {
-                stopRun();
-                sfxWin();
-                score++;
-                document.getElementById('score-display').innerText = score;
-                document.getElementById('m-title').style.color = "var(--neon-green)";
-                document.getElementById('m-title').style.textShadow = "0 0 15px rgba(16,185,129,0.5)";
-                showModal("¡EXTRACCIÓN EXITOSA! 🔋", "La lógica de tu IA funcionó a la perfección.\nIniciando siguiente laberinto...", () => {
-                    generateProceduralMap();
-                    document.getElementById('m-title').style.textShadow = "0 0 10px var(--neon-blue)";
-                    document.getElementById('m-title').style.color = "var(--neon-blue)";
-                });
-            }
-        }
-
-        function toggleRun() {
-            let btn = document.getElementById('run-btn');
-            let sBtn = document.getElementById('step-btn');
-            if (isRunning) {
-                stopRun();
-            } else {
-                sfxClick();
-                let hasRules = false;
-                for(let i=1; i<=4; i++) { if(document.getElementById(`cond-${i}`).value !== 'NONE' && document.getElementById(`act-${i}`).value !== 'NONE') hasRules = true; }
-                if(!hasRules) { sfxError(); showModal("ERROR LÓGICO", "Debes configurar al menos una regla válida.", null); return; }
-
-                isRunning = true;
-                executionSteps = 0;
-                btn.classList.add('stop');
-                btn.innerHTML = '⏹ DETENER IA';
-                sBtn.disabled = true;
-                
-                bot = { x: 1, y: 1, dir: 1 };
-                
-                runInterval = setInterval(() => {
-                    executeTick();
-                }, 300);
-            }
-        }
-
-        function stopRun() {
-            isRunning = false;
-            clearInterval(runInterval);
-            let btn = document.getElementById('run-btn');
-            btn.classList.remove('stop');
-            btn.innerHTML = '▶ EJECUTAR IA';
-            document.getElementById('step-btn').disabled = false;
-        }
-
-        // MODAL
-        let modalCallback = null;
-        function showModal(title, msg, callback = null) { 
-            document.getElementById('m-title').innerText = title; 
-            document.getElementById('m-msg').innerText = msg; 
-            document.getElementById('modal').classList.add('active'); 
-            modalCallback = callback; 
-        }
-        function closeModal() { 
-            sfxClick(); 
-            document.getElementById('modal').classList.remove('active'); 
-            if(modalCallback) { modalCallback(); modalCallback = null; } 
-        }
-
-        window.addEventListener('resize', () => { if(!isRunning) updateBotVisuals(true); });
-    </script>
+<div class="backdrop" aria-hidden="true"><div class="orb orb-a"></div><div class="orb orb-b"></div></div>
+<div class="app">
+ <header class="topbar">
+  <div class="brand"><div class="brand-mark" aria-hidden="true"><svg viewBox="0 0 48 48" fill="none"><path d="M24 4 40 13v22L24 44 8 35V13L24 4Z" stroke="#75EFFF" stroke-width="2.5"/><path d="m24 14 10 6v9l-10 6-10-6v-9l10-6Z" fill="#1b7898" stroke="#8BF9FF" stroke-width="2"/><circle cx="24" cy="24" r="4" fill="#B9FFEE"/><path d="M24 4v10M40 13l-7 7M40 35l-7-6M24 44v-9M8 35l7-6M8 13l7 7" stroke="#43d7f2" stroke-width="1.8"/></svg></div><div class="brand-name"><strong>AUTÓMATA <span>// NEXUS</span></strong><small>ARENA DE INTELIGENCIA ARTIFICIAL</small></div></div>
+  <div class="top-actions"><div class="status-pill">🏆 <b id="score-display">0</b></div><button class="top-btn" id="new-map-btn" type="button" title="Generar un nuevo mapa" aria-label="Generar un nuevo mapa" onclick="generateProceduralMap()"><span class="btn-symbol">↻</span> Nuevo mapa</button><button class="icon-btn" id="soundToggle" type="button" aria-label="Activar o silenciar sonidos" aria-pressed="false">🔇</button></div>
+ </header>
+ <main class="game-layout">
+  <section class="arena-panel" aria-label="Laberinto del autómata">
+   <div class="panel-top"><div class="panel-label"><span class="signal"></span> 01 / CAMPO DE PRUEBAS</div><div class="panel-meta">ARENA <span id="arena-count">01</span> · 10×10</div></div>
+   <div class="board-stage" id="board-stage"><div class="grid-board" id="board"></div></div>
+   <div class="arena-footer"><span class="sensor-readout"><i class="sensor-dot"></i><span id="front-readout">SENSOR: CARGANDO…</span></span><span class="step-counter">CICLOS <span id="steps-display">000</span> / 150</span></div>
+  </section>
+  <section class="rules-panel" aria-label="Programador de reglas">
+   <div class="panel-top"><div class="panel-label">02 / NÚCLEO LÓGICO</div><span class="panel-meta">PRIORIDAD ↓</span></div>
+   <div class="rules-guide"><span>LA PRIMERA REGLA VERDADERA SE EJECUTA</span><span>SI → ENTONCES</span></div>
+   <div class="rules-list" id="rules-container">
+    <div class="rule-row" id="rule-1"><div class="rule-num">01<span>REGLA</span></div><select id="cond-1" class="cond-sel" aria-label="Condición de la regla 1"><option value="NONE">Si ocurre…</option><option value="ENEMY_FRONT">Virus enfrente</option><option value="WALL_FRONT">Muro enfrente</option><option value="TARGET_FRONT">Meta enfrente</option><option value="CLEAR_FRONT">Camino libre</option><option value="ALWAYS">Siempre</option></select><span class="arrow">➜</span><select id="act-1" class="action-sel" aria-label="Acción de la regla 1"><option value="NONE">Entonces…</option><option value="MOVE">Avanzar</option><option value="TURN_L">Girar izquierda</option><option value="TURN_R">Girar derecha</option><option value="SHOOT">Disparar láser</option><option value="IDLE">Esperar</option></select></div>
+    <div class="rule-row" id="rule-2"><div class="rule-num">02<span>REGLA</span></div><select id="cond-2" class="cond-sel" aria-label="Condición de la regla 2"><option value="NONE">Si ocurre…</option><option value="ENEMY_FRONT">Virus enfrente</option><option value="WALL_FRONT">Muro enfrente</option><option value="TARGET_FRONT">Meta enfrente</option><option value="CLEAR_FRONT">Camino libre</option><option value="ALWAYS">Siempre</option></select><span class="arrow">➜</span><select id="act-2" class="action-sel" aria-label="Acción de la regla 2"><option value="NONE">Entonces…</option><option value="MOVE">Avanzar</option><option value="TURN_L">Girar izquierda</option><option value="TURN_R">Girar derecha</option><option value="SHOOT">Disparar láser</option><option value="IDLE">Esperar</option></select></div>
+    <div class="rule-row" id="rule-3"><div class="rule-num">03<span>REGLA</span></div><select id="cond-3" class="cond-sel" aria-label="Condición de la regla 3"><option value="NONE">Si ocurre…</option><option value="ENEMY_FRONT">Virus enfrente</option><option value="WALL_FRONT">Muro enfrente</option><option value="TARGET_FRONT">Meta enfrente</option><option value="CLEAR_FRONT">Camino libre</option><option value="ALWAYS">Siempre</option></select><span class="arrow">➜</span><select id="act-3" class="action-sel" aria-label="Acción de la regla 3"><option value="NONE">Entonces…</option><option value="MOVE">Avanzar</option><option value="TURN_L">Girar izquierda</option><option value="TURN_R">Girar derecha</option><option value="SHOOT">Disparar láser</option><option value="IDLE">Esperar</option></select></div>
+    <div class="rule-row" id="rule-4"><div class="rule-num">04<span>REGLA</span></div><select id="cond-4" class="cond-sel" aria-label="Condición de la regla 4"><option value="NONE">Si ocurre…</option><option value="ENEMY_FRONT">Virus enfrente</option><option value="WALL_FRONT">Muro enfrente</option><option value="TARGET_FRONT">Meta enfrente</option><option value="CLEAR_FRONT">Camino libre</option><option value="ALWAYS">Siempre</option></select><span class="arrow">➜</span><select id="act-4" class="action-sel" aria-label="Acción de la regla 4"><option value="NONE">Entonces…</option><option value="MOVE">Avanzar</option><option value="TURN_L">Girar izquierda</option><option value="TURN_R">Girar derecha</option><option value="SHOOT">Disparar láser</option><option value="IDLE">Esperar</option></select></div>
+   </div>
+   <div class="rule-status" id="rule-status" role="status" aria-live="polite">Configura condiciones y acciones para el dron.</div>
+   <div class="controls"><button class="ctrl-btn restart-btn" type="button" id="restart-btn" onclick="restartMap()" title="Restablecer este mapa">↺</button><button class="ctrl-btn step-btn" type="button" id="step-btn" onclick="executeTick(true)">⏭ PASO</button><button class="ctrl-btn run-btn" type="button" id="run-btn" onclick="toggleRun()">▶ EJECUTAR IA</button></div>
+  </section>
+ </main>
+</div>
+<div class="intro" id="instructions-screen">
+ <div class="intro-card">
+  <div class="intro-art" aria-hidden="true"><div class="intro-ring"></div><svg class="intro-robot" viewBox="0 0 160 160" fill="none"><path d="M80 7 127 38v76l-47 38-47-38V38L80 7Z" fill="#123a59" stroke="#50c7ec" stroke-width="3"/><path d="M80 29 116 54 103 110 80 128 57 110 44 54 80 29Z" fill="#186f91" stroke="#79efff" stroke-width="3"/><path d="m80 40 22 29-22 49-22-49 22-29Z" fill="#3abbdc" stroke="#a6f8ff" stroke-width="2"/><path d="m80 55 9 20-9 20-9-20 9-20Z" fill="#d1fffa"/><path d="M51 116 20 130 35 95m74 21 31 14-15-35" stroke="#6ceaff" stroke-width="5" stroke-linecap="round"/><circle cx="80" cy="14" r="4" fill="#adffd9"/></svg><div class="intro-art-label">AUTONOMOUS SYSTEM // ONLINE</div></div>
+  <div class="intro-content"><div class="intro-kicker">✦ SIMULADOR DE REGLAS · IA</div><h1 class="intro-title">CEREBRO <span>AUTÓMATA</span></h1><p class="intro-description">No controlas directamente al dron: diseñas las decisiones que tomará para llegar al núcleo.</p>
+   <div class="intro-steps">
+    <div class="intro-step"><div class="number">01</div><div><strong>Programa cuatro reglas</strong><small>Elige qué detectar y qué acción ejecutar.</small></div></div>
+    <div class="intro-step"><div class="number">02</div><div><strong>Importa el orden</strong><small>Solo se ejecuta la primera regla válida, de arriba hacia abajo.</small></div></div>
+    <div class="intro-step"><div class="number">03</div><div><strong>Supera la arena</strong><small>Esquiva muros, destruye virus y alcanza el núcleo verde.</small></div></div>
+   </div><button class="intro-start" type="button" onclick="startGame()">⚡ INICIAR SIMULACIÓN</button>
+  </div>
+ </div>
+</div>
+<div class="modal-overlay" id="modal" role="dialog" aria-modal="true" aria-labelledby="m-title"><div class="modal-box"><span class="modal-icon" id="m-icon">🤖</span><h2 class="modal-title" id="m-title">Sistema</h2><p class="modal-msg" id="m-msg"></p><button class="modal-btn" type="button" onclick="closeModal()">CONTINUAR ↗</button></div></div>
+<audio id="bgm" loop><source src="../assets/musicaFondo/cancion1.mp3" type="audio/mpeg"></audio>
+<script>
+'use strict';
+const $ = id => document.getElementById(id);
+const GRID_SIZE = 10;
+const MAX_STEPS = 150;
+const botSVG = `<div class="bot-rotate" id="bot-rotate"><svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M32 2 55 49 32 41 9 49 32 2Z" fill="#187795" stroke="#8AF5FF" stroke-width="3"/><path d="M32 10 45 39 32 34 19 39 32 10Z" fill="#59CBE9"/><path d="m32 20 7 16-7-3-7 3 7-16Z" fill="#D9FFFA"/><path d="m19 39-9 10 18-8m17-2 9 10-18-8" fill="#13445E" stroke="#66DFF1" stroke-width="2"/><path d="M32 43V56" stroke="#66E4FF" stroke-width="3" stroke-linecap="round"/><path d="m24 54 8 7 8-7" stroke="#45F7D2" stroke-width="3"/></svg></div>`;
+let map=[],initialMap=[],bot={x:1,y:1,dir:1},botElement=null,laserElement=null;
+let isRunning=false,runInterval=null,score=0,executionSteps=0,arenaIndex=0,modalCallback=null,modalOpen=false;
+let audioCtx=null,isMuted=true;
+const audioCtor=window.AudioContext||window.webkitAudioContext;
+const bgm=$('bgm');
+function tone(f,d=.1,w='sine',volume=.06,delay=0){if(isMuted||!audioCtor)return;try{audioCtx??=new audioCtor();if(audioCtx.state==='suspended')audioCtx.resume();const osc=audioCtx.createOscillator(),gain=audioCtx.createGain(),t=audioCtx.currentTime+delay;osc.type=w;osc.frequency.setValueAtTime(f,t);gain.gain.setValueAtTime(volume,t);gain.gain.exponentialRampToValueAtTime(.001,t+d);osc.connect(gain);gain.connect(audioCtx.destination);osc.start(t);osc.stop(t+d+.01)}catch(e){}}
+function sfxClick(){tone(760,.06)}function sfxMove(){tone(340,.07,'sine',.06);tone(470,.06,'sine',.04,.06)}function sfxTurn(){tone(520,.10,'triangle',.05)}function sfxLaser(){tone(960,.12,'sawtooth',.075);tone(450,.14,'triangle',.055,.09)}function sfxExplosion(){tone(150,.20,'sawtooth',.09)}function sfxError(){tone(220,.14,'square',.06);tone(160,.2,'square',.05,.15)}function sfxWin(){[520,660,780,1040].forEach((f,i)=>tone(f,.22,'sine',.07,i*.12))}
+$('soundToggle').addEventListener('click',()=>{isMuted=!isMuted;$('soundToggle').textContent=isMuted?'🔇':'🔊';$('soundToggle').setAttribute('aria-pressed',String(!isMuted));if(isMuted)bgm.pause();else{tone(660);bgm.volume=.22;bgm.play().catch(()=>{})}});
+function setStatus(txt='',warning=false){const el=$('rule-status');el.textContent=txt;el.classList.toggle('warning',warning)}
+function updateSteps(){$('steps-display').textContent=String(executionSteps).padStart(3,'0')}
+function startGame(){$('instructions-screen').classList.add('hidden');sfxClick();if(!map.length)generateProceduralMap();else resizeBoard()}
+function stopRun(){isRunning=false;if(runInterval!==null){clearInterval(runInterval);runInterval=null}const b=$('run-btn');b.classList.remove('stop');b.textContent='▶ EJECUTAR IA';$('step-btn').disabled=false}
+function canUseControls(){return !modalOpen && $('instructions-screen').classList.contains('hidden')}
+function generateProceduralMap(){stopRun();hideModal();executionSteps=0;updateSteps();arenaIndex++;$('arena-count').textContent=String(arenaIndex).padStart(2,'0');
+ // Walk carved corridors, as in the original. Choose a distant reachable target.
+ let attempts=0,start={x:1,y:1,dir:1},bestTarget={x:3,y:1};
+ do{
+  map=Array.from({length:GRID_SIZE},()=>Array(GRID_SIZE).fill(1));map[1][1]=0;
+  let x=1,y=1;const n=18+Math.floor(Math.random()*15);
+  for(let i=0;i<n;i++){
+   const candidates=[[0,-1],[1,0],[0,1],[-1,0]].filter(([dx,dy])=>{const nx=x+dx*2,ny=y+dy*2;return nx>0&&ny>0&&nx<GRID_SIZE-1&&ny<GRID_SIZE-1});
+   if(!candidates.length)break;
+   const [dx,dy]=candidates[Math.floor(Math.random()*candidates.length)];
+   x+=dx;y+=dy;map[y][x]=0;x+=dx;y+=dy;map[y][x]=0;
+  }
+  const seen=new Set(['1,1']),q=[{x:1,y:1,d:0}],options=[];
+  while(q.length){const cur=q.shift();if(cur.d>=4)options.push(cur);for(const [dx,dy] of [[1,0],[0,1],[-1,0],[0,-1]]){let nx=cur.x+dx,ny=cur.y+dy,k=nx+','+ny;if(nx>=0&&ny>=0&&nx<GRID_SIZE&&ny<GRID_SIZE&&map[ny][nx]===0&&!seen.has(k)){seen.add(k);q.push({x:nx,y:ny,d:cur.d+1})}}}
+  options.sort((a,b)=>b.d-a.d);if(options.length){const pick=options[Math.floor(Math.random()*Math.min(5,options.length))];bestTarget={x:pick.x,y:pick.y}}
+  attempts++;
+ }while(attempts<8&&(bestTarget.x===1&&bestTarget.y===1));
+ map[bestTarget.y][bestTarget.x]=3;
+ const candidateEnemies=[];for(let y=0;y<GRID_SIZE;y++)for(let x=0;x<GRID_SIZE;x++)if(map[y][x]===0&&!(x===1&&y===1))candidateEnemies.push({x,y});
+ candidateEnemies.sort(()=>Math.random()-.5);for(const p of candidateEnemies.slice(0,Math.min(candidateEnemies.length,1+Math.floor(Math.random()*3))))map[p.y][p.x]=2;
+ initialMap=map.map(row=>[...row]);bot={...start};renderMap();setStatus('Mapa cargado. Configura la IA y empieza.');sfxClick()}
+function restartMap(){if(!canUseControls())return;stopRun();map=initialMap.map(r=>[...r]);bot={x:1,y:1,dir:1};executionSteps=0;updateSteps();renderMap();document.querySelectorAll('.rule-row').forEach(r=>r.classList.remove('active','error'));setStatus('Mapa reiniciado. Tus cuatro reglas se conservaron.');sfxClick()}
+function renderMap(){const board=$('board');board.innerHTML='';for(let y=0;y<GRID_SIZE;y++)for(let x=0;x<GRID_SIZE;x++){const cell=document.createElement('div');cell.className='cell';cell.id=`cell-${x}-${y}`;if(map[y][x]===1)cell.classList.add('wall');if(map[y][x]===2)cell.classList.add('enemy');if(map[y][x]===3)cell.classList.add('target');board.appendChild(cell)}
+ botElement=document.createElement('div');botElement.className='bot';botElement.id='bot';botElement.innerHTML=botSVG;board.appendChild(botElement);
+ laserElement=document.createElement('div');laserElement.className='laser-beam';laserElement.id='laser';board.appendChild(laserElement);
+ // Browser layout must be complete before measuring cells.
+ requestAnimationFrame(()=>updateBotVisuals(true));updateFrontReadout()}
+function updateBotVisuals(instant=false){if(!botElement)return;const cell=$(`cell-${bot.x}-${bot.y}`);if(!cell)return;botElement.style.transition=instant?'none':'';botElement.style.left=cell.offsetLeft+'px';botElement.style.top=cell.offsetTop+'px';botElement.style.width=cell.offsetWidth+'px';botElement.style.height=cell.offsetHeight+'px';$('bot-rotate').style.transform=`rotate(${bot.dir*90}deg)`;if(instant)requestAnimationFrame(()=>{if(botElement)botElement.style.transition=''})}
+function getFrontCoords(){const dx=[0,1,0,-1][bot.dir],dy=[-1,0,1,0][bot.dir];return {x:bot.x+dx,y:bot.y+dy}}
+function getCellInFront(){const {x,y}=getFrontCoords();return x<0||x>=GRID_SIZE||y<0||y>=GRID_SIZE?1:map[y][x]}
+function updateFrontReadout(){const msg=['CAMINO LIBRE','MURO DETECTADO','VIRUS DETECTADO','NÚCLEO DETECTADO'][getCellInFront()];$('front-readout').textContent='SENSOR: '+msg}
+function evaluateCondition(cond){const front=getCellInFront();switch(cond){case'ENEMY_FRONT':return front===2;case'WALL_FRONT':return front===1;case'TARGET_FRONT':return front===3;case'CLEAR_FRONT':return front===0||front===3;case'ALWAYS':return true;default:return false}}
+function hasValidRule(){return [1,2,3,4].some(i=>$('cond-'+i).value!=='NONE'&&$('act-'+i).value!=='NONE')}
+function executeTick(manual=false){if(!canUseControls()||(!manual&&!isRunning))return;if(manual&&isRunning)return;if(!hasValidRule()){sfxError();stopRun();showModal('NO HAY INSTRUCCIONES','Configura al menos una condición y una acción para que el dron pueda decidir.','⚙️');return}
+ if(executionSteps>=MAX_STEPS){stopRun();sfxError();showModal('BUCLE INFINITO','El autómata ha ejecutado 150 ciclos sin alcanzar el núcleo. Revisa las prioridades de las reglas.','♾️');return}
+ document.querySelectorAll('.rule-row').forEach(r=>r.classList.remove('active','error'));
+ let idx=-1,act='';for(let i=1;i<=4;i++){const c=$('cond-'+i).value,a=$('act-'+i).value;if(c!=='NONE'&&a!=='NONE'&&evaluateCondition(c)){idx=i;act=a;break}}
+ if(idx<0){stopRun();sfxError();setStatus('Ninguna condición resultó verdadera.',true);showModal('IA DETENIDA','Ninguna regla coincide con lo que detecta el dron. Añade una condición de respaldo o cambia el orden.','⚠️');return}
+ const row=$('rule-'+idx);row.classList.add('active');const success=performAction(act);
+ executionSteps++;updateSteps();updateFrontReadout();
+ if(!success){row.classList.add('error');return}
+ setStatus('REGLA '+idx+' ACTIVADA  ·  '+({MOVE:'AVANZAR',TURN_L:'GIRAR IZQUIERDA',TURN_R:'GIRAR DERECHA',SHOOT:'DISPARAR',IDLE:'ESPERAR'}[act]||act));
+ if(map[bot.y][bot.x]===3){stopRun();score++;$('score-display').textContent=score;sfxWin();showModal('¡NÚCLEO ALCANZADO!','Tu IA llegó a la batería verde siguiendo las reglas programadas. ¡Siguiente desafío desbloqueado!','🏆',()=>generateProceduralMap());return}
+ if(executionSteps>=MAX_STEPS){stopRun();sfxError();showModal('BUCLE INFINITO','La IA llegó a 150 ciclos sin alcanzar el núcleo. Revisa su lógica.','♾️');return}
+ if(manual)setTimeout(()=>{if(!modalOpen)row.classList.remove('active')},360)
+}
+function performAction(act){if(act==='MOVE'){const front=getCellInFront();if(front===1||front===2){stopRun();sfxError();$('board-stage').animate([{transform:'translateX(0)'},{transform:'translateX(-5px)'},{transform:'translateX(5px)'},{transform:'translateX(0)'}],{duration:310});setStatus('COLISIÓN: comprueba el sensor antes de avanzar.',true);showModal('COLISIÓN CRÍTICA','El dron chocó con un muro o un virus. Programa una reacción antes de intentar avanzar.','💥');return false}
+ const next=getFrontCoords();bot.x=next.x;bot.y=next.y;sfxMove();updateBotVisuals();return true}
+ if(act==='TURN_L'||act==='TURN_R'){bot.dir=(bot.dir+(act==='TURN_L'?3:1))%4;sfxTurn();updateBotVisuals();return true}
+ if(act==='SHOOT'){sfxLaser();showLaser();const p=getFrontCoords();if(getCellInFront()===2){map[p.y][p.x]=0;const cell=$(`cell-${p.x}-${p.y}`);cell.classList.remove('enemy');cell.classList.add('blast');setTimeout(()=>cell.classList.remove('blast'),450);sfxExplosion()}return true}
+ return true}
+function showLaser(){const p=getFrontCoords(),from=$(`cell-${bot.x}-${bot.y}`),to=$(`cell-${p.x}-${p.y}`);if(!laserElement||!to||!from)return;const horizontal=bot.dir%2===1;const cell=from,thick=Math.max(3,Math.floor(cell.offsetWidth*.15));laserElement.style.width=(horizontal?cell.offsetWidth:thick)+'px';laserElement.style.height=(horizontal?thick:cell.offsetHeight)+'px';laserElement.style.left=(horizontal?to.offsetLeft:to.offsetLeft+to.offsetWidth/2-thick/2)+'px';laserElement.style.top=(horizontal?to.offsetTop+to.offsetHeight/2-thick/2:to.offsetTop)+'px';laserElement.style.opacity='1';setTimeout(()=>{if(laserElement)laserElement.style.opacity='0'},185)}
+function toggleRun(){if(!canUseControls())return;if(isRunning){stopRun();setStatus('Simulación pausada. Ejecutar inicia desde el principio.');return}if(!hasValidRule()){sfxError();showModal('REGLAS INCOMPLETAS','Programa al menos una regla antes de iniciar la simulación.','⚙️');return}
+ // Full simulation starts from a fresh map, just like a new test run.
+ map=initialMap.map(r=>[...r]);bot={x:1,y:1,dir:1};executionSteps=0;updateSteps();renderMap();isRunning=true;$('run-btn').classList.add('stop');$('run-btn').textContent='■ DETENER';$('step-btn').disabled=true;setStatus('SIMULACIÓN EN CURSO · ejecutando reglas…');sfxClick();runInterval=setInterval(()=>executeTick(false),380)}
+function showModal(title,msg,icon='🤖',callback=null){stopRun();modalOpen=true;modalCallback=callback;$('m-title').textContent=title;$('m-msg').textContent=msg;$('m-icon').textContent=icon;$('modal').classList.add('active')}
+function hideModal(){modalOpen=false;$('modal').classList.remove('active');modalCallback=null}
+function closeModal(){const cb=modalCallback;hideModal();sfxClick();if(cb)cb()}
+for(let i=1;i<=4;i++){for(const id of ['cond-'+i,'act-'+i])$(id).addEventListener('change',()=>{sfxClick();if(!isRunning&&!modalOpen)setStatus('Reglas actualizadas. Prueba un paso o ejecuta la IA.')})}
+function resizeBoard(){
+ const stage=$('board-stage'),board=$('board');
+ const side=Math.max(100,Math.floor(Math.min(stage.clientWidth-18,stage.clientHeight-18)));
+ board.style.width=side+'px';board.style.height=side+'px';
+ updateBotVisuals(true);
+}
+if(window.ResizeObserver){new ResizeObserver(resizeBoard).observe($('board-stage'))}
+window.addEventListener('resize',resizeBoard);
+document.addEventListener('keydown',e=>{if(e.key==='Escape'&&modalOpen)closeModal()});
+// Prepare a real playable map behind the welcome screen.
+generateProceduralMap();
+</script>
 </body>
 </html>
