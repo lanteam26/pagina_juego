@@ -256,6 +256,6 @@ window.CUENTO_CONFIG = {
       ]
     }
   ],
-  "activityPaperLeft": "assets/paginas/actividad-izquierda.png",
-  "activityPaperRight": "assets/paginas/actividad-derecha.png"
+  "activityPaperLeft": "assets/paginas/hoja-bertha.png",
+  "activityPaperRight": "assets/paginas/hoja-bertha.png"
 };
