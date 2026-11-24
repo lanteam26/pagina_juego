@@ -10,9 +10,28 @@
 
 <style>
 /* =========================================================
-   VARIABLES DE TEMAS (STYLES)
+   TEMAS ADAPTADOS A INICIAL, PRIMARIA Y SECUNDARIA
 ========================================================= */
-:root[data-theme="cyberpunk"] {
+:root,
+:root[data-level="inicial"] {
+    /* Pasteles con cuerpo y calidez (no lavados/blanquecinos) */
+    --bg: #220e38;
+    --panel: #321652;
+    --panel-light: #441f6e;
+    --purple: #e87999;      /* Rosa frambuesa pastel con cuerpo */
+    --pink: #f4976c;        /* Durazno / coral pastel cálido */
+    --cyan: #5eead4;        /* Menta / turquesa pastel */
+    --yellow: #fcd34d;      /* Amarillo mantequilla / sol pastel */
+    --green: #6ee7b7;       /* Verde menta pastel */
+    --white: #fffdf9;
+    --muted: #d8c7f0;
+    --border: #7842a8;
+    --header-grad: linear-gradient(90deg, #c05688, #e07a5f, #38b2ac);
+    --star-size: 31px;
+    --card-radius: 26px;
+}
+
+:root[data-level="primaria"] {
     --bg: #0b0317;
     --panel: #16082e;
     --panel-light: #211044;
@@ -25,24 +44,11 @@
     --muted: #a99bc7;
     --border: #3b1a78;
     --header-grad: linear-gradient(90deg, #4d00a8, #7800ff, #ff007b);
+    --star-size: 25px;
+    --card-radius: 20px;
 }
 
-:root[data-theme="retro"] {
-    --bg: #021a08;
-    --panel: #063813;
-    --panel-light: #0b4e1c;
-    --purple: #008f39;
-    --pink: #00ff66;
-    --cyan: #33ffcc;
-    --yellow: #ffff00;
-    --green: #2ed573;
-    --white: #ffffff;
-    --muted: #8cd4a8;
-    --border: #13752e;
-    --header-grad: linear-gradient(90deg, #004d20, #008f39, #00ff66);
-}
-
-:root[data-theme="galaxy"] {
+:root[data-level="secundaria"] {
     --bg: #030617;
     --panel: #0d1230;
     --panel-light: #161e47;
@@ -55,12 +61,14 @@
     --muted: #a4b0be;
     --border: #293570;
     --header-grad: linear-gradient(90deg, #130f40, #4834df, #68deff);
+    --star-size: 24px;
+    --card-radius: 16px;
 }
 
 /* =========================================================
    RESET
 ========================================================= */
-* {
+*, *::before, *::after {
     box-sizing: border-box;
     margin: 0;
     padding: 0;
@@ -75,32 +83,59 @@ body {
     font-family: 'Outfit', sans-serif;
     color: var(--white);
     background:
-        radial-gradient(circle at 10% 10%, rgba(120,0,255,.25), transparent 35%),
-        radial-gradient(circle at 90% 90%, rgba(0,243,255,.18), transparent 35%),
-        radial-gradient(circle at 50% 50%, rgba(255,0,123,.08), transparent 50%),
+        radial-gradient(circle at 10% 10%, rgba(120,0,255,.28), transparent 38%),
+        radial-gradient(circle at 90% 90%, rgba(0,243,255,.20), transparent 38%),
+        radial-gradient(circle at 50% 50%, rgba(255,0,123,.10), transparent 52%),
         var(--bg);
     background-attachment: fixed;
     padding: 25px;
+    position: relative;
+    overflow-x: hidden;
     transition: background 0.3s ease;
+}
+
+:root[data-level="inicial"] body {
+    background:
+        radial-gradient(circle at 12% 12%, rgba(232, 121, 153, 0.24), transparent 40%),
+        radial-gradient(circle at 88% 85%, rgba(94, 234, 212, 0.20), transparent 40%),
+        radial-gradient(circle at 50% 50%, rgba(244, 151, 108, 0.14), transparent 55%),
+        var(--bg);
+}
+
+/* Lienzos independientes por nivel */
+.bg-layer {
+    position: fixed;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 0;
+    pointer-events: none;
+    display: none;
+}
+
+.bg-layer.active {
+    display: block;
 }
 
 /* =========================================================
    APP PRINCIPAL
 ========================================================= */
 .arcade-container {
+    position: relative;
+    z-index: 1;
     width: 100%;
     max-width: 1250px;
     margin: auto;
     background: var(--panel);
     border: 2px solid var(--cyan);
-    border-radius: 20px;
+    border-radius: var(--card-radius);
     overflow: hidden;
     box-shadow: 0 0 25px rgba(0,243,255,.15), 0 0 70px rgba(120,0,255,.12);
-    transition: background 0.3s, border-color 0.3s;
+    transition: background 0.3s, border-color 0.3s, border-radius 0.3s;
 }
 
 /* =========================================================
-   HEADER & BOTÓN DE ESTILO
+   HEADER & SELECTOR DE NIVEL
 ========================================================= */
 .arcade-header {
     position: relative;
@@ -112,12 +147,12 @@ body {
     transition: background 0.3s;
 }
 
-.theme-switcher-btn {
+.level-switcher-btn {
     position: absolute;
     top: 20px;
     right: 20px;
     z-index: 10;
-    background: rgba(0, 0, 0, 0.4);
+    background: rgba(0, 0, 0, 0.42);
     border: 2px solid var(--white);
     color: var(--white);
     padding: 8px 14px;
@@ -132,7 +167,7 @@ body {
     transition: 0.2s;
 }
 
-.theme-switcher-btn:hover {
+.level-switcher-btn:hover {
     background: var(--white);
     color: var(--bg);
     transform: scale(1.05);
@@ -174,6 +209,33 @@ body {
     font-weight: 800;
     letter-spacing: 2px;
     text-transform: uppercase;
+}
+
+.level-pills {
+    position: relative;
+    z-index: 3;
+    display: inline-flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 8px;
+    margin-top: 16px;
+}
+
+.level-pill {
+    padding: 7px 14px;
+    border-radius: 20px;
+    background: rgba(0, 0, 0, 0.35);
+    border: 1.5px solid rgba(255, 255, 255, 0.45);
+    color: var(--white);
+    font-family: 'Press Start 2P', monospace;
+    font-size: 0.48rem;
+    cursor: pointer;
+}
+
+.level-pill.active {
+    background: var(--yellow);
+    color: #120624;
+    border-color: var(--white);
 }
 
 /* =========================================================
@@ -423,7 +485,7 @@ tr:hover td {
 }
 
 .star {
-    font-size: 25px;
+    font-size: var(--star-size);
     color: var(--muted);
     cursor: pointer;
     transition: .18s ease;
@@ -767,6 +829,7 @@ tr:hover td {
     width: 9px;
     height: 18px;
     z-index: 10000;
+    pointer-events: none;
     animation: fall linear forwards;
 }
 
@@ -792,20 +855,31 @@ tr:hover td {
     .scoreboard-header { align-items: flex-start; flex-direction: column; }
     table { min-width: 720px; }
     .star { font-size: 22px; }
-    .theme-switcher-btn { position: relative; top: auto; right: auto; margin: 10px auto 0; display: inline-flex; }
+    .level-switcher-btn { position: relative; top: auto; right: auto; margin: 10px auto 0; display: inline-flex; }
 }
 </style>
 </head>
 
-<body data-theme="cyberpunk">
+<body data-level="primaria">
+
+<!-- PARTÍCULAS INDEPENDIENTES POR NIVEL -->
+<canvas id="layerInicial" class="bg-layer"></canvas>
+<canvas id="layerPrimaria" class="bg-layer active"></canvas>
+<canvas id="layerSecundaria" class="bg-layer"></canvas>
 
 <div class="arcade-container">
 
     <!-- HEADER -->
     <header class="arcade-header">
-        <button class="theme-switcher-btn" onclick="cambiarTema()">🎨 <span id="themeName">CYBERPUNK</span></button>
+        <button class="level-switcher-btn" onclick="ciclarNivel()">🎓 <span id="levelBadge">PRIMARIA</span></button>
         <h1>🎮 BATTLE STARS</h1>
-        <p>⚡ ¡Competencia de campeones! ⚡</p>
+        <p id="levelSubtitle">⚡ ¡COMPETENCIA DE CAMPEONES • PRIMARIA! ⚡</p>
+
+        <div class="level-pills" role="group" aria-label="Nivel escolar">
+            <button class="level-pill" data-level="inicial" onclick="setNivel('inicial')">🐣 INICIAL</button>
+            <button class="level-pill active" data-level="primaria" onclick="setNivel('primaria')">⚡ PRIMARIA</button>
+            <button class="level-pill" data-level="secundaria" onclick="setNivel('secundaria')">🚀 SECUNDARIA</button>
+        </div>
     </header>
 
     <!-- CONFIGURACIÓN -->
@@ -859,7 +933,7 @@ tr:hover td {
     </div>
 
     <!-- FOOTER -->
-    <footer class="arcade-footer">
+    <footer class="arcade-footer" id="levelFooter">
         ⭐ SIGUE JUGANDO • SIGUE APRENDIENDO • SÉ UN CAMPEÓN ⭐
     </footer>
 
@@ -889,87 +963,267 @@ tr:hover td {
 
 <script>
 /* =========================================================
-   CAMBIO DE TEMAS (ESTILOS)
+   SISTEMAS DE PARTÍCULAS SEPARADOS POR NIVEL
 ========================================================= */
-const temas = ["cyberpunk", "retro", "galaxy"];
-const nombresTemas = ["CYBERPUNK", "RETRO ARCADE", "GALAXY SPACE"];
-let temaActualIndex = 0;
+const cInicial = document.getElementById("layerInicial");
+const ctxIni = cInicial.getContext("2d");
 
-function cambiarTema() {
-    temaActualIndex = (temaActualIndex + 1) % temas.length;
-    const nuevoTema = temas[temaActualIndex];
-    
-    document.documentElement.setAttribute("data-theme", nuevoTema);
-    document.getElementById("themeName").textContent = nombresTemas[temaActualIndex];
+const cPrimaria = document.getElementById("layerPrimaria");
+const ctxPri = cPrimaria.getContext("2d");
+
+const cSecundaria = document.getElementById("layerSecundaria");
+const ctxSec = cSecundaria.getContext("2d");
+
+let pInicial = [];
+let pPrimaria = [];
+let pSecundaria = [];
+
+function resizeCapas() {
+    [cInicial, cPrimaria, cSecundaria].forEach(c => {
+        c.width = window.innerWidth;
+        c.height = window.innerHeight;
+    });
 }
 
+function crearCapas() {
+    // INICIAL: Pasteles con cuerpo (frambuesa, durazno, menta y mantequilla)
+    pInicial = Array.from({ length: 24 }, (_, i) => ({
+        x: Math.random() * cInicial.width,
+        y: Math.random() * cInicial.height,
+        r: Math.random() * 11 + 6,
+        vy: Math.random() * 0.45 + 0.2,
+        vx: (Math.random() - 0.5) * 0.35,
+        rot: Math.random() * Math.PI * 2,
+        color: ["#e87999", "#f4976c", "#5eead4", "#fcd34d"][i % 4],
+        estrella: i % 2 === 0
+    }));
+
+    // PRIMARIA: Rombos/fichas arcade en cian, magenta, dorado y violeta
+    pPrimaria = Array.from({ length: 28 }, (_, i) => ({
+        x: Math.random() * cPrimaria.width,
+        y: Math.random() * cPrimaria.height,
+        size: Math.random() * 10 + 6,
+        vx: (Math.random() - 0.5) * 0.9,
+        vy: (Math.random() - 0.5) * 0.9,
+        rot: Math.random() * Math.PI,
+        vRot: (Math.random() - 0.5) * 0.03,
+        color: ["#00f3ff", "#ff007b", "#ffdf00", "#9d4edd"][i % 4]
+    }));
+
+    // SECUNDARIA: Nodos y líneas de red en azul cobalto, turquesa y lila
+    pSecundaria = Array.from({ length: 40 }, (_, i) => ({
+        x: Math.random() * cSecundaria.width,
+        y: Math.random() * cSecundaria.height,
+        vx: (Math.random() - 0.5) * 0.65,
+        vy: (Math.random() - 0.5) * 0.65,
+        color: ["#3b82f6", "#68deff", "#c084fc"][i % 3]
+    }));
+}
+
+function dibujarEstrella(ctx, cx, cy, rOuter, rInner, rot) {
+    let ang = rot;
+    const step = Math.PI / 5;
+    ctx.beginPath();
+    for (let i = 0; i < 10; i++) {
+        const rad = i % 2 === 0 ? rOuter : rInner;
+        const x = cx + Math.cos(ang) * rad;
+        const y = cy + Math.sin(ang) * rad;
+        if (i === 0) ctx.moveTo(x, y);
+        else ctx.lineTo(x, y);
+        ang += step;
+    }
+    ctx.closePath();
+    ctx.fill();
+}
+
+function animarCapas() {
+    const lvl = document.documentElement.getAttribute("data-level") || "primaria";
+
+    if (lvl === "inicial") {
+        ctxIni.clearRect(0, 0, cInicial.width, cInicial.height);
+        pInicial.forEach(p => {
+            p.y -= p.vy;
+            p.x += p.vx;
+            p.rot += 0.01;
+            if (p.y < -25) p.y = cInicial.height + 25;
+            if (p.x < -25) p.x = cInicial.width + 25;
+            if (p.x > cInicial.width + 25) p.x = -25;
+
+            ctxIni.save();
+            ctxIni.globalAlpha = 0.34;
+            ctxIni.fillStyle = p.color;
+            if (p.estrella) {
+                dibujarEstrella(ctxIni, p.x, p.y, p.r, p.r * 0.45, p.rot);
+            } else {
+                ctxIni.beginPath();
+                ctxIni.arc(p.x, p.y, p.r * 0.8, 0, Math.PI * 2);
+                ctxIni.fill();
+            }
+            ctxIni.restore();
+        });
+    } else if (lvl === "primaria") {
+        ctxPri.clearRect(0, 0, cPrimaria.width, cPrimaria.height);
+        pPrimaria.forEach(p => {
+            p.x += p.vx;
+            p.y += p.vy;
+            p.rot += p.vRot;
+            if (p.x < -20) p.x = cPrimaria.width + 20;
+            if (p.x > cPrimaria.width + 20) p.x = -20;
+            if (p.y < -20) p.y = cPrimaria.height + 20;
+            if (p.y > cPrimaria.height + 20) p.y = -20;
+
+            ctxPri.save();
+            ctxPri.translate(p.x, p.y);
+            ctxPri.rotate(p.rot);
+            ctxPri.globalAlpha = 0.25;
+            ctxPri.fillStyle = p.color;
+            ctxPri.fillRect(-p.size / 2, -p.size / 2, p.size, p.size);
+            ctxPri.restore();
+        });
+    } else if (lvl === "secundaria") {
+        ctxSec.clearRect(0, 0, cSecundaria.width, cSecundaria.height);
+        pSecundaria.forEach((n, i) => {
+            n.x += n.vx;
+            n.y += n.vy;
+            if (n.x < 0 || n.x > cSecundaria.width) n.vx *= -1;
+            if (n.y < 0 || n.y > cSecundaria.height) n.vy *= -1;
+
+            ctxSec.save();
+            ctxSec.globalAlpha = 0.45;
+            ctxSec.fillStyle = n.color;
+            ctxSec.beginPath();
+            ctxSec.arc(n.x, n.y, 2.5, 0, Math.PI * 2);
+            ctxSec.fill();
+
+            for (let j = i + 1; j < pSecundaria.length; j++) {
+                const m = pSecundaria[j];
+                const dist = Math.hypot(n.x - m.x, n.y - m.y);
+                if (dist < 130) {
+                    ctxSec.globalAlpha = (1 - dist / 130) * 0.22;
+                    ctxSec.strokeStyle = "#68deff";
+                    ctxSec.lineWidth = 1;
+                    ctxSec.beginPath();
+                    ctxSec.moveTo(n.x, n.y);
+                    ctxSec.lineTo(m.x, m.y);
+                    ctxSec.stroke();
+                }
+            }
+            ctxSec.restore();
+        });
+    }
+
+    requestAnimationFrame(animarCapas);
+}
+
+window.addEventListener("resize", () => {
+    resizeCapas();
+    crearCapas();
+});
+
 /* =========================================================
-   DATOS Y CONFIGURACIÓN INICIAL
+   DATOS POR NIVEL ESCOLAR
 ========================================================= */
+const niveles = ["inicial", "primaria", "secundaria"];
+let nivelIdx = 1;
+
+const datosNiveles = {
+    inicial: {
+        badge: "INICIAL",
+        subtitulo: "🌈 ¡A JUGAR, COMPARTIR Y GANAR ESTRELLITAS • INICIAL! 🐣",
+        footer: "🐣 JUGANDO SE APRENDE • CADA ESTRELLITA ES UN LOGRO ⭐",
+        equipos: ["🐣 Los Polluelos", "🐻 Los Ositos", "🌈 Arcoíris", "🦋 Las Mariposas", "🐰 Los Conejitos", "☀️ Los Solecitos"],
+        avatares: ["🐣", "🐻", "🌈", "🦋", "🐰", "☀️"],
+        retos: [
+            "🎨 Colores y Formas",
+            "🎵 Canción y Ritmo",
+            "🧸 Orden y Compartir",
+            "👀 Observo y Señalo",
+            "💃 Movimiento y Baile"
+        ]
+    },
+    primaria: {
+        badge: "PRIMARIA",
+        subtitulo: "⚡ ¡COMPETENCIA DE CAMPEONES • PRIMARIA! ⚡",
+        footer: "⭐ SIGUE JUGANDO • SIGUE APRENDIENDO • SÉ UN CAMPEÓN ⭐",
+        equipos: ["🐼 Los Pandas", "🐝 Las Abejitas", "⭐ Las Estrellitas", "🦖 Los Dinosaurios", "🦄 Los Unicornios", "🦁 Los Leones"],
+        avatares: ["🐼", "🐝", "⭐", "🦖", "🦄", "🦁"],
+        retos: [
+            "📚 Reto de Lectura",
+            "🧮 Reto de Matemáticas",
+            "🙋 Reto de Participación",
+            "🤝 Trabajo en Equipo",
+            "🎨 Reto de Creatividad"
+        ]
+    },
+    secundaria: {
+        badge: "SECUNDARIA",
+        subtitulo: "🚀 DESAFÍO POR EQUIPOS • ANÁLISIS, DEBATE Y VELOCIDAD",
+        footer: "🚀 ESTRATEGIA • DEBATE • PROYECTOS • PRECISIÓN",
+        equipos: ["⚡ Alpha Squad", "🔥 Nova Team", "🧬 Quantum", "🛡️ Vanguardia", "🌐 Nexus", "🎯 Apex"],
+        avatares: ["⚡", "🔥", "🧬", "🛡️", "🌐", "🎯"],
+        retos: [
+            "📊 Análisis y Resolución",
+            "🎤 Debate y Argumentación",
+            "🛠️ Proyecto Express",
+            "⚡ Ronda Relámpago",
+            "🧠 Estrategia de Equipo"
+        ]
+    }
+};
+
+const coloresAvatar = ["#00f3ff", "#2ed573", "#ffdf00", "#ff4757", "#c56cf0", "#ff9f43"];
+
 let grupos = [];
 let retos = [];
 let puntos = [];
 
-const nombresIniciales = [
-    "🐼 Los Pandas",
-    "🐝 Las Abejitas",
-    "⭐ Las Estrellitas",
-    "🦖 Los Dinosaurios",
-    "🦄 Los Unicornios",
-    "🦁 Los Leones"
-];
+function setNivel(lvl) {
+    nivelIdx = niveles.indexOf(lvl);
+    if (nivelIdx < 0) nivelIdx = 1;
 
-const retosIniciales = [
-    "📚 Reto de Lectura", "🧮 Reto de Matemáticas", "🙋 Reto de Participación",
-    "🤝 Trabajo en Equipo", "🎨 Reto de Creatividad", "🏃 Reto de Velocidad",
-    "🧠 Reto de Preguntas", "🎯 Reto Sorpresa", "🌈 Reto Especial",
-    "⭐ Gran Reto", "🚀 Reto Relámpago", "💡 Reto de Ideas",
-    "🎤 Reto de Expresión", "🧩 Reto Misterioso", "👑 Reto Final"
-];
+    document.documentElement.setAttribute("data-level", lvl);
+    document.getElementById("levelBadge").textContent = datosNiveles[lvl].badge;
+    document.getElementById("levelSubtitle").textContent = datosNiveles[lvl].subtitulo;
+    document.getElementById("levelFooter").textContent = datosNiveles[lvl].footer;
 
-const coloresAvatar = ["#00f3ff", "#2ed573", "#ffdf00", "#ff4757", "#c56cf0", "#ff9f43"];
-const avatares = ["🐼", "🐝", "⭐", "🦖", "🦄", "🦁"];
+    document.querySelectorAll(".level-pill").forEach(btn => {
+        btn.classList.toggle("active", btn.dataset.level === lvl);
+    });
 
-/* =========================================================
-   CREAR TABLA
-========================================================= */
+    cInicial.classList.toggle("active", lvl === "inicial");
+    cPrimaria.classList.toggle("active", lvl === "primaria");
+    cSecundaria.classList.toggle("active", lvl === "secundaria");
+
+    generarTabla();
+}
+
+function ciclarNivel() {
+    nivelIdx = (nivelIdx + 1) % niveles.length;
+    setNivel(niveles[nivelIdx]);
+}
+
 function generarTabla() {
-    let cantidadGrupos = parseInt(document.getElementById("cantidadGrupos").value);
-    let cantidadRetos = parseInt(document.getElementById("cantidadRetos").value);
+    const lvl = niveles[nivelIdx];
+    const cfg = datosNiveles[lvl];
 
-    cantidadGrupos = Math.max(2, Math.min(6, cantidadGrupos));
-    cantidadRetos = Math.max(1, Math.min(15, cantidadRetos));
+    let cantidadGrupos = parseInt(document.getElementById("cantidadGrupos").value, 10);
+    let cantidadRetos = parseInt(document.getElementById("cantidadRetos").value, 10);
+
+    cantidadGrupos = Math.max(2, Math.min(6, cantidadGrupos || 4));
+    cantidadRetos = Math.max(1, Math.min(15, cantidadRetos || 5));
 
     document.getElementById("cantidadGrupos").value = cantidadGrupos;
     document.getElementById("cantidadRetos").value = cantidadRetos;
 
-    grupos = [];
-    retos = [];
-    puntos = [];
-
-    for (let i = 0; i < cantidadGrupos; i++) {
-        grupos.push(nombresIniciales[i]);
-    }
-
-    for (let i = 0; i < cantidadRetos; i++) {
-        retos.push(retosIniciales[i] || "🎯 Reto " + (i + 1));
-    }
-
-    for (let r = 0; r < cantidadRetos; r++) {
-        puntos[r] = [];
-        for (let g = 0; g < cantidadGrupos; g++) {
-            puntos[r][g] = 0;
-        }
-    }
+    grupos = cfg.equipos.slice(0, cantidadGrupos);
+    retos = Array.from({ length: cantidadRetos }, (_, i) => cfg.retos[i % cfg.retos.length]);
+    puntos = Array.from({ length: cantidadRetos }, () => new Array(cantidadGrupos).fill(0));
 
     mostrarEditores();
     dibujarTabla();
     actualizarRanking();
 }
 
-/* =========================================================
-   EDITORES DE EQUIPOS
-========================================================= */
 function mostrarEditores() {
     const editor = document.getElementById("teamsEditor");
     editor.innerHTML = "";
@@ -991,9 +1245,6 @@ function mostrarEditores() {
     });
 }
 
-/* =========================================================
-   DIBUJAR TABLA
-========================================================= */
 function dibujarTabla() {
     const encabezado = document.getElementById("encabezado");
     const cuerpo = document.getElementById("cuerpo");
@@ -1001,7 +1252,6 @@ function dibujarTabla() {
     encabezado.innerHTML = "";
     cuerpo.innerHTML = "";
 
-    /* HEADER */
     const filaHeader = document.createElement("tr");
     const retoHeader = document.createElement("th");
     retoHeader.textContent = "🎯 RETO";
@@ -1015,7 +1265,6 @@ function dibujarTabla() {
     });
     encabezado.appendChild(filaHeader);
 
-    /* FILAS DE RETOS */
     retos.forEach((reto, r) => {
         const fila = document.createElement("tr");
 
@@ -1030,23 +1279,18 @@ function dibujarTabla() {
         celdaReto.appendChild(inputReto);
         fila.appendChild(celdaReto);
 
-        /* ESTRELLAS */
-        grupos.forEach((grupo, g) => {
+        grupos.forEach((_, g) => {
             const celda = document.createElement("td");
             const divEstrellas = document.createElement("div");
             divEstrellas.className = "stars";
 
             for (let s = 0; s < 5; s++) {
                 const estrella = document.createElement("span");
-                estrella.className = "star";
+                estrella.className = "star" + (s < puntos[r][g] ? " active" : "");
                 estrella.textContent = "★";
-                
-                if (s < puntos[r][g]) {
-                    estrella.classList.add("active");
-                }
 
                 estrella.onclick = function() {
-                    puntos[r][g] = s + 1;
+                    puntos[r][g] = (puntos[r][g] === s + 1) ? s : (s + 1);
                     dibujarTabla();
                     actualizarRanking();
                 };
@@ -1060,16 +1304,15 @@ function dibujarTabla() {
         cuerpo.appendChild(fila);
     });
 
-    /* FILA TOTALES */
     const filaTotal = document.createElement("tr");
     filaTotal.className = "total-row";
-    
+
     const celdaTotalLabel = document.createElement("td");
     celdaTotalLabel.className = "total-label";
     celdaTotalLabel.textContent = "⭐ TOTAL";
     filaTotal.appendChild(celdaTotalLabel);
 
-    grupos.forEach((grupo, g) => {
+    grupos.forEach((_, g) => {
         let suma = 0;
         for (let r = 0; r < retos.length; r++) {
             suma += puntos[r][g];
@@ -1084,28 +1327,28 @@ function dibujarTabla() {
     cuerpo.appendChild(filaTotal);
 }
 
-/* =========================================================
-   ACTUALIZAR RANKING EN VIVO
-========================================================= */
+function obtenerRanking() {
+    const avatares = datosNiveles[niveles[nivelIdx]].avatares;
+    return grupos
+        .map((nombre, index) => {
+            let suma = 0;
+            for (let r = 0; r < retos.length; r++) {
+                suma += puntos[r][index];
+            }
+            return {
+                nombre,
+                puntos: suma,
+                avatar: avatares[index] || "⭐"
+            };
+        })
+        .sort((a, b) => b.puntos - a.puntos);
+}
+
 function actualizarRanking() {
     const rankingList = document.getElementById("rankingList");
     rankingList.innerHTML = "";
 
-    let datosRanking = grupos.map((nombre, index) => {
-        let suma = 0;
-        for (let r = 0; r < retos.length; r++) {
-            suma += puntos[r][index];
-        }
-        return {
-            nombre: nombre,
-            puntos: suma,
-            avatar: avatares[index] || "⭐"
-        };
-    });
-
-    datosRanking.sort((a, b) => b.puntos - a.puntos);
-
-    datosRanking.forEach((item, pos) => {
+    obtenerRanking().forEach((item, pos) => {
         const div = document.createElement("div");
         div.className = "ranking-item" + (pos === 0 ? " first" : "");
 
@@ -1119,9 +1362,6 @@ function actualizarRanking() {
     });
 }
 
-/* =========================================================
-   REINICIAR PUNTOS
-========================================================= */
 function reiniciarPuntos() {
     for (let r = 0; r < retos.length; r++) {
         for (let g = 0; g < grupos.length; g++) {
@@ -1132,23 +1372,8 @@ function reiniciarPuntos() {
     actualizarRanking();
 }
 
-/* =========================================================
-   FINALIZAR COMPETENCIA
-========================================================= */
 function finalizarCompetencia() {
-    let datosRanking = grupos.map((nombre, index) => {
-        let suma = 0;
-        for (let r = 0; r < retos.length; r++) {
-            suma += puntos[r][index];
-        }
-        return {
-            nombre: nombre,
-            puntos: suma,
-            avatar: avatares[index] || "⭐"
-        };
-    });
-
-    datosRanking.sort((a, b) => b.puntos - a.puntos);
+    const datosRanking = obtenerRanking();
 
     document.getElementById("championName").textContent = datosRanking[0].avatar + " " + datosRanking[0].nombre;
     document.getElementById("championScore").textContent = "¡Con un total de " + datosRanking[0].puntos + " estrellas!";
@@ -1177,17 +1402,14 @@ function cerrarResultados() {
     document.getElementById("modalResultados").classList.remove("show");
 }
 
-/* =========================================================
-   EFECTO DE CONFETI
-========================================================= */
 function lanzarConfeti() {
-    const colores = ['#00f3ff', '#ff007b', '#ffdf00', '#2ed573', '#c56cf0'];
+    const colores = ["#00f3ff", "#ff007b", "#ffdf00", "#2ed573", "#c56cf0"];
     for (let i = 0; i < 70; i++) {
-        const conf = document.createElement('div');
-        conf.className = 'confetti';
-        conf.style.left = Math.random() * 100 + 'vw';
+        const conf = document.createElement("div");
+        conf.className = "confetti";
+        conf.style.left = Math.random() * 100 + "vw";
         conf.style.backgroundColor = colores[Math.floor(Math.random() * colores.length)];
-        conf.style.animationDuration = (Math.random() * 2 + 1.5) + 's';
+        conf.style.animationDuration = (Math.random() * 2 + 1.5) + "s";
         conf.style.opacity = Math.random();
         document.body.appendChild(conf);
 
@@ -1195,8 +1417,10 @@ function lanzarConfeti() {
     }
 }
 
-// Cargar automáticamente al iniciar
 window.onload = function() {
+    resizeCapas();
+    crearCapas();
+    animarCapas();
     generarTabla();
 };
 </script>
