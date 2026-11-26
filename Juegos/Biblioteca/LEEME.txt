@@ -1,0 +1,13 @@
+ACTUALIZACIÓN DE BIBLIOTECA
+
+Extrae el contenido de este ZIP dentro de tu carpeta Biblioteca, donde están Biblioteca.html, cuentos, js y assets. Acepta reemplazar los archivos incluidos. Conserva tus demás carpetas, ilustraciones y audios.
+
+Incluye tres secciones con desvanecimiento, créditos de Team LAN / LAN Studio y CID Pujllay en los cuatro cuentos, nueva portada de Bertha, ajustes para móvil y bloqueo del menú de pulsación prolongada. No requiere Java; funciona con JavaScript.
+
+Los logos comunes están en assets/creditos/. Las portadas de sección, en assets/categorias/.
+
+Fábulas está preparada con un libro próximo. Cuentos reúne los cerditos y El Principito (próximamente). Mujeres reúne Ada, Bertha y Olga. Para añadir libros edita js/catalogo.js y asigna category: fabulas, cuentos o mujeres.
+
+En móvil vertical las hojas narrativas aparecen una debajo de otra para facilitar la lectura. Las actividades conservan sus dos hojas juntas.
+
+No reemplaza los motores de narración ni los audios grabados. Debes tener instalados previamente los cuatro cuentos.

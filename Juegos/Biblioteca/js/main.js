@@ -1,66 +1,29 @@
 (()=>{'use strict';
-const catalog=window.HISTORIAS||[], dialog=document.querySelector('#detail');
-const books=document.querySelector('#books'), stage=document.querySelector('.carousel-stage');
-const shell=document.querySelector('.bookcase'), pagination=document.querySelector('#carouselPagination');
-let selected=Math.max(0,catalog.findIndex(b=>b.id==='bertha'));
-if(!catalog.length)return;
-const wrap=n=>(n+catalog.length)%catalog.length;
-function cover(b){
- if(b.cover){const img=document.createElement('img');img.src=b.cover;img.alt='Portada de '+b.title;return img;}
- const div=document.createElement('div');div.className='illustrated-cover'+(b.tone?' cover-'+b.tone:'');
- const decoration=document.createElement('span');decoration.className='cover-symbol';decoration.textContent=b.symbol||'✦';
- const title=document.createElement('strong');title.textContent=b.shortTitle||b.title;
- const sub=document.createElement('small');sub.textContent='Una nueva historia';
- div.append(decoration,title,sub);return div;
+const stories=window.HISTORIAS||[],sections=window.SECCIONES||[],books=document.querySelector('#books'),dialog=document.querySelector('#detail'),back=document.querySelector('#backCategories');
+let current=null,lastFocus=null;
+function cover(item){const img=document.createElement('img');img.src=item.cover||sections.find(s=>s.id===item.category)?.cover;if(item.id==='olga')img.onerror=()=>{img.onerror=null;img.src='cuentos/olga-lock-sing/assets/portada.webp';};img.alt=item.title;img.draggable=false;return img;}
+function close(){dialog.close();lastFocus?.focus();}
+function detail(item){lastFocus=document.activeElement;document.querySelector('#modal-cover-holder').replaceChildren(cover(item));document.querySelector('#modal-title').textContent=item.title;document.querySelector('#modal-kicker').textContent=item.kicker||'Una historia para descubrir';document.querySelector('#modal-description').textContent=item.description;document.querySelector('#modal-status').textContent=item.href?'Historia disponible':'Próximamente';document.querySelector('#modal-action').textContent=item.href?'Comenzar historia →':'Entendido';dialog.dataset.book=item.id;dialog.showModal();}
+function render(category=null){current=category;books.replaceChildren();books.classList.toggle('category-view',!category);const items=category?stories.filter(s=>s.category===category).sort((a,b)=>Number(!!b.href)-Number(!!a.href)):sections;for(const item of items){const button=document.createElement('button');button.type='button';button.className='collection-book';button.dataset.book=item.id;button.setAttribute('aria-label',item.title);button.append(cover(item));const label=document.createElement('span');label.textContent=category?(item.href?item.title:item.title+' · Próximamente'):item.title;button.append(label);button.onclick=()=>category?detail(item):LibraryTransition(()=>{render(item.id);back.focus();});books.append(button);}back.hidden=!category;document.querySelector('.header p').textContent=category?sections.find(s=>s.id===category).title:'Elige una sección y descubre sus historias';document.querySelector('#collectionCount').textContent=category?`${items.filter(s=>s.href).length} cuentos disponibles · ${items.filter(s=>!s.href).length} próximamente`:`3 secciones · ${stories.filter(s=>s.href).length} cuentos disponibles`;document.querySelector('#carouselStatus').textContent=category?'Elige un libro para conocer su aventura':'Fábulas · Cuentos · Mujeres que marcaron la historia';}
+back.onclick=()=>LibraryTransition(()=>{render();books.querySelector('button')?.focus();});document.querySelector('.close').onclick=close;dialog.addEventListener('click',e=>{if(e.target===dialog)close();});document.querySelector('#modal-action').onclick=()=>{const item=stories.find(s=>s.id===dialog.dataset.book);if(!item?.href){close();return;}LibraryTransition(()=>{document.querySelector('#bgm')?.pause();window.BookSounds?.stop();location.assign(item.href);},true);};
+// Fit the shelf into its grid row, including fullscreen and browser zoom.
+const stage=document.querySelector('.carousel-stage'),shelf=document.querySelector('.bookcase');
+function fitShelf(){
+ if(matchMedia('(max-width:700px) and (orientation:portrait)').matches){shelf.style.removeProperty('--shelf-width');shelf.style.removeProperty('--shelf-y');return;}
+ const r=stage.getBoundingClientRect();
+ shelf.style.setProperty('--shelf-width',Math.max(1,Math.min(r.width,r.height*16/9))+'px');
+ shelf.style.setProperty('--shelf-y','0px');
+ const box=shelf.getBoundingClientRect(),room=document.querySelector('.library').getBoundingClientRect();
+ // The room is a 1920×1080 background, positioned at center bottom.
+ // Anchor the visible feet (96.2% of the transparent shelf image) to its floor.
+ const scale=Math.max(room.width/1920,room.height/1080);
+ const floor=room.bottom-105*scale;
+ const footer=document.querySelector('.collection-footer').getBoundingClientRect();
+ const contact=Math.min(floor,footer.top-10);
+ shelf.style.setProperty('--shelf-y',(contact-(box.top+box.height*1039/1080))+'px');
 }
-function openDetail(b){
- document.querySelector('#modal-cover-holder').replaceChildren(cover(b));
- document.querySelector('#modal-title').textContent=b.title;
- document.querySelector('#modal-kicker').textContent=b.kicker||'Una nueva aventura';
- document.querySelector('#modal-description').textContent=b.description||'';
- document.querySelector('#modal-status').textContent=b.href?'¡Historia interactiva disponible!':'Próximamente';
- document.querySelector('#modal-action').textContent=b.href?'Comenzar historia →':'Entendido';
- dialog.dataset.book=b.id;dialog.showModal();
-}
-// Keep every book in place: position and scale animate continuously between slots.
-const bookNodes=catalog.map(b=>{
- const btn=document.createElement('button');btn.type='button';btn.className='book';
- btn.dataset.book=b.id;btn.setAttribute('aria-label',b.title+(b.href?', abrir historia':', próximamente'));
- const tag=document.createElement('div');tag.className='featured-tag';tag.textContent=b.href?'✦ Lista para descubrir ✦':'✦ Próximamente ✦';
- btn.append(tag,cover(b));const label=document.createElement('span');label.className='book-label';
- label.textContent=b.href?'¡Descubre su aventura!':'Próximamente';btn.append(label);
- btn.onclick=()=>openDetail(b);books.append(btn);return btn;
-});
-const dots=catalog.map((b,i)=>{const dot=document.createElement('button');dot.type='button';dot.className='carousel-dot';
- dot.setAttribute('aria-label','Mostrar '+b.title);dot.onclick=()=>select(i);pagination.append(dot);return dot;
-});
-function render(){
- bookNodes.forEach((btn,i)=>{
-  let offset=wrap(i-selected);if(offset>catalog.length/2)offset-=catalog.length;
-  const visible=Math.abs(offset)<=1, featured=offset===0;
-  btn.classList.toggle('featured',featured);btn.classList.toggle('side',!featured);
-  btn.dataset.visible=String(visible);btn.setAttribute('aria-hidden',String(!visible));btn.inert=!visible;btn.tabIndex=visible?0:-1;
-  btn.style.setProperty('--book-x',`${offset*22}cqw`);btn.style.setProperty('--book-scale',featured?'1':'.76');
-  btn.style.zIndex=featured?'3':visible?'2':'1';
- });
- dots.forEach((dot,i)=>dot.setAttribute('aria-current',String(i===selected)));
- document.querySelector('#carouselStatus').textContent=`${selected+1} de ${catalog.length} · ${catalog[selected].title}`;
- document.querySelectorAll('.carousel-arrow').forEach(b=>b.hidden=catalog.length<2);
-}
-function select(n){selected=wrap(n);render();}
-const previous=document.querySelector('#carouselPrev'), next=document.querySelector('#carouselNext');
-previous.onclick=()=>select(selected-1);next.onclick=()=>select(selected+1);
-stage.addEventListener('keydown',e=>{if(e.key==='ArrowLeft'||e.key==='ArrowRight'){e.preventDefault();select(selected+(e.key==='ArrowRight'?1:-1));}});
-let touchStart=null;
-stage.addEventListener('pointerdown',e=>{if(e.pointerType==='touch')touchStart={x:e.clientX,y:e.clientY};});
-stage.addEventListener('pointerup',e=>{if(!touchStart)return;const dx=e.clientX-touchStart.x,dy=e.clientY-touchStart.y;touchStart=null;if(Math.abs(dx)>55&&Math.abs(dx)>Math.abs(dy)){select(selected+(dx<0?1:-1));stage.dataset.swiped='true';setTimeout(()=>delete stage.dataset.swiped,350);}});
-stage.addEventListener('pointercancel',()=>touchStart=null);
-stage.addEventListener('click',e=>{if(stage.dataset.swiped){e.preventDefault();e.stopPropagation();}},true);
-document.querySelector('.close').onclick=()=>dialog.close();
-document.querySelector('#modal-action').onclick=()=>{const b=catalog.find(b=>b.id===dialog.dataset.book);if(b?.href){document.querySelector('#bgm').pause();window.BookSounds?.stop();location.href=b.href;}else dialog.close();};
-dialog.addEventListener('click',e=>{if(e.target===dialog)dialog.close();});
-function fitShelf(){const r=stage.getBoundingClientRect();shell.style.width=Math.max(1,Math.min(r.width/.84,r.height*1920/995))+'px';}
-document.querySelector('#collectionCount').textContent=`${catalog.filter(b=>b.href).length} cuentos disponibles · ${catalog.filter(b=>!b.href).length} próximamente`;
+
 if(window.ResizeObserver)new ResizeObserver(fitShelf).observe(stage);
-window.addEventListener('resize',fitShelf);render();fitShelf();
+window.addEventListener('resize',fitShelf);document.addEventListener('fullscreenchange',fitShelf);
+render();fitShelf();
 })();

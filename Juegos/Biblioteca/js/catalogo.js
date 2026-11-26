@@ -16,3 +16,7 @@ window.HISTORIAS = [
   { id: 'nueva-historia', title: 'Una historia por descubrir', shortTitle: 'Próximamente', symbol: '✧', tone: 'forest',
     description: 'Estamos preparando más historias para seguir aprendiendo, imaginando y explorando juntos.' }
 ];
+
+// Categories stay separate from the story definitions so new books reuse the same UI.
+window.SECCIONES=[{id:'fabulas',title:'Fábulas',cover:'assets/categorias/fabula.png'},{id:'cuentos',title:'Cuentos',cover:'assets/categorias/cuentos.png'},{id:'mujeres',title:'Mujeres que marcaron la historia',cover:'assets/categorias/mujeres.png'}];
+for(const story of window.HISTORIAS)story.category=['bertha','ada','olga'].includes(story.id)?'mujeres':story.id==='nueva-historia'?'fabulas':'cuentos';
